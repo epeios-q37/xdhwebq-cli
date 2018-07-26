@@ -1,2 +1,3 @@
 # xdhwebq-cli
-XDHTML module wrapper fo web interface
+
+*[XDHTML](http://q37.info/XDHTML/)* module wrapper for the web interface.
