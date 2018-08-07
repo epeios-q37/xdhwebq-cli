@@ -141,6 +141,8 @@ namespace stsfsm {
 	};
 
 	typedef ctn::qMCONTAINERd( dCard, sCRow ) dAutomat;
+	typedef crt::qCMITEMs( dCard, sCRow ) sCard_;
+
 	qW( Automat );
 
 	using bch::rRH;
@@ -199,29 +201,22 @@ namespace stsfsm {
 
 	class parser__ {
 	private:
-		const automat_ *_Automat;
-		crow__ _Current;
-		const automat_ &_A( void ) const
-		{
-			if ( _Automat == NULL )
-				qRFwk();
-
-			return *_Automat;
-		}
+		crow__ Current_;
+		qCRMV( automat_, A_, Automat_ );
 		status__ _Handle(
 			const str::string_ &Pattern,
 			sdr::row__ *LostPosition );
 	public:
 		void reset( bso::bool__ = true )
 		{
-			_Automat = NULL;
-			_Current = qNIL;
+			Automat_ = NULL;
+			Current_ = qNIL;
 		}
 		E_CVDTOR( parser__ );
 		void Init( const automat_ &Automat )
 		{
-			_Automat = &Automat;
-			_Current = qNIL;
+			Automat_ = &Automat;
+			Current_ = qNIL;
 		}
 		status__ Handle( bso::u8__ C );
 		status__ Handle( const str::string_ &Pattern )
@@ -236,7 +231,11 @@ namespace stsfsm {
 		}
 		id__ GetId( void ) const
 		{
-			return _A()( _Current ).GetId();
+			sCard_ Card;
+
+			Card.Init( A_() );
+
+			return Card( Current_ ).GetId();
 		}
 	};
 

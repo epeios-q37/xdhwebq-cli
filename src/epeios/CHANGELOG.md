@@ -5,6 +5,19 @@
 - [adpt]: Adaptation to changes in underlying modules;
 - [stdz]: modification to comply with current standards;
 
+## 2018-08-07
+- STSFSM :
+  - handling thread-safety with item rather then mutex.
+
+## 2018-08-05
+- STSFSM:
+  - handling thread-safety.
+
+## 2018-07-28
+
+- SCLJRE:
+  - introducing array of strings (`(d|w)XStrings`),
+
 ## 2018-07-23
 
 - CSDBNS:
