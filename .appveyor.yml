@@ -1,7 +1,7 @@
 # cli.appveyor
 
 environment:
-  version: 20180807
+  version: 20180816
   label: xdhwebq
 
 platform:
