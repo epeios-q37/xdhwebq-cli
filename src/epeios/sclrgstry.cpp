@@ -209,7 +209,7 @@ rgstry::level__ sclrgstry::GetRawLevel( eLevel Level )
 
 #undef C
 
-const char *sclrgstry::GetLanguage_(
+const char *sclrgstry::GetLanguage(
 	const registry_ &Registry,
 	TOL_CBUFFER___ &Buffer )
 {
@@ -529,9 +529,22 @@ qRE
 bso::bool__ sclrgstry::BGetValue(
 	const registry_ &Registry,
 	const rgstry::tentry__ &Entry,
+	eNeedness Needness,
 	str::string_ &Value )
 {
-	return Registry.GetValue( Entry, Value );
+	bso::sBool Return = false;
+
+	switch ( Needness ) {
+	case nMandatory:
+		MGetValue( Registry, Entry, Value );
+		Return = true;
+		break;
+	case nOptional:
+		Return =  OGetValue( Registry, Entry, Value );
+		break;
+	}
+
+	return Return;
 }
 
 void sclrgstry::AddValue(
@@ -581,7 +594,7 @@ bso:: bool__ sclrgstry::OGetValue(
 	const rgstry::tentry__ &Entry,
 	str::string_ &Value )
 {
-	return BGetValue( Registry, Entry, Value );
+	return Registry.GetValue( Entry, Value );
 }
 
 const char *sclrgstry::OGetValue(

@@ -572,7 +572,7 @@ qRE
 
 void rgstry::registry_::_DumpAttributes(
 	row__ Row,
-	xml::writer_ &Writer ) const
+	xml::rWriter &Writer ) const
 {
 qRH
 	rows Rows;
@@ -600,7 +600,7 @@ qRE
 sdr::size__ rgstry::registry_::_Dump(
 	row__ Root,
 	bso::bool__ RootToo,
-	xml::writer_ &Writer ) const
+	xml::rWriter &Writer ) const
 {
 	sdr::size__ ChildAmount = 0;
 qRH
@@ -638,7 +638,7 @@ qRE
 sdr::size__ rgstry::registry_::Dump(
 	row__ Root,
 	bso::bool__ RootToo,
-	xml::writer_ &Writer ) const
+	xml::rWriter &Writer ) const
 {
 	return _Dump( Root, RootToo, Writer );
 }
@@ -652,7 +652,7 @@ sdr::size__ rgstry::registry_::Dump(
 {
 	sdr::size__ ChildAmount = 0;
 qRH
-	xml::writer Writer;
+	xml::rWriter Writer;
 qRB
 	Writer.Init( Flow, Outfit, Encoding );
 
@@ -868,7 +868,7 @@ namespace {
 		xtf::extended_text_iflow__ PXFlow;
 		xml::status__ Status = xml::s_Undefined;
 	qRB
-		PFlow.Init( XFlow, xpp::criterions___( Criterions.Directory, Criterions.CypherKey, Criterions.IsNamespaceDefined() ? Criterions.Namespace : str::string( DEFAULT_NAMESPACE ) ) );
+		PFlow.Init( XFlow, xpp::criterions___( Criterions.Directory, 0, Criterions.CypherKey, Criterions.IsNamespaceDefined() ? Criterions.Namespace : str::string( DEFAULT_NAMESPACE ) ) );	// NOTA: 'Level' member is not used.
 		PXFlow.Init( PFlow, XFlow.Format() );
 
 		switch ( Status = xml::Parse( PXFlow, xml::ehReplace, Callback, qRPU ) ) {
@@ -1145,7 +1145,7 @@ qRE
 void rgstry::Dump(
 	const entry__ &Entry,
 	bso::bool__ RootToo,
-	xml::writer_ &Writer )
+	xml::rWriter &Writer )
 {
 qRH
 	hLock Lock;
@@ -1712,7 +1712,7 @@ qRB
 
 	Location.Init();
 	Buffer.Init();
-	Root = Fill( XFlow, xpp::criterions___( fnm::GetLocation( FileName, Location ).UTF8( Buffer ), Criterions.CypherKey, Criterions.Namespace ), RootPath, Registry, Context );
+	Root = Fill( XFlow, xpp::criterions___( fnm::GetLocation( FileName, Location ).UTF8( Buffer ), 0, Criterions.CypherKey, Criterions.Namespace ), RootPath, Registry, Context );	//NOTA: 'Level' member is not used.
 
 	if ( Root == qNIL )
 		if ( Context.Status == sParseError )

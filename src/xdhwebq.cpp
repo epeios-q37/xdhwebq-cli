@@ -59,7 +59,8 @@ namespace {
 		: public cProcessing_
 		{
 		private:
-			Q37_MRMDF( session::rSessions, S_, Sessions_ );
+			qRMV( xdwmain::rAgent, A_, Agent_ );
+			qRMV( session::rSessions, S_, Sessions_ );
 		protected:
 			void *CSDSCBPreProcess(
 				fdr::rRWDriver *RWDriver,
@@ -73,7 +74,7 @@ namespace {
 			{
 			qRH
 				query::wPairs Pairs;
-				str::string Response;
+				str::string Token, Response;
 				TOL_CBUFFER___ Buffer;
 				flw::sDressedRWFlow<> Flow;
 			qRB
@@ -82,7 +83,15 @@ namespace {
 				Pairs.FillWith( Flow );
 
 				Response.Init();
-				xdwmain::Handle( Pairs, S_(), Response );
+
+				if ( Pairs.Exists( str::wString( "_head" ) ) ) {
+					Token.Init();
+					Pairs.GetValue( str::wString( "_token" ), Token );
+
+					A_().Head( &Token, Response );
+				}  else
+					xdwmain::Handle( Pairs, S_(), Response );
+
 				Flow.Write(Response.Convert(Buffer), Response.Amount() );
 				Flow.Commit();
 			qRR
@@ -97,11 +106,15 @@ namespace {
 		public:
 			void reset( bso::bool__ P = true )
 			{
+				Agent_ = NULL;
 				Sessions_ = NULL;
 			}
 			E_CVDTOR( sProcessingCallback );
-			void Init( session::rSessions &Sessions )
+			void Init(
+				xdwmain::rAgent &Agent,
+				session::rSessions &Sessions )
 			{
+				Agent_ = &Agent;
 				Sessions_ = &Sessions;
 			}
 		};
@@ -132,7 +145,7 @@ namespace {
 
 		Sessions.Init( SessionsUnprotected );
 
-		Callback.Init( Sessions );
+		Callback.Init( Agent, Sessions );
 
 		Server.Init( sclmisc::MGetU16( registry::parameter::Service ), Callback );
 		Server.Process( NULL );

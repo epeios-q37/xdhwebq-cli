@@ -2,8 +2,145 @@
 
 ## *Shortcuts*
 
-- [adpt]: Adaptation to changes in underlying modules;
-- [stdz]: modification to comply with current standards;
+- [adpt]: Adaptation to changes in underlying modules,
+- [stdz]: modification to comply with current standards,
+- [trvl]: trivial modifications,
+
+## 2018-10-05
+
+- SCLXDHTML:
+  - adding handling of the *HTML* user's head section for the *Atlas* toolkit,
+- XDHCMN:
+  - changing `cUpstream::[XDHCMN]` return type,
+- XDHUPS:
+  - [adpt],
+  - [stdz],
+
+## 2018-10-03
+- SCLI:
+  - adding control feature to ensure compatibility so the object can be moved between binaries,
+- XDHCMN:
+  - `sUpstream::[XDHCMN]GetInfo(...)` does no more deal with strings, but returns a `scli::sInfo`,
+- XDHUPS:
+  - [adpt],
+
+## 2018-10-02
+
+- SCLXDHTML:
+  - [adpt],
+- XDHCMN:
+  - moving `[XDHCMN]GetHead(...)` and `[XDHCMN]GetInfos(...)` from `cSession` to `cDownstream` as this methods are global to the app.,
+  - renaming `cProxy` to `cUpstream` as it's the counterpart of `cDownstream`,
+- XDHDWS:
+  - [adpt],
+- XDHUJP:
+  - [adpt],
+- XDHUPS:
+  - [adpt],
+
+## 2018-09-28
+
+- XML:
+  - handling the  skipping of top tags in `sWriter`,
+
+## 2018-09-27
+
+- RGSTRY:
+  - [adpt],
+- SCLXDHTML:
+  - [adpt],
+  - introducing `sProxy` new head retrieving methods,
+  - deprecating old `sProxy` head setting methods,
+- XDHCMN:
+  - introducing `cSession::(XDHCMN)Info(...)` and `cSession::(XDHCMN)Head(...)`,
+- XDHUPS:
+  - [adpt],
+
+## 2018-09-25
+
+- FLX:
+  - introducing `R...`/`W...` variants,
+- RGSTRY:
+  - [adpt],
+- SCLFRNTND:
+  - [adpt],
+- SCLLOCALE:
+  - [adpt],
+- SCLMISC:
+  - [adpt],
+- SCLXDHTML:
+  - [adpt],
+- TXF:
+  - introducing `(R|W)Void`,
+- XML:
+  - `mark__` -> `sMark`,
+  - `(d|w)Writer` -> `rWriter`,
+  - `XML_UNDEFINED_MARK` -> `Undefined`,
+  - `rWriter` can be instruct to ignore some levels,
+- XPP:
+  - [adpt],
+
+## 2018-09-21
+
+- SCLRGSTRY:
+ - fixing a bug introduced by previous modifications,
+
+- SCLXDHTML:
+  - introducing `sProxy::AlertB(...)`, calling the JS original `alert(...)`,
+  - an error is now correctly reported when occurring at a early time,
+
+## 2018-09-19
+
+- SCLRGSTRY:
+  - introducing `eNeedness`,
+
+## 2018-09-18
+
+- SCLXDHTML:
+  - [adpt],
+- XDH...:
+  - *EventFetcher* replaced by *LayoutSetter* (yes, was naming was weired),
+  - setting the head section (*HeadUp*) has now its own script (*HeadSetter*),
+
+## 2018-09-17
+
+- SCLXDHTML:
+  - the head section is now set automatically, and no more by explicitly calling the `HeadUp(...)` method,
+  - no more use of `XDHRoot`,
+  - default action was not handled properly with web interface,
+
+## 2018-09-14
+
+- XDHCMN:
+  - adding `Escape(...)` variant,
+- XML:
+  - fixing bad error reporting when extraneous `"`,
+- SCLXDHTML:
+  - changing the handling of the *head* section of the application's main page,
+
+## 2018-09-13
+
+- SCLMISC:
+  - [adpt]
+
+- SCLRGSTRY:
+  - [trvl],
+
+- SCLXDHTML:
+  - adding `rSession::HeadUp(...)`,
+  - *XSL* files are now referred with the more generic *XML* term, to cover the use of locale (*XLCL* affix) and *XHTML* files.
+
+## 2018-09-12
+
+- CSDLEC:
+  - [adpt]
+
+## 2018-09-09
+
+- MTX:
+  - adding `rMutex::InitAndLock(...)`,
+- THT :
+  - adding timeout handlig to `rReadWrite`.
 
 ## 2018-08-16
 
@@ -3017,6 +3154,7 @@
 
 [adpt]:#Adaptation
 [stdz]:#Standardization
+[trvl]:#Trivial
   
 ### Adaptation
 
@@ -3025,3 +3163,7 @@ Adaptation to changes in underlying modules.
 ### Standardization
 
 Modification to comply with current standards.
+
+### Trivial
+
+Trivial modifications.

@@ -67,7 +67,7 @@ namespace xdhups {
 		}
 	};
 
-    class agent___
+    class rAgent
     {
     private:
 		dlbrry::dynamic_library___ Library_;
@@ -79,7 +79,7 @@ namespace xdhups {
 			Library_.reset( P );
 			Callback_ = NULL;
         }
-        E_CDTOR( agent___ );
+        E_CDTOR( rAgent );
 		bso::bool__ Init(
 			xdhcmn::eMode Mode,
 			const str::string_ &ModuleFileName,
@@ -88,7 +88,7 @@ namespace xdhups {
 		cSession_ *RetrieveCallback(
 			const char *Language,
 			const str::dString &Token,	// If empty, PROD, otherwise DEMO.
-			xdhcmn::cProxy *Callback )
+			xdhcmn::cUpstream *Callback )
 		{
 			return C_().RetrieveCallback( Language, Token, Callback );
 		}
@@ -99,6 +99,25 @@ namespace xdhups {
 		void ReleaseCallback( cSession_ *Callback )
 		{
 			return C_().ReleaseCallback( Callback );
+		}
+		const str::dString &Info( str::dString &Info )
+		{
+			const scli::sInfo &I = C_().GetInfo();
+
+			Info.Append( "T: " );
+			Info.Append( I.Target() );
+			Info.Append( "; P: " );
+			Info.Append( I.Product() );
+			Info.Append( "; O: " );
+			Info.Append( I.Organization() );
+
+			return Info;
+		}
+		const str::dString &Head(
+			void *UP,
+			str::dString &Head )
+		{
+			return C_().GetHead( UP, Head );
 		}
 	};
 }

@@ -80,7 +80,8 @@ namespace xdhcmn {
 		fLog,				// Message,
 		fAlert,				// XML, XSL, Title.
 		fConfirm,			// XML, XSL, Title.
-		fSetLayout,			// Id, XML, XSL; if XSL is empty, XML is pure HTML.
+		fSetHead,			// XML, XSL; if XSL is empty, XML is pure HTML.
+		fSetLayout,		// Id, XML, XSL; if XSL is empty, XML is pure HTML.
 		fSetContents,		// Ids, Contents.
 		fDressWidgets,		// Id.
 		fInsertCSSRule,		// Rule, Index.
@@ -107,7 +108,7 @@ namespace xdhcmn {
 
 	const char *GetLabel( function__ Function );
 
-	class cProxy
+	class cUpstream
 	{
 	protected:
 		virtual void XDHCMNProcess(
@@ -115,7 +116,7 @@ namespace xdhcmn {
 			TOL_CBUFFER___ *Result,
 			va_list List ) = 0;
 	public:
-		qCALLBACK( Proxy );
+		qCALLBACK( Upstream );
 		void Process(
 			function__ Function,
 			TOL_CBUFFER___ *Result,
@@ -188,8 +189,12 @@ namespace xdhcmn {
 			const char *Language,
 			const str::dString &Token,	// If not empty, DEMO mode with connexion identified by 'Token',
 										// otherwise PROD mode, with host/service retrieved from registry.
-			cProxy *Proxy ) = 0;
+			cUpstream *Upstream ) = 0;
 		virtual void XDHCMNReleaseCallback( cSession *Session ) = 0;
+		virtual const scli::sInfo &XDHCMNGetInfo( void ) = 0;
+		virtual void XDHCMNGetHead(
+			void *UP,
+			str::dString &Head ) = 0;
 	public:
 		qCALLBACK( Downstream )
 		void Initialize( const shared_data__ &Data )
@@ -206,13 +211,25 @@ namespace xdhcmn {
 			const char *Language,
 			const str::dString &Token,	// If not empty, DEMO mode with connexion identified by 'Token',
 										// otherwise PROD mode, with host/service retrieved from registry.
-			cProxy *Proxy )
+			cUpstream *Upstream )
 		{
-			return XDHCMNRetrieveCallback( Language, Token, Proxy );
+			return XDHCMNRetrieveCallback( Language, Token, Upstream );
 		}
 		void ReleaseCallback( cSession *Session )
 		{
 			return XDHCMNReleaseCallback( Session );
+		}
+		const scli::sInfo &GetInfo( void )
+		{
+			return XDHCMNGetInfo();
+		}
+		const str::dString &GetHead(
+			void *UP,
+			str::dString &Head )
+		{
+			XDHCMNGetHead( UP, Head );
+
+			return Head;
 		}
 	};
 
@@ -223,6 +240,12 @@ namespace xdhcmn {
 		str::string_ &Target,
 		bso::char__ Delimiter,	// Should be '\'', '"' or 0. If 0, escapes '\'' and '\"', otherwise escapes 'Delimiter'.
 		bso::char__ EscapeChar = strmrg::DefaultEscapeToken );
+
+	const str::dString &Escape(
+		str::string_ &String,
+		bso::char__ Delimiter,	// Should be '\'', '"' or 0. If 0, escapes '\'' and '\"', otherwise escapes 'Delimiter'.
+		bso::char__ EscapeChar = strmrg::DefaultEscapeToken );
+
 #if 0
 	void Unescape(
 		const str::string_ &Source,
