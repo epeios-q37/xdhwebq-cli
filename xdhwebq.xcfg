@@ -22,7 +22,9 @@
      </Attribute>
      <Value>
       <Getter><![CDATA[
-							getValue( "%Id%" );
+							var result = getValue( "%Id%" );
+							console.log( "XDH: ", result );
+							result;
 						]]>      </Getter>
       <Setter><![CDATA[
 							setValue( "%Id%", "%Value%" );
@@ -73,7 +75,6 @@
 												document.head.innerHTML = "";
 												document.head.appendChild( transformToFragment( xml, xsl ) );
 						}
-//				handleHead();
 					}
 					]]>      </Head>
       <Layout><![CDATA[
