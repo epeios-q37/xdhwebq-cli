@@ -45,6 +45,7 @@
 namespace xdhcmn {
 	// NOTA : not used by this module, but by other 'upstream' and 'downtream' 'XDH...' modules.
 	typedef ntvstr::char__ nchar__;
+	typedef ntvstr::sChar sNChar;
 	typedef ntvstr::string___ nstring___;
 	typedef ntvstr::rString rNString;
 	qMIMICs( bso::sU16, sIndex );	// For the 'CSS' rules.
@@ -76,17 +77,32 @@ namespace xdhcmn {
 	};
 
 	enum function__ {		// Parameters :
-		fExecute,			// Script,
+		fExecute,			// Script
 		fLog,				// Message,
 		fAlert,				// XML, XSL, Title.
 		fConfirm,			// XML, XSL, Title.
-		fSetHead,			// XML, XSL; if XSL is empty, XML is pure HTML.
-		fSetLayout,		// Id, XML, XSL; if XSL is empty, XML is pure HTML.
+		fSetLayout,			// Id, XML, XSL; if XSL is empty, XML is pure HTML.
 		fSetContents,		// Ids, Contents.
+		fSetTimeout,		// Id, Delay, Action.
+/**/
+		fDummy,				// Dummy entry, which helps creating new entries.
+		fParent,			// Id,
+		fFirstChild,		// Id,
+		fLastChild,			// Id,
+		fPreviousSibling,	// Id,
+		fNextSibling,		// Id,
+		fCreateElement,		// Name, Id.
+		fInsertChild,		// Child, Id.
+		fAppendChild,		// Child, Id.
+		fInsertBefore,		// Sibling, Id,
+		fInsertAfter,		// Sibling, Id,
+/**/
 		fDressWidgets,		// Id.
+		/*
 		fInsertCSSRule,		// Rule, Index.
 		fAppendCSSRule,		// Rule.
 		fRemoveCSSRule,		// Index.
+		*/
 		fAddClasses,		// Ids, Classes.
 		fRemoveClasses,		// Ids, Classes.
 		fToggleClasses,		// Ids, Classes.

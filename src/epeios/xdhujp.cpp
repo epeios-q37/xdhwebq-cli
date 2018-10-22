@@ -30,7 +30,9 @@
 using namespace xdhujp;
 
 using xdhutl::nstring___;
+using xdhutl::rNString;
 using xdhutl::nchar__;
+using xdhutl::sNChar;
 using xdhujs::script_name__;
 
 static const char *Execute_(
@@ -195,25 +197,6 @@ static void HandleWidgets_(
 	ParametersSetsTag.Append( " ]");
 }
 
-static void SetHead_(
-	cJS &Callback,
-	const nchar__ *XML,
-	const nchar__ *XSL )	// If empty, 'XML' contains pure 'XHTML'.
-{
-	Execute( Callback, xdhujs::snHeadSetter, NULL, XML, XSL );
-}
-
-static void SetHead_(
-	cJS &Callback,
-	va_list List )
-{
-	// NOTA : we use variables, because if we put 'va_arg()' directly as parameter to below function, it's not sure that they are called in the correct order.
-	const nchar__ *XML = va_arg( List, const nchar__ * );
-	const nchar__ *XSL = va_arg( List, const nchar__ * );
-
-	SetHead_( Callback,  XML, XSL );
-}
-
 static void SetLayout_(
 	cJS &Callback,
 	const nchar__ *Id,	// If 'Id' != NULL, it's the id of the element to apply to, otherwise it applies to the document.
@@ -326,6 +309,207 @@ static void SetContents_(
 	const nchar__ *Contents = va_arg( List, const nchar__ * );
 
 	SetContents_( Callback, Ids, Contents );
+}
+
+static void SetTimeout_(
+	cJS &Callback,
+	const sNChar *Delay,
+	const sNChar *Action )
+{
+	Execute( Callback, xdhujs::snTimeoutSetter, NULL, Delay, Action );
+}
+
+static void SetTimeout_(
+	cJS &Callback,
+	va_list List )
+{
+	// NOTA : we use variables, because if we put 'va_arg()' directly as parameter to below function, it's not sure that they are called in the correct order.
+	const sNChar *Delay = va_arg( List, const sNChar * );
+	const sNChar *Action = va_arg( List, const sNChar * );
+
+	SetTimeout_( Callback, Delay, Action );
+}
+
+static void Parent_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snParent, Result, Id );
+}
+
+static void Parent_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	Parent_( Callback, Id, Result );
+}
+
+static void FirstChild_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snFirstChild, Result, Id );
+}
+
+static void FirstChild_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	FirstChild_( Callback, Id, Result );
+}
+
+static void LastChild_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snLastChild, Result, Id );
+}
+
+static void LastChild_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	LastChild_( Callback, Id, Result );
+}
+
+static void PreviousSibling_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snPreviousSibling, Result, Id );
+}
+
+static void PreviousSibling_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	PreviousSibling_( Callback, Id, Result );
+}
+
+static void NextSibling_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snNextSibling, Result, Id );
+}
+
+static void NextSibling_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	NextSibling_( Callback, Id, Result );
+}
+
+static void CreateElement_(
+	cJS &Callback,
+	const sNChar *Name,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snCreateElement, Result, Name, Id );
+}
+
+static void CreateElement_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Name = va_arg( List, const sNChar * );
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	CreateElement_( Callback, Name, Id, Result );
+}
+
+static void InsertChild_(
+	cJS &Callback,
+	const sNChar *Child,
+	const sNChar *Id )
+{
+	Execute( Callback, xdhujs::snInsertChild, NULL, Child, Id );
+}
+
+static void InsertChild_(
+	cJS &Callback,
+	va_list List )
+{
+	const sNChar *Child = va_arg( List, const sNChar * );
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	InsertChild_( Callback, Child, Id );
+}
+
+static void AppendChild_(
+	cJS &Callback,
+	const sNChar *Child,
+	const sNChar *Id )
+{
+	Execute( Callback, xdhujs::snAppendChild, NULL, Child, Id );
+}
+
+static void AppendChild_(
+	cJS &Callback,
+	va_list List )
+{
+	const sNChar *Child = va_arg( List, const sNChar * );
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	AppendChild_( Callback, Child, Id );
+}
+
+static void InsertBefore_(
+	cJS &Callback,
+	const sNChar *Sibling,
+	const sNChar *Id )
+{
+	Execute( Callback, xdhujs::snInsertBefore, NULL, Sibling, Id );
+}
+
+static void InsertBefore_(
+	cJS &Callback,
+	va_list List )
+{
+	const sNChar *Sibling = va_arg( List, const sNChar * );
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	InsertBefore_( Callback, Sibling, Id );
+}
+
+static void InsertAfter_(
+	cJS &Callback,
+	const sNChar *Sibling,
+	const sNChar *Id )
+{
+	Execute( Callback, xdhujs::snInsertAfter, NULL, Sibling, Id );
+}
+
+static void InsertAfter_(
+	cJS &Callback,
+	va_list List )
+{
+	const sNChar *Sibling = va_arg( List, const sNChar * );
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	InsertAfter_( Callback, Sibling, Id );
 }
 
 namespace{
@@ -543,7 +727,7 @@ static void GetResult_(
 {
 	GetResult_( Callback, va_arg( List, const nchar__ * ), Result );
 }
-
+/*
 namespace {
 	void InsertCSSRule_(
 		cJS &Callback,
@@ -615,6 +799,7 @@ static void RemoveCSSRule_(
 {
 	RemoveCSSRule_( Callback, va_arg( List, const nchar__ * ) );
 }
+*/
 
 namespace {
 	void HandleClasses_(
@@ -687,6 +872,24 @@ static void DisableElements_(
 	DisableElements_( Callback, va_arg( List, const nchar__ * ) );
 }
 
+static void Dummy_(
+	cJS &Callback,
+	const sNChar *Id,
+	qCBUFFERr *Result )
+{
+	Execute( Callback, xdhujs::snDummy, Result, Id );
+}
+
+static void Dummy_(
+	cJS &Callback,
+	qCBUFFERr *Result,
+	va_list List )
+{
+	const sNChar *Id = va_arg( List, const sNChar * );
+
+	Dummy_( Callback, Id, Result );
+}
+
 static script_name__ Convert_( xdhcmn::function__ Function )
 {
 	switch ( Function ) {
@@ -732,9 +935,6 @@ static script_name__ Convert_( xdhcmn::function__ Function )
 	case xdhcmn::fSelect:
 		qRFwk();
 		break;
-	case xdhcmn::fSetHead:
-		qRFwk();
-		break;
 	case xdhcmn::fSetLayout:
 		qRFwk();
 		break;
@@ -744,6 +944,40 @@ static script_name__ Convert_( xdhcmn::function__ Function )
 	case xdhcmn::fSetContents:
 		qRFwk();
 		break;
+	case xdhcmn::fSetTimeout:
+		qRFwk();
+		break;
+	case xdhcmn::fParent:
+		qRFwk();
+		break;
+	case xdhcmn::fFirstChild:
+		qRFwk();
+		break;
+	case xdhcmn::fLastChild:
+		qRFwk();
+		break;
+	case xdhcmn::fPreviousSibling:
+		qRFwk();
+		break;
+	case xdhcmn::fNextSibling:
+		qRFwk();
+		break;
+	case xdhcmn::fCreateElement:
+		qRFwk();
+		break;
+	case xdhcmn::fInsertChild:
+		qRFwk();
+		break;
+	case xdhcmn::fAppendChild:
+		qRFwk();
+		break;
+	case xdhcmn::fInsertBefore:
+		qRFwk();
+		break;
+	case xdhcmn::fInsertAfter:
+		qRFwk();
+		break;
+		/*
 	case xdhcmn::fInsertCSSRule:
 		qRFwk();
 		break;
@@ -753,6 +987,7 @@ static script_name__ Convert_( xdhcmn::function__ Function )
 	case xdhcmn::fRemoveCSSRule:
 		qRFwk();
 		break;
+*/
 	case xdhcmn::fAddClasses:
 		qRFwk();
 		break;
@@ -766,6 +1001,9 @@ static script_name__ Convert_( xdhcmn::function__ Function )
 		qRFwk();
 		break;
 	case xdhcmn::fDisableElements:
+		qRFwk();
+		break;
+	case xdhcmn::fDummy:
 		qRFwk();
 		break;
 	default:
@@ -808,9 +1046,6 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 	case xdhcmn::fSelect:
 		Select_( C_(), List);
 		break;
-	case xdhcmn::fSetHead:
-		SetHead_( C_(), List );
-		break;
 	case xdhcmn::fSetLayout:
 		SetLayout_( C_(), List );
 		break;
@@ -820,6 +1055,40 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 	case xdhcmn::fSetContents:
 		SetContents_( C_(), List);
 		break;
+	case xdhcmn::fSetTimeout:
+		SetTimeout_( C_(), List );
+		break;
+	case xdhcmn::fParent:
+		Parent_( C_(), Result, List );
+		break;
+	case xdhcmn::fFirstChild:
+		FirstChild_( C_(), Result, List );
+		break;
+	case xdhcmn::fLastChild:
+		LastChild_( C_(), Result, List );
+		break;
+	case xdhcmn::fPreviousSibling:
+		PreviousSibling_( C_(), Result, List );
+		break;
+	case xdhcmn::fNextSibling:
+		NextSibling_( C_(), Result, List );
+		break;
+	case xdhcmn::fCreateElement:
+		CreateElement_( C_(), Result, List );
+		break;
+	case xdhcmn::fInsertChild:
+		InsertChild_( C_(), List );
+		break;
+	case xdhcmn::fAppendChild:
+		AppendChild_( C_(), List );
+		break;
+	case xdhcmn::fInsertBefore:
+		InsertBefore_( C_(), List );
+		break;
+	case xdhcmn::fInsertAfter:
+		InsertAfter_( C_(), List );
+		break;
+		/*
 	case xdhcmn::fInsertCSSRule:
 		InsertCSSRule_( C_(), List );
 		break;
@@ -829,6 +1098,7 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 	case xdhcmn::fRemoveCSSRule:
 		RemoveCSSRule_( C_(), List );
 		break;
+	*/
 	case xdhcmn::fAddClasses:
 		HandleClasses_( C_(), xdhujs::snClassesAdder, List );
 		break;
@@ -843,6 +1113,9 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 		break;
 	case xdhcmn::fDisableElements:
 		DisableElements_( C_(), List );
+		break;
+	case xdhcmn::fDummy:
+		Dummy_( C_(), Result, List );
 		break;
 	default:
 		qRFwk();

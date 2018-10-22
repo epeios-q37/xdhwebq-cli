@@ -34,7 +34,9 @@
 
 namespace xdhutl {
 	using xdhcmn::nchar__;
+	using xdhcmn::sNChar;
 	using xdhcmn::nstring___;
+	using xdhcmn::rNString;
 
 	E_ENUM( action ) {
 		aOpenFile,
@@ -136,20 +138,20 @@ namespace xdhutl {
 	E_AUTO( event_abstracts );
 
 	inline void GetTagDefaultEvent(
-		const str::string_ &Name,
+		const str::string_ &Name,	// For the 'INPUT' tag, 'Name' contains the value of the 'type' attribute (uppercased).
 		str::string_ &Event,
 		str::dString &Keys )	// If the event is key related.
 	{
 		if ( Name == "SELECT" )
 			Event.Append( "change" );
-		else if ( Name == "INPUT" ) {
+		else if ( Name == "TEXT" ) {
 			Event.Append( "keypress" );
 			Keys.Append( "Enter" );
 		}  else if ( Name == "TEXTAREA" ) {
 			Event.Append( "keypress" );
 			Keys.Append( "Enter" );
-		} else if ( Name == "SCRIPT" ) {
-			Event.Append( "timeout" );
+		} else if ( Name == "TIMEOUT" ) {	// 'TIMEOUT' is a placeholder needed by the 'setTimeout(...)' function. It will never be used in a HTML file.
+			Event.Append( "timeout" );	// The 'timeout' event has the same purpose.
 		}  else
 			Event.Append( "click" );
 	}
