@@ -140,9 +140,10 @@ void xdhcmn::Escape(
 
 			Target.Append( C );
 			break;
-		default:
+		default:	// The '\x' char sequence remains this 2 chars (hex number). Used essentially for end of string marker ('\x00': NUL char).
 			if ( C == EscapeChar )
-				Target.Append( EscapeChar );
+				if ( Source( Source.Next( Row ) ) != 'x' )
+					Target.Append( EscapeChar );
 
 			Target.Append( Source( Row ) );
 			break;
