@@ -6,6 +6,40 @@
 - [stdz]: modification to comply with current standards;
 - [trvl]: trivial modifications;
 
+## 2018-12-07
+
+- CSDBNC:
+  - [adpt],
+- CSDBNS:
+  - [adpt],
+- SCK
+  - the `close(…)` takes now an error handling parameter (and returns a success/failure boolean), to avoid the throwing of errors in destructors,
+
+## 2018-12-03
+
+- RGSTRY:
+  - [adpt],
+- XML:
+  - it is now possible to specify the delimiter used for the attribute value,
+- XPP:
+   - attribute delimiters are now preserved and no more systematically replaced with `"`,
+
+## 2018-12-01
+
+- XML:
+  - space-like characters (`\r`, `\n`, `\t`...) are now allowed in attribute values,
+  - fixing bad indentation,
+
+## 2018-11-20
+
+- MTK:
+  - the routine can now receive a reference to an object instead of the usual `void *` as user parameter,
+
+## 2018-11-19
+
+- LOGQ:
+  - [adpt],
+
 ## 2018-11-07
 
 - XDHCMN:

@@ -440,7 +440,6 @@ static unsigned char HandleEntity_( _flow___ &Flow )
 static status__ GetValue_(
 	_flow___ &Flow,
 	bso::char__ Delimiter,
-	bso::bool__ ErrorIfSpaceInValue,
 	entities_handling__ EntitiesHandling,
 	str::string_ &Value,
 	bso::bool__ &OnlySpaces )
@@ -456,8 +455,6 @@ static status__ GetValue_(
 
 		if ( !isspace( C = Flow.Get( UTF ) ) )
 			OnlySpaces = false;
-		else if ( !OnlySpaces && ErrorIfSpaceInValue && ( C != ' ' ) )
-			return sUnexpectedCharacter;
 
 		if ( ( C == '&' ) && ( EntitiesHandling == ehReplace ) ) {
 			C = HandleEntity_( Flow );
@@ -486,7 +483,7 @@ inline status__ GetAttributeValue_(
 {	
 	bso::bool__ Dummy;
 
-	return GetValue_( Flow, Delimiter, true, EntitiesHandling, Value, Dummy );
+	return GetValue_( Flow, Delimiter, EntitiesHandling, Value, Dummy );
 }
 
 #define HANDLE( F )\
@@ -499,9 +496,9 @@ static status__ GetAttribute_(
 	_flow___ &Flow,
 	entities_handling__ EntitiesHandling,
 	str::string_ &Name,
-	str::string_ &Value )
+	bso::sChar &Delimiter,
+	str::string_ &Value)
 {
-	char Delimiter;
 	status__ Status = s_Undefined;
 
 	if ( GetName_( Flow, Name ) == 0 ) {
@@ -542,7 +539,7 @@ inline static status__ GetTagValue_(
 	entities_handling__ EntitiesHandling,
 	bso::bool__ &OnlySpaces )
 {
-	return GetValue_( Flow, '<', false, EntitiesHandling, Value, OnlySpaces );
+	return GetValue_( Flow, '<', EntitiesHandling, Value, OnlySpaces );
 }
 
 #define XMLNS	"xmlns"
@@ -787,10 +784,11 @@ qRB
 		case cAttribute:
 			switch ( _Token ) {
 			case t_Undefined:
-				_AttributeName.Init();
+				AttributeName_.Init();
+				AttributeDelimiter_ = delimiter::sUndefined;
 				_Value.Init();
 
-				HANDLE( GetAttribute_( _Flow, _EntitiesHandling, _AttributeName, _Value ) );
+				HANDLE( GetAttribute_( _Flow, _EntitiesHandling, AttributeName_, AttributeDelimiter_, _Value ) );
 
 				if ( _Tags.IsEmpty() )
 					qRFwk();
@@ -799,7 +797,7 @@ qRB
 
 				_Tags.Top( _TagName );
 
-				if ( IsSpecialAttribute_( _AttributeName ) )
+				if ( IsSpecialAttribute_( AttributeName_ ) )
 					_Token = tSpecialAttribute;
 				else
 					_Token = tAttribute;
@@ -967,7 +965,6 @@ qRB
 					HANDLE( GetTagValue_( _Flow, _Value, _EntitiesHandling, OnlySpaces ) );
 
 					if ( !OnlySpaces ) {
-
 						_TagName.Init();
 
 						if ( _Tags.IsEmpty() )
@@ -1049,7 +1046,8 @@ status__ xml::Parse(
 	status__ Status = s_Undefined;
 qRH
 	parser___ Parser;
-	str::string TagName, AttributeName, Value;	
+	str::string TagName, AttributeName, Value;
+	bso::sChar AttributeDelimiter = delimiter::sUndefined;
 	bso::bool__ Stop = false;
 	xml::dump Dump;
 qRB
@@ -1058,10 +1056,11 @@ qRB
 	while ( !Stop ) {
 		TagName.Init();
 		AttributeName.Init();
+		AttributeDelimiter = delimiter::sUndefined;
 		Value.Init();
 		Dump.PurgeData();
 
-		switch ( Parser.Parse( TagName, AttributeName, Value, Dump, Status ) ) {
+		switch ( Parser.Parse( TagName, AttributeName, AttributeDelimiter, Value, Dump, Status ) ) {
 		case tProcessingInstruction:
 			Stop = !Callback.XMLProcessingInstruction( Dump );
 			break;
@@ -1072,10 +1071,10 @@ qRB
 			Stop = !Callback.XMLStartTagClosed( TagName, Dump );
 			break;
 		case tAttribute:
-			Stop = !Callback.XMLAttribute( TagName, AttributeName, Value, Dump );
+			Stop = !Callback.XMLAttribute( TagName, AttributeName, AttributeDelimiter, Value, Dump );
 			break;
 		case tSpecialAttribute:
-			Stop = !Callback.XMLSpecialAttribute( TagName, AttributeName, Value, Dump );
+			Stop = !Callback.XMLSpecialAttribute( TagName, AttributeName, AttributeDelimiter, Value, Dump );
 			break;
 		case tValue:
 		case tCData:
@@ -1292,16 +1291,17 @@ void xml::rWriter::PutValue( const value_ &Value )
 
 void xml::rWriter::PutRawAttribute(
 	const name_ &Name,
-	flw::sRFlow &Flow )
+	flw::sRFlow &Flow,
+	eDelimiter Delimiter )
 {
 	if ( !TagNameInProgress_ )
 		qRFwk();
 
-	F_() << ' ' << Name << "=\"";
+	F_() << ' ' << Name << '=' << GetAttributeDelimiter_( Delimiter );
 
 	flx::Copy( Flow, RF_() );
 		
-	F_() << '"';
+	F_() << GetAttributeDelimiter_( Delimiter );
 
 	Commit_();
 }
@@ -1310,7 +1310,8 @@ namespace {
 	void TransformAndPutAttribute_(
 		const name_ &Name,
 		flw::sRFlow &Flow,
-		rWriter &Writer )
+		rWriter &Writer,
+		eDelimiter Delimiter )
 	{
 	qRH
 		flw::standalone_iflow__<> TFlow;
@@ -1319,7 +1320,7 @@ namespace {
 		Driver.Init( Flow );
 		TFlow.Init( Driver );
 
-		Writer.PutRawAttribute( Name, TFlow );
+		Writer.PutRawAttribute( Name, TFlow, Delimiter );
 	qRR
 	qRT
 	qRE
@@ -1328,14 +1329,15 @@ namespace {
 
 void xml::rWriter::PutAttribute(
 	const name_ &Name,
-	flw::sRFlow &Flow )
+	flw::sRFlow &Flow,
+	eDelimiter Delimiter )
 {
 	switch ( SpecialCharHandling_ ) {
 	case schReplace:
-		TransformAndPutAttribute_( Name, Flow, *this );
+		TransformAndPutAttribute_( Name, Flow, *this, Delimiter );
 		break;
 	case schKeep:
-		PutRawAttribute( Name, Flow );
+		PutRawAttribute( Name, Flow, Delimiter );
 		break;
 	default:
 		qRFwk();
@@ -1345,22 +1347,24 @@ void xml::rWriter::PutAttribute(
 
 void xml::rWriter::PutAttribute(
 	const name_ &Name,
-	const value_ &Value )
+	const value_ &Value,
+	eDelimiter Delimiter)
 {
 	flx::sStringIFlow Flow;
 
 	Flow.Init( Value );
-	PutAttribute( Name, *Flow );
+	PutAttribute( Name, *Flow, Delimiter );
 }
 
 void xml::rWriter::PutRawAttribute(
 	const name_ &Name,
-	const value_ &Value )
+	const value_ &Value,
+	eDelimiter Delimiter)
 {
 	flx::sStringIFlow Flow;
 
 	Flow.Init( Value );
-	PutRawAttribute( Name, Flow );
+	PutRawAttribute( Name, Flow, Delimiter );
 }
 
 void xml::rWriter::PutCData( flw::sRFlow &Flow )
@@ -1446,7 +1450,7 @@ bso::sBool xml::rWriter::Put( rParser &Parser )
 			break;
 		case xml::tAttribute:
 		case xml::tSpecialAttribute:
-			PutAttribute( Parser.AttributeName(), Parser.Value() );
+			PutAttribute( Parser.AttributeName(), Parser.Value(), Convert( Parser.AttributeDelimiter() ) );
 			break;
 		case xml::tValue:
 			PutValue( Parser.Value() );

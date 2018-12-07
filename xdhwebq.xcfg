@@ -1,90 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <Configurations xmlns:xpp="http://q37.info/ns/xpp/">
-  <Configuration target="xdhwebq">
-   <Definitions>
-    <CustomItems>
-     <AttributeNames>
-      <Widget>data-xdh-widget</Widget>
-      <Result>data-xdh-result</Result>
-     </AttributeNames>
-    </CustomItems>
-    <Scripts>
-     <Parent><![CDATA[
+<Configurations xmlns:xpp="http://q37.info/ns/xpp/">
+ <Configuration target="xdhwebq">
+  <Definitions>
+   <CustomItems>
+    <AttributeNames>
+     <Widget>data-xdh-widget</Widget>
+     <Result>data-xdh-result</Result>
+    </AttributeNames>
+   </CustomItems>
+   <Scripts>
+    <Parent><![CDATA[
 					getOrGenerateId( getElement( "%Id% ).parentElement );
-				]]>     </Parent>
-     <CreateElement><![CDATA[
+				]]>    </Parent>
+    <CreateElement><![CDATA[
 					let id = "%Id%";
 					let node = document.createElement( "%Name%" );
 					if ( id !== "" )
 						node.id = id;
 					document.head.appendChild( node );	// 'node' had to be inserted in the DOM, or subsequent 'document.getElementById()' will not find it !
 					getOrGenerateId( node );
-				]]>     </CreateElement>
-     <Child>
-      <Insert><![CDATA[
+				]]>    </CreateElement>
+    <Child>
+     <Insert><![CDATA[
 					 let node = getElement( "%Id%" );
 					 node.insertBefore( getElement( "%Child%" ), node.firstChild );
-					]]>      </Insert>
-      <Append><![CDATA[
+					]]>     </Insert>
+     <Append><![CDATA[
 					 getElement( "%Id%" ).appendChild( getElement( "%Child% ) );
-					]]>      </Append>
-      <First><![CDATA[
+					]]>     </Append>
+     <First><![CDATA[
 						getOrGenerateId( getElement( "%Id%" ).firstChild );
-					]]>      </First>
-      <Last><![CDATA[
+					]]>     </First>
+     <Last><![CDATA[
 						getOrGenerateId( getElement( "%Id%" ).lastChild );
-					]]>      </Last>
-     </Child>
-     <Sibling>
-      <Previous><![CDATA[
+					]]>     </Last>
+    </Child>
+    <Sibling>
+     <Previous><![CDATA[
 						getOrGenerateId( getElement( "%Id%" ).previousSibling );
-					]]>      </Previous>
-      <Next><![CDATA[
+					]]>     </Previous>
+     <Next><![CDATA[
 						getOrGenerateId( getElement( "%Id%" ).nextSibling );
-					]]>      </Next>
-     </Sibling>
-     <Insert>
-      <Before><![CDATA[
+					]]>     </Next>
+    </Sibling>
+    <Insert>
+     <Before><![CDATA[
 						let node = getElement( "%Id%" );
 					 node.parentElement.insertBefore( getElement( "%Sibling%"), node );
-					]]>      </Before>
-      <After><![CDATA[
+					]]>     </Before>
+     <After><![CDATA[
 						let node = getElement( "%Id%" );
 						node.parentElement.insertBefore( getElement( "%Sibling%"), node.nextSibling );
-					]]>      </After>
-     </Insert>
-     <Attribute>
-      <Getter><![CDATA[
+					]]>     </After>
+    </Insert>
+    <Attribute>
+     <Getter><![CDATA[
 							getElement( "%Id%" ).getAttribute("%Name%");
-						]]>      </Getter>
-      <Remover><![CDATA[
+						]]>     </Getter>
+     <Remover><![CDATA[
 							getElement( "%Id%" ).removeAttribute( "%Name%" );
-						]]>      </Remover>
-      <Setter><![CDATA[
+						]]>     </Remover>
+     <Setter><![CDATA[
 							getElement( "%Id%" ).setAttribute("%Name%", "%Value%");
-						]]>      </Setter>
-     </Attribute>
-     <Value>
-      <Getter><![CDATA[
+						]]>     </Setter>
+    </Attribute>
+    <Value>
+     <Getter><![CDATA[
 							var result = getValue( "%Id%" );
 							console.log( "XDH: ", result );
 							result;
-						]]>      </Getter>
-      <Setter><![CDATA[
+						]]>     </Getter>
+     <Setter><![CDATA[
 							setValue( "%Id%", "%Value%" );
-						]]>      </Setter>
-     </Value>
-     <Dialog>
-      <Alert><![CDATA[
+						]]>     </Setter>
+    </Value>
+    <Dialog>
+     <Alert><![CDATA[
 						dia = document.createElement( "span" );
 						dia.innerHTML = transformToHTML( "%XML%", "%XSL%" );
 						jQuery(dia).dialog({modal: true},{title: "%Title%"},{width: "auto"} ,{closeText: "%CloseText%"});
-					]]>      </Alert>
-      <Confirm><![CDATA[
+					]]>     </Alert>
+     <Confirm><![CDATA[
 							confirm( transformToText( "%XML%", "%XSL%" ).trim() );
-					]]>      </Confirm>
-     </Dialog>
-     <DraggableSetter><![CDATA[
+					]]>     </Confirm>
+    </Dialog>
+    <DraggableSetter><![CDATA[
 				var element = getElement( "%Id%" );
 //				element.setAttribute( "draggable", "true" );
 				if ( false )
@@ -96,8 +96,8 @@
 					.on( 'dragend', function( event ) { log( 'dragend' ); launchEvent( event.target, "dragend" ); } )
 					.on( 'click', function( event ) { log( '-->click' );event.stopImmediatePropagation();event.stopPropagation(); } )
 					;
-				]]>     </DraggableSetter>
-     <DroppableSetter><![CDATA[
+				]]>    </DraggableSetter>
+    <DroppableSetter><![CDATA[
 				var element = getElement( "%Id%" );
 //				element.setAttribute( "ondragover", "event.preventDefault();" );
 				if ( false )
@@ -106,10 +106,10 @@
 						}
 					)
 					.on( 'drop', function( event ) { log( 'drop : ' + event.target.id + " ; " + event.relatedTarget.id ); launchEvent( event.target, "drop" );} );
-				]]>     </DroppableSetter>
-     <Fetcher/>
-     <Setter>
-      <Head><![CDATA[
+				]]>    </DroppableSetter>
+    <Fetcher/>
+    <Setter>
+     <Head><![CDATA[
 					{
 						let xml = "%XML%";
 						let xsl = "%XSL%";
@@ -120,8 +120,8 @@
 												document.head.appendChild( transformToFragment( xml, xsl ) );
 						}
 					}
-					]]>      </Head>
-      <Layout><![CDATA[
+					]]>     </Head>
+     <Layout><![CDATA[
 					{
 						let xml = "%XML%";
 						let xsl = "%XSL%";
@@ -144,137 +144,137 @@
 						var digests = fetchEventHandlers( id );
 						digests;
 						}
-					]]>      </Layout>
-      <EventHandlers><![CDATA[
+					]]>     </Layout>
+     <EventHandlers><![CDATA[
 					setEventHandlers( %Ids_%, %Events_% );
-				]]>      </EventHandlers>
-      <Contents><![CDATA[
+				]]>     </EventHandlers>
+     <Contents><![CDATA[
 					setContents( %Ids_%, %Contents_% );
-				]]>      </Contents>
-      <Timeout><![CDATA[
+				]]>     </Contents>
+     <Timeout><![CDATA[
 					setTimeout( (digest) => launchEvent(digest), %Delay%, "|TIMEOUT|timeout||((%Action%))" );
-				]]>      </Timeout>
-     </Setter>
-     <WidgetsInstantiator><![CDATA[
+				]]>     </Timeout>
+    </Setter>
+    <WidgetsInstantiator><![CDATA[
 					instantiateWidgets( %Ids_%, %Types_%, %ParametersSets_% );
-				]]>     </WidgetsInstantiator>
-     <Focuser><![CDATA[
+				]]>    </WidgetsInstantiator>
+    <Focuser><![CDATA[
 						getElement( "%Id%" ).focus();
-					]]>     </Focuser>
-     <Selector><![CDATA[
+					]]>    </Focuser>
+    <Selector><![CDATA[
 						getElement( "%Id%" ).select();
-					]]>     </Selector>
-     <Log><![CDATA[
+					]]>    </Selector>
+    <Log><![CDATA[
 						log( "%Message%" );
-					]]>     </Log>
-     <Property>
-      <Getter><![CDATA[
+					]]>    </Log>
+    <Property>
+     <Getter><![CDATA[
 							getElement( "%Id%" ).%Name_%;
-						]]>      </Getter>
-      <Setter><![CDATA[
+						]]>     </Getter>
+     <Setter><![CDATA[
 							getElement( "%Id%" ).%Name_% = %Value_%;
-						]]>      </Setter>
-     </Property>
-     <Widget>
-      <ValueRetriever><![CDATA[
+						]]>     </Setter>
+    </Property>
+    <Widget>
+     <ValueRetriever><![CDATA[
 							jQuery( getElement( "%Id%") ).%Method_%
-						]]>      </ValueRetriever>
-      <Focuser><![CDATA[
+						]]>     </ValueRetriever>
+     <Focuser><![CDATA[
 							jQuery( getElement( "%Id%") ).%Method_%
-						]]>      </Focuser>
-      <Selector><![CDATA[
+						]]>     </Focuser>
+     <Selector><![CDATA[
 							jQuery( getElement( "%Id%") ).%Method_%
-						]]>      </Selector>
-      <Fetcher><![CDATA[
+						]]>     </Selector>
+     <Fetcher><![CDATA[
 					var digest = fetchWidgets( "%Id%" );
 					digest;
-				]]>      </Fetcher>
-     </Widget>
-     <CSSRule>
-      <Insert><![CDATA[
+				]]>     </Fetcher>
+    </Widget>
+    <CSSRule>
+     <Insert><![CDATA[
 							insertCSSRule( "%Rule%", %Index% );
-						]]>      </Insert>
-      <Append><![CDATA[
+						]]>     </Insert>
+     <Append><![CDATA[
 							insertCSSRule( "%Rule%", -1 ).toString();
-						]]>      </Append>
-      <Remove><![CDATA[
+						]]>     </Append>
+     <Remove><![CDATA[
 							removeCSSRule( %Index% );
-						]]>      </Remove>
-     </CSSRule>
-     <Classes>
-      <Add><![CDATA[
+						]]>     </Remove>
+    </CSSRule>
+    <Classes>
+     <Add><![CDATA[
 							addClasses( %Ids_%, %Classes_% );
-						]]>      </Add>
-      <Remove><![CDATA[
+						]]>     </Add>
+     <Remove><![CDATA[
 							removeClasses( %Ids_%, %Classes_% );
-						]]>      </Remove>
-      <Toggle><![CDATA[
+						]]>     </Remove>
+     <Toggle><![CDATA[
 							toggleClasses( %Ids_% , %Classes_% );
-						]]>      </Toggle>
-     </Classes>
-     <Elements>
-      <Enable><![CDATA[
+						]]>     </Toggle>
+    </Classes>
+    <Elements>
+     <Enable><![CDATA[
 							enableElements( %Ids_% );
-						]]>      </Enable>
-      <Disable><![CDATA[
+						]]>     </Enable>
+     <Disable><![CDATA[
 							disableElements( %Ids_% );
-						]]>      </Disable>
-     </Elements>
-    </Scripts>
-   </Definitions>
-   <Parameters>
-    <Language>fr</Language>
-    <Command>Process</Command>
-    <Service>53741</Service>
-   </Parameters>
-   <Definitions/>
-   <Locale>
-    <Translations message="VersionCommandDescription">
-     <Translation language="fr">Affiche la version du programme.</Translation>
-     <Translation language="en">Displays the version of the program.</Translation>
-    </Translations>
-    <Translations message="LicenseCommandDescription">
-     <Translation language="fr">Affiche la licence du programme.</Translation>
-     <Translation language="en">Displays the program license.</Translation>
-    </Translations>
-    <Translations message="UsageCommandDescription">
-     <Translation language="fr">Affiche cette page.</Translation>
-     <Translation language="en">Displays this page.</Translation>
-    </Translations>
-    <Translations text="ProcessCommandDescription">
-     <Translation language="fr">Lancement de la CGI.</Translation>
-     <Translation language="en">CGI launching.</Translation>
-    </Translations>
-    <Translations text="ModuleFilenameArgumentDescription">
-     <Translation language="fr">Nom et chemin de la bibliothèque dynamique correspondant au module XDHTML.</Translation>
-     <Translation language="en"> Name and path of the dynamic library corresponding to the XDHTML module.</Translation>
-    </Translations>
-    <Translations text="ModuleFilenameArgumentLabel">
-     <Translation language="fr">module</Translation>
-     <Translation language="en">module</Translation>
-    </Translations>
-    <Translations text="ServiceArgumentDescription">
-     <Translation language="fr">Port en écoute ('53741' si absent).</Translation>
-     <Translation language="en">Port to listen to ('53741' if missing).</Translation>
-    </Translations>
-    <Translations text="ServiceArgumentLabel">
-     <Translation language="fr">service</Translation>
-     <Translation language="en">service</Translation>
-    </Translations>
-   </Locale>
-   <Arguments>
-    <Argument id="Usage" Description="UsageCommandDescription" long="help" Value="Usage"/>
-    <Argument id="Version" Description="VersionCommandDescription" long="version" Value="Version"/>
-    <Argument id="License" Description="LicenseCommandDescription" long="license" Value="License"/>
-    <Argument id="ProcessCommand" Description="ProcessCommandDescription" long="process" Value="Process" Usage=" %ModuleFilenameArgument% [%ServiceArgument%]"/>
-    <Argument id="ModuleFilenameArgument" Description="ModuleFilenameArgumentDescription" Path="ModuleFilename" Label="ModuleFilenameArgumentLabel"/>
-    <Argument id="ServiceArgument" Description="ServiceArgumentDescription" Path="Service" Label="ServiceArgumentLabel"/>
-    <Layouts>
-     <Layout command="Process">
-      <Link index="0" Target="ModuleFilenameArgument"/>
-      <Link index="1" Target="ServiceArgument"/>
-     </Layout>
-    </Layouts>
-   </Arguments>
-  </Configuration>
- </Configurations>
+						]]>     </Disable>
+    </Elements>
+   </Scripts>
+  </Definitions>
+  <Parameters>
+   <Language>fr</Language>
+   <Command>Process</Command>
+   <Service>53741</Service>
+  </Parameters>
+  <Definitions/>
+  <Locale>
+   <Translations message="VersionCommandDescription">
+    <Translation language="fr">Affiche la version du programme.</Translation>
+    <Translation language="en">Displays the version of the program.</Translation>
+   </Translations>
+   <Translations message="LicenseCommandDescription">
+    <Translation language="fr">Affiche la licence du programme.</Translation>
+    <Translation language="en">Displays the program license.</Translation>
+   </Translations>
+   <Translations message="UsageCommandDescription">
+    <Translation language="fr">Affiche cette page.</Translation>
+    <Translation language="en">Displays this page.</Translation>
+   </Translations>
+   <Translations text="ProcessCommandDescription">
+    <Translation language="fr">Lancement de la CGI.</Translation>
+    <Translation language="en">CGI launching.</Translation>
+   </Translations>
+   <Translations text="ModuleFilenameArgumentDescription">
+    <Translation language="fr">Nom et chemin de la bibliothèque dynamique correspondant au module XDHTML.</Translation>
+    <Translation language="en"> Name and path of the dynamic library corresponding to the XDHTML module.</Translation>
+   </Translations>
+   <Translations text="ModuleFilenameArgumentLabel">
+    <Translation language="fr">module</Translation>
+    <Translation language="en">module</Translation>
+   </Translations>
+   <Translations text="ServiceArgumentDescription">
+    <Translation language="fr">Port en écoute ('53741' si absent).</Translation>
+    <Translation language="en">Port to listen to ('53741' if missing).</Translation>
+   </Translations>
+   <Translations text="ServiceArgumentLabel">
+    <Translation language="fr">service</Translation>
+    <Translation language="en">service</Translation>
+   </Translations>
+  </Locale>
+  <Arguments>
+   <Argument id="Usage" Description="UsageCommandDescription" long="help" Value="Usage"/>
+   <Argument id="Version" Description="VersionCommandDescription" long="version" Value="Version"/>
+   <Argument id="License" Description="LicenseCommandDescription" long="license" Value="License"/>
+   <Argument id="ProcessCommand" Description="ProcessCommandDescription" long="process" Value="Process" Usage=" %ModuleFilenameArgument% [%ServiceArgument%]"/>
+   <Argument id="ModuleFilenameArgument" Description="ModuleFilenameArgumentDescription" Path="ModuleFilename" Label="ModuleFilenameArgumentLabel"/>
+   <Argument id="ServiceArgument" Description="ServiceArgumentDescription" Path="Service" Label="ServiceArgumentLabel"/>
+   <Layouts>
+    <Layout command="Process">
+     <Link index="0" Target="ModuleFilenameArgument"/>
+     <Link index="1" Target="ServiceArgument"/>
+    </Layout>
+   </Layouts>
+  </Arguments>
+ </Configuration>
+</Configurations>
