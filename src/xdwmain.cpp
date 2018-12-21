@@ -88,6 +88,7 @@ namespace {
 			session::rSession *Session = NULL;
 			err::buffer__ ERRBuffer;
 			str::string Token, AbortMessage;
+			xdhujp::sProxyCallback *ProxyCallback = NULL;
 		qRB;
 			Sessions.Init( RawSessions );
 
@@ -96,7 +97,10 @@ namespace {
 
 			if ( SessionId.Amount() == 0 ) {
 				SessionId.Init();
-				Row = Sessions().New( SessionId, Language, Token );
+				Row = Sessions().New( SessionId, Language, Token, ProxyCallback);
+				Session = Sessions().Sessions( Row );
+				Sessions.Release();
+				Session->Initialize( ProxyCallback, Language, Token );
 			} else {
 				Row = Sessions().Search( SessionId );
 			}
