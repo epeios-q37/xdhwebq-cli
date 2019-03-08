@@ -132,22 +132,22 @@ qRB
 									   on ne peut donc pas lui passer directement 'ConstCommand', qui est 'const' (voir doc. 'CreateProcessW(...)'. */
  
 	// Launch the process.
-	if ( !CreateProcessW( NULL,
-		Command.ExposedInternal(), 0, 0, TRUE,
-		0, 0, 0,
-		&siStartupInfo, &piProcessInfo ) )
-		qRReturn;
+	if ( CreateProcessW( NULL,
+						 Command.ExposedInternal(), 0, 0, TRUE,
+						 0, 0, 0,
+						 &siStartupInfo, &piProcessInfo ) ) {
 
-//   WaitForSingleObject( piProcessInfo.hProcess, INFINITE );
+		//   WaitForSingleObject( piProcessInfo.hProcess, INFINITE );
 
-	In = hChildStdinWr;
-	Out = hChildStdoutRd;
-	Err = hChildStderrRd;
+		In = hChildStdinWr;
+		Out = hChildStdoutRd;
+		Err = hChildStderrRd;
 
-	CloseHandle( piProcessInfo.hProcess );
-	CloseHandle( piProcessInfo.hThread );
+		CloseHandle( piProcessInfo.hProcess );
+		CloseHandle( piProcessInfo.hThread );
 
-	Success = true;
+		Success = true;
+	}
 qRR
 qRT
 qRE
@@ -307,7 +307,9 @@ qRE
 	return Maximum;
 }
 
-void flx::rRWMonitor::FDRDismiss( bso::sBool Unlock )
+bso::sBool flx::rRWMonitor::FDRDismiss(
+	bso::sBool Unlock,
+	qRPN )
 {
 	if ( Undismissed_ ) {
 		if ( M_().In.After != NULL )
@@ -317,12 +319,12 @@ void flx::rRWMonitor::FDRDismiss( bso::sBool Unlock )
 
 	Undismissed_ = false;
 
-	return ID_().Dismiss( Unlock );
+	return ID_().Dismiss( Unlock, ErrHandling );
 }
 
-fdr::sTID flx::rRWMonitor::FDRITake( fdr::sTID Owner )
+fdr::sTID flx::rRWMonitor::FDRRTake( fdr::sTID Owner )
 {
-	return ID_().ITake( Owner );
+	return ID_().RTake( Owner );
 }
 
 fdr::sSize flx::rRWMonitor::FDRWrite(
@@ -352,7 +354,9 @@ fdr::sSize flx::rRWMonitor::FDRWrite(
 	return Maximum;
 }
 
-void flx::rRWMonitor::FDRCommit( bso::sBool Unlock )
+bso::sBool flx::rRWMonitor::FDRCommit(
+	bso::sBool Unlock,
+	qRPN )
 {
 	if ( IsOut_() ) {
 		if ( Uncommited_ ) {
@@ -362,13 +366,14 @@ void flx::rRWMonitor::FDRCommit( bso::sBool Unlock )
 		}
 	}
 
-	OD_().Commit( Unlock );
 	Uncommited_ = false;
+
+	return OD_().Commit( Unlock, ErrHandling );
 }
 
-fdr::sTID flx::rRWMonitor::FDROTake( fdr::sTID Owner )
+fdr::sTID flx::rRWMonitor::FDRWTake( fdr::sTID Owner )
 {
-	return OD_().OTake( Owner );
+	return OD_().WTake( Owner );
 }
 
 namespace async_ {
@@ -387,8 +392,8 @@ namespace async_ {
 		mtk::gBlocker &Blocker )
 	{
 	qRH
-		flw::sDressedRFlow<> IFlow;
-		flw::sDressedWFlow<> OFlow;
+		flw::rDressedRFlow<> IFlow;
+		flw::rDressedWFlow<> OFlow;
 		fdr::sByte Buffer[100];
 		rData &Data = *(rData *)UP;
 	qRB
@@ -430,8 +435,8 @@ qRE
 fdr::rRDriver &flx::VoidRDriver = flx::VoidIDriver;
 fdr::rWDriver &flx::VoidWDriver = flx::VoidODriver;
 
-flw::sRFlow &flx::VoidRFlow = flx::VoidIFlow;
-flw::sWFlow &flx::VoidWFlow = flx::VoidOFlow;
+flw::rRFlow &flx::VoidRFlow = flx::VoidIFlow;
+flw::rWFlow &flx::VoidWFlow = flx::VoidOFlow;
 
 
 Q37_GCTOR( flx )

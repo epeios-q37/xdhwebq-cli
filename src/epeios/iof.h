@@ -78,11 +78,15 @@ namespace iof {
 		{
 			return (fdr::size__)_output_driver__::Write( Tampon, Maximum );
 		}
-		virtual void FDRCommit( bso::sBool Unlock ) override
+		virtual bso::sBool FDRCommit(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			return _output_driver__::_Commit();
+			_output_driver__::_Commit();
+
+			return true;
 		}
-		virtual fdr::sTID FDROTake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRWTake( fdr::sTID Owner ) override
 		{
 			return fdr::UndefinedTID;
 		}
@@ -170,11 +174,15 @@ namespace iof {
 		{
 			return _input_driver__::_Read( Maximum, Buffer );
 		}
-		virtual void FDRDismiss(  bso::sBool Unlock  ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
 			_input_driver__::_Dismiss();
+
+			return true;
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
 			return fdr::UndefinedTID;
 		}
@@ -202,7 +210,7 @@ namespace iof {
 	};
 
 	class io_iflow___
-	: public flw::sDressedRFlow<>
+	: public flw::rDressedRFlow<>
 	{
 	private:
 		io_iflow_driver___ _Driver;
@@ -210,7 +218,7 @@ namespace iof {
 		void reset( bso::bool__ P = true )
 		{
 			_Driver.reset( P );
-			sDressedRFlow<>::reset( P );
+			rDressedRFlow<>::reset( P );
 		}
 		io_iflow___( void )
 		{
@@ -223,7 +231,7 @@ namespace iof {
 		void Init( iop::descriptor__ D )
 		{
 			_Driver.Init( D, fdr::tsDisabled );
-			sDressedRFlow<>::Init( _Driver );
+			rDressedRFlow<>::Init( _Driver );
 		}
 	};
 
@@ -241,11 +249,15 @@ namespace iof {
 		{
 			return _output_driver__::_Write( Buffer, Maximum );
 		}
-		virtual void FDRCommit(  bso::sBool Unlock  ) override
+		virtual bso::sBool FDRCommit(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
 			_output_driver__::_Commit();
+
+			return true;
 		}
-		virtual fdr::sTID FDROTake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRWTake( fdr::sTID Owner ) override
 		{
 			return fdr::UndefinedTID;
 		}
@@ -255,11 +267,15 @@ namespace iof {
 		{
 			return _input_driver__::_Read( Maximum, Buffer );
 		}
-		virtual void FDRDismiss(  bso::sBool Unlock  ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			return _input_driver__::_Dismiss();
+			_input_driver__::_Dismiss();
+
+			return true;
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
 			return fdr::UndefinedTID;
 		}

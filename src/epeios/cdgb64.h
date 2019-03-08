@@ -172,15 +172,17 @@ namespace cdgb64 {
 
 			return Amount;
 		}
-		virtual void FDRCommit( bso::sBool Unlock ) override
+		virtual bso::sBool FDRCommit(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
 			flw::byte__ Result[4];
 
 			if ( _Flow == NULL )
-				return;
+				return true;
 
 			if ( _Amount == CDGB64__PROCESSED )
-				return;
+				return true;
 
 			Encode_( _Cache, Flavor_, Result );
 			memset(_Cache, 0, sizeof( _Cache ) );
@@ -202,17 +204,17 @@ namespace cdgb64 {
 
 			_Amount = CDGB64__PROCESSED;
 
-			_Flow->Commit( Unlock );
+			return _Flow->Commit( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDROTake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRWTake( fdr::sTID Owner ) override
 		{
-			return _Flow->ODriver().OTake( Owner );
+			return _Flow->ODriver().WTake( Owner );
 		}
 	public:
 		void reset( bso::bool__ P = true )
 		{
 			if ( P )
-				Commit( true );
+				Commit( true, err::hUserDefined );	// Errors are ignored.
 
 			_oflow_driver___::reset( P );
 			_Amount = CDGB64__PROCESSED;
@@ -232,7 +234,7 @@ namespace cdgb64 {
 			eFlavor Flavor,
 			fdr::thread_safety__ ThreadSafety = fdr::ts_Default )
 		{
-			Commit( true );
+			Commit( true, err::hUserDefined );	// Errors are ignored.
 
 			_Amount = CDGB64__PROCESSED;
 			_Flow = &Flow;
@@ -283,7 +285,7 @@ namespace cdgb64 {
 	: public rIFlowDriver_
 	{
 	private:
-		qRMV( flw::sRFlow, F_, Flow_ );
+		qRMV( flw::rRFlow, F_, Flow_ );
 	protected:
 		virtual fdr::sSize FDRRead(
 			fdr::sSize Maximum,
@@ -309,13 +311,15 @@ namespace cdgb64 {
 
 			return Amount;
 		}
-		virtual void FDRDismiss( bso::sBool Unlock ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			F_().Dismiss( Unlock );
+			return F_().Dismiss( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
-			return F_().IDriver().ITake( Owner );
+			return F_().IDriver().RTake( Owner );
 		}
 	public:
 		void reset( bso::sBool P = true )
@@ -325,7 +329,7 @@ namespace cdgb64 {
 		}
 		qCVDTOR( rSkippingIFlowDriver_ );
 		void Init(
-			flw::sRFlow &Flow, 
+			flw::rRFlow &Flow, 
 			fdr::eThreadSafety ThreadSafety )
 		{
 			rIFlowDriver_::Init( ThreadSafety );
@@ -405,7 +409,7 @@ namespace cdgb64 {
 	{
 	private:
 		rSkippingIFlowDriver_ SkippingIFlowDriver_;
-		flw::sDressedRFlow<> SkippingIFlow_;
+		flw::rDressedRFlow<> SkippingIFlow_;
 		fdr::byte__ _Cache[4];
 		bso::u8__ _Size;
 	protected:
@@ -451,16 +455,18 @@ namespace cdgb64 {
 
 			return 3 * ( Amount >> 2 ) + ( ( Amount & 3 ) > 1 ? ( Amount & 3 ) - 1 : 0 ); 
 		}
-		virtual void FDRDismiss( bso::sBool Unlock ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
 			if ( _Size != 0 )
 				qRFwk();
 
-			SkippingIFlow_.Dismiss( Unlock );
+			return SkippingIFlow_.Dismiss( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
-			return SkippingIFlowDriver_.ITake( Owner );
+			return SkippingIFlowDriver_.RTake( Owner );
 		}
 	public:
 		void reset( bso::bool__ P = true )
@@ -520,7 +526,7 @@ namespace cdgb64 {
 	: public encoding_oflow_driver___
 	{
 	private:
-		flw::sDressedWFlow<> Flow_;
+		flw::rDressedWFlow<> Flow_;
 	public:
 		void reset( bso::sBool P = true )
 		{
@@ -542,7 +548,7 @@ namespace cdgb64 {
 	: public decoding_iflow_driver___
 	{
 	private:
-		flw::sDressedRFlow<> Flow_;
+		flw::rDressedRFlow<> Flow_;
 	public:
 		void reset( bso::sBool P = true )
 		{

@@ -22,7 +22,7 @@
   <Import Project="Windows.targets"/>
   <Import Project="Details.props"/>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>7d97b96c-d513-4a30-8dae-11d8162edf3f</ProjectGuid>
+    <ProjectGuid>2953cad1-774f-4d3e-8364-17bd46ebbf03</ProjectGuid>
     <RootNamespace>xdhwebq</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>

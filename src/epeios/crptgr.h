@@ -82,13 +82,15 @@ namespace crptgr {
 
 			return Amount;
 		}
-		virtual void FDRCommit(  bso::sBool Unlock  ) override
+		virtual bso::sBool FDRCommit(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			_Flow->Commit( Unlock );
+			return _Flow->Commit( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDROTake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRWTake( fdr::sTID Owner ) override
 		{
-			 return _Flow->ODriver().OTake( Owner );
+			 return _Flow->ODriver().WTake( Owner );
 		}
 	public:
 		void reset( bso::bool__ P = true )
@@ -193,13 +195,15 @@ namespace crptgr {
 
 			return Maximum;
 		}
-		virtual void FDRDismiss(  bso::sBool Unlock  ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			_Flow->Dismiss( Unlock );
+			return _Flow->Dismiss( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
-			return _Flow->IDriver().ITake( Owner );
+			return _Flow->IDriver().RTake( Owner );
 		}
 	public:
 		void reset( bso::bool__ P = true )

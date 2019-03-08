@@ -5,6 +5,229 @@
 - [adpt]: Adaptation to changes in underlying modules;
 - [stdz]: modification to comply with current standards;
 - [trvl]: trivial modifications;
+- [rvrt]: reverting modifications;
+
+## 2019-03-05
+
+- CSDCMN: [adpt],
+- DIR: [adpt],
+- ERR:
+	- removing `t_Return` related stuff,
+- FBLFRD: [adpt],
+- FIL: [adpt],
+- FLX: [adpt],
+- FNM: [adpt],
+- LCL: [adpt],
+- PLGN: [adpt],
+- RGSTRY: [adpt],
+- SCLARGMNT: [adpt],
+- SCLFRNTND: [adpt],
+- SCLLOCALE: [adpt],
+- SCLMISC: [adpt],
+- SCLRGSTRY: [adpt],
+- SCLTOOL: [adpt],
+- SCLXDHTML: [adpt],
+- TAGSBS: [adpt],
+- XDHUPS: [adpt],
+- XDHUTL: [adpt],
+- XML: [adpt],
+- XPP: [adpt],
+
+## 2019-02-18
+
+- FDR:
+  - introducing the possibility to consume data without retrieving,
+  - removing relaying stuff,
+  - removing `bKeep`, introducing `bKeepNonBlocking` and `bKeepBlocking`,
+  - adding `iflow_driver_base___::EmptyCache(…)`,
+
+## 2019-02-17
+
+- FDR:
+  - simplification,
+  - fixing deadlock,
+- TXF: [trvl],
+
+## 2019-02-15
+
+- MTX:
+  - redesign,
+- TOL:
+  - [stdz],
+
+## 2019-02-14
+
+- CDGB64:
+  - [adpt]
+- CNVFDR:
+  - [adpt]
+- CRPTGR:
+  - [adpt]
+- CSDMXC:
+  - [adpt]
+- FDR:
+  - some redesigning,
+- FLW:
+  - [adpt]
+- FLX:
+  - [adpt]
+- IOF:
+  - [adpt]
+- LOGQ:
+  - [adpt]
+- LTF:
+  - [adpt]
+- MTX:
+  - redesign,
+- SCK:
+  - [adpt]
+- TXF:
+  - [adpt]
+- XML:
+  - [adpt]
+- XPP:
+  - [adpt]
+
+## 2019-02-13
+
+- FDR:
+  - fixing locking/unlocking bug,
+- FLW:
+  - fix useless write attempt on two successive commit (intentional commit followed by the one launched on object destruction) which could lead to a false error,
+  - fixing unwanted error on destruction after an error occurs,
+- MDR:
+  - simplification,
+- MTK:
+  - [trvl],
+- THT:
+  - fix `rBlocker` blocking/unblocking cycling,
+
+## 2019-02-12
+
+- FRD:
+  - introducing the possibility for a read driver to have no cache ; useful for relaying driver,
+  - [rvrt] above modifications:
+    - need at least a cache of one byte (handling of EOF),
+    - a cache with only one byte fixes issue encounterd with relaying driver,
+
+## 2019-02-11
+
+- DTFPTB :
+  - removing function with file **write** driver as parameter due to commit/cache issue,
+
+## 2019-02-08
+
+- CSDMXS:
+  - [adpt]
+- FDR:
+  - adding default value to some parameters,
+
+## 2019-02-07
+
+- FDR:
+  - adding default value for some parameters,
+
+## 2019-02-05
+
+- SCLXDHTML:
+  - fixing bad return value,
+- SCLMISC:
+  - fixing *clang* issues,
+- SCLRGSTRY:
+  - fixing *clang* issues,
+
+## 2019-02-04
+
+- CSDCMN:
+  - disambiguation,
+- DTFPTB:
+  - disambiguation,
+
+## 2019-02-03
+
+- CDGB64:
+  - [adpt]
+- CDGURL:
+  - [adpt]
+- CNVFDR:
+  - [adpt]
+- CSDCMN:
+  - [adpt]
+- CSDMXC:
+  - [adpt]
+- DFTPTB:
+  - introducing file driver based version of functions,
+  - [stdz],
+- DIR:
+  - [adpt]
+- FLW:
+  - fixing incoherency (objects were static instead of dynamic),
+- FLX:
+  - [adpt]
+- IOF:
+  - [adpt]
+- LOGQ:
+  - [adpt]
+- SCLARGMNT:
+  - [adpt]
+- SCLAFRNTND:
+  - [adpt]
+- SCLRGSTRY:
+  - [adpt]
+- TXF:
+  - [adpt]
+- XDHCMN:
+  - [adpt]
+- XML:
+  - [adpt]
+
+## 2019-02-02:
+
+- CDGB64:
+  - [adpt]
+- CNVFDR:
+  - [adpt]
+- CRPTGR:
+  - [adpt]
+- CSDLEC:
+  - [adpt]
+- CSDUCL:
+  - [adpt]
+- CSDMXC:
+  - [adpt]
+- FDR:
+  - `(I|O)Take(...)` -> `(R|W)Take(...)`,
+- FLW:
+  - [adpt]
+- FLX:
+  - [adpt]
+- HTP:
+  - [adpt]
+- IOF:
+  - [adpt]
+- LOGQ:
+  - [adpt]
+- LTF:
+  - [adpt]
+- MSCMDD:
+  - [adpt]
+- PRXY:
+  - [adpt]
+- SCK:
+  - [adpt]
+- SCLJRE:
+  - [adpt]
+- XML:
+  - [adpt]
+- XPP:
+  - [adpt]
+
+## 2019-01-06
+
+- XDHCMN:
+  - introducing handling of session initialization failure,
+- XDHUPS:
+- [adpt]
 
 ## 2018-12-21
 
@@ -3271,6 +3494,7 @@
 [adpt]:#Adaptation
 [stdz]:#Standardization
 [trvl]:#Trivial
+[rvrt]:#Reverting
   
 ### Adaptation
 
@@ -3283,3 +3507,7 @@ Modification to comply with current standards.
 ### Trivial
 
 Trivial modifications.
+
+### Reverting
+
+Reverting previous modifications.

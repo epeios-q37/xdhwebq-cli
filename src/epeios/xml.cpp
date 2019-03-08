@@ -566,22 +566,23 @@ inline static bso::bool__ IsSpecialAttribute_( const str::string_ &Attribute )
 	if ( ( _Status = ( F ) ) != sOK )\
 	{\
 		_Token = t_Error;\
-		qRReturn;\
+		Error = true;\
+		break;\
 	}
 
 #define RETURN( V )\
 	{\
 		_Status = V;\
 		_Token = t_Error;\
-		qRReturn;\
+		Error = true;\
+		break;\
 	}
 
 token__ xml::parser___::Parse( int TokenToReport )
 {
 qRH
-	bso::bool__ OnlySpaces = false, Continue = true, TEOX = true;	// 'TEOX' : Test EOX.
+	bso::bool__ OnlySpaces = false, Continue = true, TEOX = true, Error = false;	// 'TEOX' : Test EOX.
 qRB
-
 	_Flow.Purge();
 
 	while ( Continue ) {
@@ -994,23 +995,29 @@ qRB
 			qRFwk();
 			break;
 		}
+
+		if ( Error )
+			break;
 	}
 
-	if ( _Tags.IsEmpty() )
-		if ( _Token == t_Undefined )
-			_Token = t_Processed;
 
-	_Status = sOK;
+	if ( !Error ) {
+		if ( _Tags.IsEmpty() )
+			if ( _Token == t_Undefined )
+				_Token = t_Processed;
+
+		_Status = sOK;
+	}
 qRR
-		if ( ERRType == err::t_Free ) {
-			xtf::error__ Error = xtf::e_NoError;
+	if ( ERRType == err::t_Free ) {
+		xtf::error__ Error = xtf::e_NoError;
 
-			if ( _Flow.Flow().EndOfFlow( Error ) && ( Error != xtf::e_NoError ) ) {
-				_Status = (status__)( s_FirstXTFError + Error );
-				_Token = t_Error;
-				ERRRst();
-			}
+		if ( _Flow.Flow().EndOfFlow( Error ) && ( Error != xtf::e_NoError ) ) {
+			_Status = (status__)( s_FirstXTFError + Error );
+			_Token = t_Error;
+			ERRRst();
 		}
+	}
 qRT
 qRE
 	return _Token;
@@ -1168,13 +1175,15 @@ namespace {
 
 			return Size;
 		}
-		virtual void FDRDismiss( bso::sBool Unlock ) override
+		virtual bso::sBool FDRDismiss(
+			bso::sBool Unlock,
+			qRPN ) override
 		{
-			F_().Dismiss( Unlock );
+			return F_().Dismiss( Unlock, ErrHandling );
 		}
-		virtual fdr::sTID FDRITake( fdr::sTID Owner ) override
+		virtual fdr::sTID FDRRTake( fdr::sTID Owner ) override
 		{
-			return F_().IDriver().ITake( Owner );
+			return F_().IDriver().RTake( Owner );
 		}
 	public:
 		void reset( bso::sBool P = true )
@@ -1224,7 +1233,7 @@ void xml::rWriter::Indent_( bso::size__ Amount ) const
 		F_() << ' ';
 }
 
-void xml::rWriter::PutRawValue( flw::sRFlow &Flow )
+void xml::rWriter::PutRawValue( flw::rRFlow &Flow )
 {
 	if ( TagNameInProgress_ ) {
 		F_() << '>';
@@ -1240,7 +1249,7 @@ void xml::rWriter::PutRawValue( flw::sRFlow &Flow )
 
 namespace {
 	void TransformAndPutValue_(
-		flw::sRFlow &Flow,
+		flw::rRFlow &Flow,
 		rWriter &Writer )
 	{
 	qRH
@@ -1257,7 +1266,7 @@ namespace {
 	}
 }
 
-void xml::rWriter::PutValue( flw::sRFlow &Flow )
+void xml::rWriter::PutValue( flw::rRFlow &Flow )
 {
 	switch ( SpecialCharHandling_ ) {
 	case schReplace:
@@ -1291,7 +1300,7 @@ void xml::rWriter::PutValue( const value_ &Value )
 
 void xml::rWriter::PutRawAttribute(
 	const name_ &Name,
-	flw::sRFlow &Flow,
+	flw::rRFlow &Flow,
 	eDelimiter Delimiter )
 {
 	if ( !TagNameInProgress_ )
@@ -1309,7 +1318,7 @@ void xml::rWriter::PutRawAttribute(
 namespace {
 	void TransformAndPutAttribute_(
 		const name_ &Name,
-		flw::sRFlow &Flow,
+		flw::rRFlow &Flow,
 		rWriter &Writer,
 		eDelimiter Delimiter )
 	{
@@ -1329,7 +1338,7 @@ namespace {
 
 void xml::rWriter::PutAttribute(
 	const name_ &Name,
-	flw::sRFlow &Flow,
+	flw::rRFlow &Flow,
 	eDelimiter Delimiter )
 {
 	switch ( SpecialCharHandling_ ) {
@@ -1367,7 +1376,7 @@ void xml::rWriter::PutRawAttribute(
 	PutRawAttribute( Name, Flow, Delimiter );
 }
 
-void xml::rWriter::PutCData( flw::sRFlow &Flow )
+void xml::rWriter::PutCData( flw::rRFlow &Flow )
 {
 	if ( TagNameInProgress_ ) {
 		F_() << '>';

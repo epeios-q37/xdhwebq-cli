@@ -302,16 +302,15 @@ namespace {
 	qRB
 		Row = GetRegistry().Search( Level, sclrgstry::Locale );
 
-		if ( Row == qNIL )
-			qRReturn;
+		if ( Row != qNIL ) {
+			Flow.Init( Locale );
+			TFlow.Init( Flow );
+			Writer.Init( TFlow, xml::lCompact, xml::e_Default );
 
-		Flow.Init( Locale );
-		TFlow.Init( Flow );
-		Writer.Init( TFlow, xml::lCompact, xml::e_Default );
+			GetRegistry().Dump( Level, Row, true, Writer );
 
-		GetRegistry().Dump( Level, Row, true, Writer );
-
-		Found = true;
+			Found = true;
+		}
 	qRR
 	qRT
 	qRE
@@ -1081,7 +1080,7 @@ bso::sBool sclmisc::LoadAndTranslateTags(
 qRH
 	TOL_CBUFFER___ Buffer;
 qRB
-	if ( Found = Load( FileName, Registry, Needness, Content ) )
+	if ( ( Found = Load( FileName, Registry, Needness, Content ) ) )
 		scllocale::TranslateTags( Content, sclrgstry::GetLanguage( Registry, Buffer ), Marker );
 qRR
 qRT
@@ -1129,7 +1128,7 @@ qRH;
 qRB;
 	Filename.Init();
 
-	if ( Found = sclrgstry::BGetValue( Registry, FilenameEntry, Needness, Filename ) )
+	if ( ( Found = sclrgstry::BGetValue( Registry, FilenameEntry, Needness, Filename ) ) )
 		LoadXMLAndTranslateTags( Filename, sclrgstry::GetLanguage( Registry, Buffer ), Content, Level, Marker );
 qRR;
 qRT;
@@ -1282,7 +1281,7 @@ namespace {
 		str::string Id;
 	qRB
 		Id.Init();
-		if ( Exists = sclmisc::OGetValue( rgstry::tentry___( sclrgstry::parameter::targeted_plugin::Id, Target ), Id ) )
+		if ( ( Exists = sclmisc::OGetValue( rgstry::tentry___( sclrgstry::parameter::targeted_plugin::Id, Target ), Id ) ) )
 			FillPluginRelatedTags_( Target, Id, Tags );
 	qRR
 	qRT
@@ -1364,7 +1363,7 @@ qRH
 qRB
 	Tags.Init();
 
-	if ( Exists = GetPluginRelatedTags_( Target, Tags ) ) {
+	if ( ( Exists = GetPluginRelatedTags_( Target, Tags ) ) ) {
 		GetPluginFeatures_( Target, Tags, Filename, Configuration, Locale );
 	
 		sclmisc::MGetValue( rgstry::tentry___( sclrgstry::parameter::TargetedPlugin, Target ), Arguments );

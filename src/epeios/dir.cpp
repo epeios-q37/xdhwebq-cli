@@ -134,7 +134,7 @@ const fnm::rName &dir::GetAppDataPath( fnm::rName &Path )
 
 namespace {
 	void BuildParts_(
-		flw::sRFlow &Flow,
+		flw::rRFlow &Flow,
 		str::dStrings &Parts )
 	{
 	qRH
@@ -361,17 +361,14 @@ qRB
 
 	Handle = CreateFileW( fnm::rName( Name ).Internal(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 
-	if ( Handle == INVALID_HANDLE_VALUE )
-		qRReturn;
-
-	Query.PropertyId = StorageDeviceProperty;
-	Query.QueryType = PropertyStandardQuery;
+	if ( Handle != INVALID_HANDLE_VALUE ) {
+		Query.PropertyId = StorageDeviceProperty;
+		Query.QueryType = PropertyStandardQuery;
 
 
-	if ( DeviceIoControl(Handle, IOCTL_STORAGE_QUERY_PROPERTY, &Query, sizeof( Query ), &Descriptor, sizeof( Descriptor ), &Size ,NULL ) == 0 )
-		qRReturn;
-
-	Type = Convert_( Descriptor.BusType );
+		if ( DeviceIoControl( Handle, IOCTL_STORAGE_QUERY_PROPERTY, &Query, sizeof( Query ), &Descriptor, sizeof( Descriptor ), &Size, NULL ) != 0 )
+			Type = Convert_( Descriptor.BusType );
+	}
 qRR
 qRE
 qRT

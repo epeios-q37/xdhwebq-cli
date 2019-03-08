@@ -277,65 +277,83 @@ namespace tht {
 		// Block a thread until another unblocks it.
 	class rBlocker {
 	private:
-		rLocker Locker_;
-		rCore_ Core_;
+		mtx::rHandler
+			Local_,	// To protect access to below mutex.
+			Main_;	// Main mutex.
+		void ReleaseMutex_( mtx::rHandler &Handler )
+		{
+			if ( Handler != mtx::Undefined )
+				mtx::Delete( Handler, true );
+
+			Handler = mtx::Undefined;
+		}
+		void ReleaseMutexes_( void )
+		{
+			ReleaseMutex_( Local_ );
+			ReleaseMutex_( Main_ );
+		}
 	public:
 		void reset( bso::sBool P = true )
 		{
-			tol::reset( P, Locker_, Core_);
+			if ( P ) {
+				ReleaseMutexes_();
+			}
+
+			Local_ = Main_ = mtx::Undefined;
 		}
 		qCDTOR( rBlocker );
 		void Init( bso::sBool SkipPrefetching = false )
 		{
-			tol::Init( Locker_, Core_ );
+		qRH;
+		qRB;
+			ReleaseMutexes_();
 
-			if ( SkipPrefetching ) {
-				Core_.ThreadID = Undefined;
-			} else {
-				Core_.Lock();
-				Core_.ThreadID = GetTID();
+			Local_ = mtx::Create();
+			Main_ = mtx::Create();
+
+			if ( !SkipPrefetching ) {
+				mtx::Lock( Main_ );
 			}
+		qRR;
+			ReleaseMutexes_();
+		qRT;
+		qRE;
 		}
-		void Wait( bso::sBool IgnoreTarget = false )
+		void Wait( void )
 		{
 		qRH
-			rLockerHandler Locker;
+			mtx::rMutex Mutex;
 		qRB
-			Locker.Init( Locker_ );
+			Mutex.InitAndLock( Local_ );
 
-			if ( Core_.ThreadID == Undefined ) {
-				Core_.Lock();
-				Core_.ThreadID = GetTID();
-			} else 	if ( !IgnoreTarget && ( Core_.ThreadID != GetTID() ) )
-				qRFwk();
-
-			Locker.Unlock();
-
-			Core_.Lock();
-
-			Locker.Lock();
-
-			Core_.ThreadID = Undefined;
-
-			Core_.Unlock();
+			if ( mtx::TryToLock( Main_ ) ) 
+				mtx::Unlock( Main_ );
+			else
+				Mutex.Unlock();
+				
+			mtx::Lock( Main_ );
 		qRR
 		qRT
 		qRE
 		}
-		void Unblock( bso::sBool IgnoreTarget = false )
+		void Unblock( void )
 		{
 		qRH
-			rLockerHandler Locker;
+//			mtx::rMutex Mutex;	// Can not be used, because the destructor could be called after destruction of underlying mutes.
+			bso::sBool Locked = false;
 		qRB
-			Locker.Init( Locker_ );
+			mtx::Lock( Local_ );
+			Locked = true;
 
-			if ( !IgnoreTarget && ( Core_.ThreadID == GetTID() ) )
-				qRFwk();
-
-			if ( Core_.ThreadID != Undefined )
-				Core_.Unlock();
+			if ( mtx::IsLocked( Main_ ) ) {
+				mtx::Unlock( Local_ );
+				Locked = false;
+				mtx::Unlock( Main_ );
+			}
 		qRR
 		qRT
+			if ( Locked )
+				mtx::Unlock( Local_ );
 		qRE
 		}
 	};

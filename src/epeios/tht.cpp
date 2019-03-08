@@ -37,6 +37,8 @@ using namespace tht;
 # error "Unknown compilation enviroment"
 #endif
 
+# include "cio.h"
+
 
 
 void tht::Suspend( unsigned long Delay )
@@ -66,7 +68,7 @@ void tht::Defer( void )
 	if( sched_yield() != 0 )
 		qRLbr();
 #else
-	#error
+#error
 #endif
 }
 

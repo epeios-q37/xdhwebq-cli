@@ -75,13 +75,20 @@ namespace txf {
 		{
 			return _F().ReadUpTo( Nombre, Tampon );
 		}
-		void _Dismiss( void )
+		bso::sBool _Dismiss(
+			bso::sBool Unlock,
+			qRPN )
 		{
-			_F().Dismiss();
+			return _F().Dismiss( Unlock, ErrHandling);
 		}
 	public:
-		void reset( bso::bool__ = true )
+		void reset( bso::bool__ P = true )
 		{
+			if ( P ) {
+				if ( _Flow != NULL )
+					_Dismiss( true, err::hUserDefined );	// Errors are ignored.
+			}
+
 			_Flow = NULL;
 		}
 		E_CVDTOR( text_iflow__ );
@@ -93,6 +100,8 @@ namespace txf {
 		}
 		void Init( flw::iflow__ &Flow )
 		{
+			reset();
+
 			_Flow = &Flow;
 		}
 		text_iflow__ &operator >>( char &C )
@@ -217,9 +226,11 @@ namespace txf {
 		{
 			return Lire_();
 		}
-		void Dismiss( void )
+		bso::sBool Dismiss( 
+			bso::sBool Unlock = true,
+			qRPD )
 		{
-			_Dismiss();
+			return _Dismiss( Unlock, ErrHandling );
 		}
 		flw::iflow__ &Flow( void ) const
 		{
@@ -238,7 +249,7 @@ namespace txf {
 		{
 #ifdef TXF_DBG
 			if ( _Flow == NULL )
-				qRFwk();
+				qRFwk();	// If this occurs with the console I/O (COut(F), CIn(F),CErr(F)), this means that the CIO module is not initialized.
 #endif
 			return *_Flow;
 		}
@@ -252,16 +263,18 @@ namespace txf {
 		{
 			_F().Write( Tampon, Nombre );
 		}
-		void Commit_( bso::sBool Unlock )
+		bso::sBool Commit_(
+			bso::sBool Unlock,
+			qRPN )
 		{
-			_F().Commit( Unlock );
+			return _F().Commit( Unlock, ErrHandling );
 		}
 	public:
 		void reset( bso::bool__ P = true )
 		{
 			if ( P ) {
 				if ( _Flow != NULL )
-					Commit_( true );
+					Commit_( true, err::hUserDefined );	// Errors are igonred.
 			}
 
 			_Flow = NULL;
@@ -386,10 +399,14 @@ namespace txf {
 			Ecrire_( Buffer, Amount );
 		}
 		//f Synchronization.
-		void Commit( bso::sBool Unlock = true )
+		bso::sBool Commit(
+			bso::sBool Unlock = true,
+			qRPD )
 		{
 			if ( IsInitialized() ) 
-				Commit_( Unlock );
+				return Commit_( Unlock, ErrHandling );
+
+			return true;
 		}
 		flw::oflow__ &Flow( void ) const
 		{
@@ -458,7 +475,7 @@ namespace txf {
 	: public text_oflow__
 	{
 	private:
-		flw::sDressedWFlow<> Flow_;
+		flw::rDressedWFlow<> Flow_;
 	public:
 		void reset( bso::sBool P = true )
 		{
@@ -479,7 +496,7 @@ namespace txf {
 	class rRFlow
 	: public text_iflow__ {
 	private:
-		flw::sDressedRFlow<> Flow_;
+		flw::rDressedRFlow<> Flow_;
 	public:
 		void reset( bso::sBool P = true )
 		{
