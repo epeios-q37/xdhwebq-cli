@@ -67,7 +67,7 @@
     <Value>
      <Getter><![CDATA[
 							var result = getValue( "%Id%" );
-							console.log( "XDH: ", result );
+//							console.log( "XDH: ", result );
 							result;
 						]]>     </Getter>
      <Setter><![CDATA[
@@ -113,12 +113,7 @@
 					{
 						let xml = "%XML%";
 						let xsl = "%XSL%";
-						if( xsl == "" )
-												document.head.innerHTML = xml;
-						else {
-												document.head.innerHTML = "";
-												document.head.appendChild( transformToFragment( xml, xsl ) );
-						}
+						setLayout(document.head, xml, xsl);
 					}
 					]]>     </Head>
      <Layout><![CDATA[
@@ -126,12 +121,7 @@
 						let xml = "%XML%";
 						let xsl = "%XSL%";
 						let id = "%Id%";
-						if( xsl == "" )
-												getElement( id ).innerHTML = xml;
-						else {
-												removeChildren( id );
-												getElement( id ).appendChild( transformToFragment( xml, xsl ) );
-						}
+						setLayout(id, xml, xsl);
             
 						if ( id == "" ) {
 							let node = document.createElement("span");
