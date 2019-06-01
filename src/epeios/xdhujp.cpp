@@ -727,16 +727,17 @@ static void GetResult_(
 {
 	GetResult_( Callback, va_arg( List, const nchar__ * ), Result );
 }
-/*
+
 namespace {
 	void InsertCSSRule_(
 		cJS &Callback,
+		const nchar__ *Id,
 		const nchar__ *Rule,
 		const nchar__ *Index )
 	{
 	qRH;
 	qRB;
-		Execute( Callback, xdhujs::snCSSRuleInserter, NULL, nstring___( Rule ).Internal()(), nstring___( Index ).Internal()() );
+		Execute( Callback, xdhujs::snCSSRuleInserter, NULL, Id, Rule, Index);
 	qRR;
 	qRT;
 	qRE;
@@ -748,21 +749,23 @@ void InsertCSSRule_(
 	va_list List )
 {
 	// NOTA : we use variables, because if we put 'va_arg()' directly as parameter to below function, it's not sure that they are called in the correct order.
-	const nchar__ *Rule = va_arg( List, const nchar__ * );
+	const nchar__ *Id = va_arg(List, const nchar__ *);
+	const nchar__ *Rule = va_arg(List, const nchar__ *);
 	const nchar__ *Index = va_arg( List, const nchar__ * );
 
-	InsertCSSRule_( Callback, Rule, Index );
+	InsertCSSRule_( Callback, Id, Rule, Index );
 }
 
 namespace {
 	void AppendCSSRule_(
 		cJS &Callback,
+		const nchar__ *Id,
 		const nchar__ *Rule,
 		TOL_CBUFFER___ *Index )
 	{
 	qRH;
 	qRB;
-		Execute( Callback, xdhujs::snCSSRuleAppender, Index, Rule );
+		Execute( Callback, xdhujs::snCSSRuleAppender, Index, Id, Rule );
 	qRR;
 	qRT;
 	qRE;
@@ -774,19 +777,22 @@ static void AppendCSSRule_(
 	TOL_CBUFFER___ *Result,
 	va_list List )
 {
-	AppendCSSRule_( Callback, va_arg( List, const nchar__ * ), Result );
+	// NOTA : we use variables, because if we put 'va_arg()' directly as parameter to below function, it's not sure that they are called in the correct order.
+	const nchar__ *Id = va_arg(List, const nchar__ *);
+	const nchar__ *Rule = va_arg(List, const nchar__ *);
+
+	AppendCSSRule_( Callback, Id, Rule, Result );
 }
-
-
 
 namespace {
 	void RemoveCSSRule_(
 		cJS &Callback,
+		const nchar__ *Id,
 		const nchar__ *Index )
 	{
 	qRH;
 	qRB;
-		Execute( Callback, xdhujs::snCSSRuleRemover, NULL, nstring___( Index ).Internal()() );
+		Execute( Callback, xdhujs::snCSSRuleRemover, NULL, Id, Index);
 	qRR;
 	qRT;
 	qRE;
@@ -797,9 +803,12 @@ static void RemoveCSSRule_(
 	cJS &Callback,
 	va_list List )
 {
-	RemoveCSSRule_( Callback, va_arg( List, const nchar__ * ) );
+	// NOTA : we use variables, because if we put 'va_arg()' directly as parameter to below function, it's not sure that they are called in the correct order.
+	const nchar__ *Id = va_arg(List, const nchar__ *);
+	const nchar__ *Index = va_arg(List, const nchar__ *);
+
+	RemoveCSSRule_( Callback, Id, Index );
 }
-*/
 
 namespace {
 	void HandleClasses_(
@@ -977,7 +986,6 @@ static script_name__ Convert_( xdhcmn::eFunction Function )
 	case xdhcmn::fInsertAfter:
 		qRFwk();
 		break;
-		/*
 	case xdhcmn::fInsertCSSRule:
 		qRFwk();
 		break;
@@ -987,7 +995,6 @@ static script_name__ Convert_( xdhcmn::eFunction Function )
 	case xdhcmn::fRemoveCSSRule:
 		qRFwk();
 		break;
-*/
 	case xdhcmn::fAddClasses:
 		qRFwk();
 		break;
@@ -1088,7 +1095,6 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 	case xdhcmn::fInsertAfter:
 		InsertAfter_( C_(), List );
 		break;
-		/*
 	case xdhcmn::fInsertCSSRule:
 		InsertCSSRule_( C_(), List );
 		break;
@@ -1098,7 +1104,6 @@ void xdhujp::sProxyCallback::XDHCMNProcess(
 	case xdhcmn::fRemoveCSSRule:
 		RemoveCSSRule_( C_(), List );
 		break;
-	*/
 	case xdhcmn::fAddClasses:
 		HandleClasses_( C_(), xdhujs::snClassesAdder, List );
 		break;

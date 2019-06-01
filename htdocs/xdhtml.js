@@ -119,7 +119,14 @@ function convert(xml) {
 
 	[name, offset] = getString(xml, offset);
 
-	let node = document.implementation.createDocument(null, name).firstChild;
+	let noRoot = name === "";
+
+	if (noRoot)
+		name = "dummy";
+
+	let rootNode = document.implementation.createDocument(null, name).firstChild;
+
+	let node = rootNode;
 
 	while (offset < length) {
 		switch (xml[offset++]) {
@@ -145,7 +152,20 @@ function convert(xml) {
 		}
 	}
 
-	let result = new XMLSerializer().serializeToString(node.ownerDocument.documentElement);
+	node = rootNode;
+
+	if (noRoot)
+		node = node.firstChild;
+
+	let result = "";
+
+	while (node !== null) {
+		log(node);
+		result += new XMLSerializer().serializeToString(node);
+		node = node.nextSibling;
+	}
+
+	log(result);
 
 	return result;
 }
@@ -177,8 +197,12 @@ function setLayout(id, xml, xsl) {
 	if (xsl === "") {
 		getElement(id).innerHTML = xml;
 	} else {
-		removeChildren(id);
-		getElement(id).appendChild(transformToFragment(xml, xsl));
+		let div = document.createElement('div');
+		div.appendChild(transformToFragment(xml, xsl));
+		getElement(id).innerHTML = div.innerHTML;
+//		div = null;
+//		removeChildren(id);
+//		getElement(id).appendChild(transformToFragment(xml, xsl));
 	}
 }
 
@@ -540,12 +564,15 @@ function mktreeExpandToNode(element) {
 	}
 }
 
-function getCSSRules() {
-	return document.getElementById(styleId).sheet;
+function getCSSRules(id) {
+	if (id === "")
+		id = styleId;
+
+	return document.getElementById(id).sheet;
 }
 
-function insertCSSRule(rule, index) {
-	var rules = getCSSRules();
+function insertCSSRule(id, rule, index) {
+	var rules = getCSSRules(id);
 
 	if (index === -1)
 		index = rules.cssRules.length;
@@ -557,9 +584,9 @@ function insertCSSRule(rule, index) {
 	return index;
 }
 
-function removeCSSRule(index) {
+function removeCSSRule(id, index) {
 //	console.log(getCSSRules().cssRules.length + " : " + index);
-	getCSSRules().removeRule(index);
+	getCSSRules(id).removeRule(index);
 }
 
 function handleClasses(ids, classes, method) {
