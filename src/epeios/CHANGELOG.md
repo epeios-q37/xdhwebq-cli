@@ -8,6 +8,25 @@
 - [stdz]: modification to comply with current standards;
 - [trvl]: trivial modifications;
 
+
+## 2019-07-06
+
+- SCLXDHTML, XDHCMN, XDHDWS, XDHUJP, XDHUJR, XDHUJS:
+	- adding new layout related functionnalities,
+
+## 2019-06-20
+
+- SCLMISC: [adpt],
+- SCLRGSTRY: [adpt],
+- STR:
+	- adding `AmountOf(Lead|Tails)Chars(…)` methods,
+	- renamig and adapting stripping methods,
+
+## 2019-06-04
+
+- SCK:
+	- removing an exception throwing when deconnexion on writing, because it breaks the upstream error handling,
+
 ## 2019-06-01
 
 - XDHDWS, XDHUJ(P|S):
