@@ -21,7 +21,7 @@ along with xdhwebq. If not, see <http://www.gnu.org/licenses/>.
 error_reporting(E_ALL);
 
 $host = "localhost";
-$service = 53741;
+$service = 53710;
 
 function send($query) {
  /* creates a TCP/IP socket. */
@@ -37,7 +37,7 @@ function send($query) {
  $result = socket_connect($socket, gethostbyname($host), $service);
 
  if ($result === false) {
-  echo "socket_connect() fails : ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
+  echo "Unable to connect to " . gethostbyname($host) . ":" . $service . "!\n";
   return;
  }
 
@@ -54,28 +54,14 @@ function send($query) {
  return $answer;
 }
 
-if (isset($_REQUEST["_prolog"]) || (isset($_REQUEST["_token"]) && !isset($_REQUEST["_cont"]))) {
- $cgi = $_SERVER['PHP_SELF'];
- $action = $_REQUEST["_action"];
- $language = $_REQUEST["_language"];
- $UserID = $_REQUEST["UserID"];
- $Password = $_REQUEST["Password"];
- $token = $_REQUEST["_token"];
- $head = send("_token" . "\00" . $token . "\00" . "_head" . "\00\00\00");
+$token = $_REQUEST["_token"];
+$head = send("XDH web prolog\r\nToken: " . $token . "\r\n\r\n");
 
- require 'prolog.php';
+if (empty($token))
+    $additional = ' style="display: none;"';
 
- echo $out;
-} else {
- $in = "";
+require 'prolog.php';
 
- foreach ($_REQUEST as $key => $value) {
-  $in .= $key . "\00" . $value . "\00";
- }
-
- $in .= "_CGI\00" . $_SERVER['PHP_SELF'] . "\00\00";
-
- echo send($in);
-}
+echo $out;
 ?>
 

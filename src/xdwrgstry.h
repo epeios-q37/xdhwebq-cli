@@ -20,27 +20,19 @@
 #ifndef XDWRGSTRY_INC_
 # define XDWRGSTRY_INC_
 
-# include "sclrgstry.h"
-
-# include "xdhujr.h"
+# include "sclr.h"
 
 namespace xdwrgstry {
-	using namespace sclrgstry;
-
-	using namespace xdhujr;
+	using namespace sclr;
 
 	namespace parameter {
-		using namespace sclrgstry::parameter;
-
-		namespace script {
-			extern rEntry Fallback;
-		}
+		using namespace sclr::parameter;
 
 	    extern rEntry ModuleFilename;
 	}
 
 	namespace definition {
-		using namespace sclrgstry::definition;
+		using namespace sclr::definition;
 	}
 }
 

@@ -17,44 +17,29 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef SCLRGSTRY__INC
-#define SCLRGSTRY__INC
+// SoCLe Registry
 
-#define SCLRGSTRY_NAME		"SCLRGSTRY"
+#ifndef SCLR_INC_
+# define SCLR_INC_
 
-#if defined( E_DEBUG ) && !defined( SCLRGSTRY_NODBG )
-#define SCLRGSTRY_DBG
-#endif
+# define SCLR_NAME		"SCLR"
 
-// SoCLe ReGiSTRY
+# if defined( E_DEBUG ) && !defined( SCLR_NODBG )
+#  define SCLR_DBG
+# endif
 
 # include "err.h"
-# include "xtf.h"
-
 # include "rgstry.h"
 
-/***************/
-/***** OLD *****/
-/***************/
-
-namespace sclrgstry {
+namespace sclr {
 
 	using rgstry::tags_;
 	using rgstry::tags;
 	using rgstry::rEntry;
 
-	typedef rgstry::multi_level_registry_ registry_;
+	typedef rgstry::multi_layer_registry_ registry_;
 
 	extern const char *ParametersTag;
-
-	// For the 'BGetValue(...)' function.
-	qENUM( Needness )
-	{
-		nMandatory,	// Error if the entry is not present.
-		nOptional,	// Returns true if the entry is present, false otherwise.
-		n_amount,
-		n_Undefined,
-	};
 
 #if 0
 	registry_ &GetRegistry( void );
@@ -65,7 +50,7 @@ namespace sclrgstry {
 
 	tht::rLocker &GetCommonRegistryLocker( void );
 
-	qENUM( Level ) {
+	qENUM( Layer ) {
 		lMain,
 		lLasting,	// Lasting data set by application.
 		lProject,
@@ -73,12 +58,14 @@ namespace sclrgstry {
 		lArguments,
 		lRuntime,	// Data set by application, but which are lost when quitting (contrary of the data of 'Lasting', which are persistent.
 		l_amount,
+		l_Highest = lRuntime,
+		l_Default = l_Highest,
 		l_Undefined
 	};
 
-	const char *GetLabel( eLevel Level );
+	const char *GetLabel( eLayer Layer );
 
-	rgstry::level__ GetRawLevel( eLevel Level );
+	rgstry::layer__ GetRawLayer( eLayer Layer );
 
 	extern rgstry::entry___ Parameters;
 	extern rgstry::entry___ Definitions;
@@ -159,28 +146,28 @@ namespace sclrgstry {
 		Path.Append( "\"]" );
 	}
 
-	void Erase( eLevel Level );
+	void Erase( eLayer Layer );
 
-	void Reset( eLevel Level );
+	void Reset( eLayer Layer );
 
 	void Reset(
-		eLevel Level,
+		eLayer Layer,
 		const rgstry::entry__ &Entry );
 
 	void Load(
-		eLevel Level,
+		eLayer Layer,
 		xtf::extended_text_iflow__ &Flow,
 		const fnm::name___ &Directory,
 		const char *RootPath );
 
 	void Load(
-		eLevel Level,
+		eLayer Layer,
 		flw::rRFlow &Flow,
 		const fnm::name___ &Directory,
 		const char *RootPath );
 
 	void Load(
-		eLevel Level,
+		eLayer Layer,
 		const fnm::name___ &Filename,
 		const char *Target,
 		str::string_ &Id );
@@ -198,32 +185,32 @@ namespace sclrgstry {
 
 	void FillWithSetupOfId(
 		registry_ &Registry,
-		rgstry::level__ Level,
+		rgstry::layer__ layer,
 		const str::string_ &Id );
 
 	void FillWithGivenSetup(
 		registry_ &Registry,
-		rgstry::level__ Level );	// Fill the indicated setup if one is given.
+		rgstry::layer__ Layer );	// Fill the indicated setup if one is given.
 
-	void ReportIfNoSetupId( void );
+	void ReportIfNoParametersSetupId( void );
 
 	void FillWithContent(
 		registry_ &Registry,
-		rgstry::level__ Level,
+		rgstry::layer__ Layer,
 		const str::dString &BinPath,
 		const str::string_ &Content );
-	
+
 # if 0
 	void FillRegistryWithSetup(
 		registry_ &Registry,
-		level__ Level,	// 'level' de le 'setup registry'.
+		layer__ Layer,	// 'Layer' de le 'setup registry'.
 		const str::string_ &SetupId );	// Remplit la section 'Parameters' de la 'registry' avec le contenu du 'Setup' d'identifiant 'SetupId'.
 
 	inline void FillRegistryWithSetup(
 		registry_ &Registry,
-		level__ Level )	// Remplit la section 'Parameters' de la 'registry' avec le contenu du 'Setup' par dÃ©faut ('Parameters/@DefaultSetup').
+		layer__ Layer )	// Remplit la section 'Parameters' de la 'registry' avec le contenu du 'Setup' par dÃ©faut ('Parameters/@DefaultSetup').
 	{
-		FillRegistryWithSetup( Registry, Level, str::string() );
+		FillRegistryWithSetup( Registry, Layer, str::string() );
 	}
 # endif
 
@@ -251,24 +238,10 @@ namespace sclrgstry {
 		const str::string_ &Value,
 		sdr::row__ *Error = NULL );
 
-	bso::bool__ BGetValue(
-		const registry_ &Registry,
-		const rgstry::tentry__ &Entry,
-		eNeedness Needness,
-		str::string_ &Value );
-
-	inline 	bso::bool__ BGetValue(
-		const registry_ &Registry,
-		const rgstry::tentry__ &Entry,
-		str::string_ &Value )
-	{
-		return BGetValue( Registry, Entry, nOptional, Value );
-	}
-
 	bso::bool__ GetValues(
 		const registry_ &Registry,
 		const rgstry::tentry__ &Entry,
-		str::strings_ &Values );
+		str::dStrings &Values );
 
 	bso::bool__ OGetValue(
 		const registry_ &Registry,
@@ -290,16 +263,41 @@ namespace sclrgstry {
 		const rgstry::tentry__ &Entry,
 		TOL_CBUFFER___ &Buffer );
 
-	bso::bool__ BGetBoolean(
+	inline bso::bool__ BGetValue(
 		const registry_ &Registry,
 		const rgstry::tentry__ &Entry,
-		bso::bool__ DefaultValue = false );
+		str::string_ &Value,
+		qRPN )
+    {
+        if ( !OGetValue(Registry, Entry, Value)) {
+            if ( qRPT )
+                qRFwk();
+            else
+                return false;
+        }
+
+        return true;
+    }
+
+    bso::bool__ BGetBoolean(
+		const registry_ &Registry,
+		const rgstry::tentry__ &Entry,
+		bso::bool__ DefaultValue,
+		qRPN );
+
+    inline bso::bool__ OGetBoolean(
+		const registry_ &Registry,
+		const rgstry::tentry__ &Entry,
+		bso::bool__ DefaultValue = false )
+    {
+        return BGetBoolean(Registry, Entry, DefaultValue, qRPU);
+    }
 
 	bso::bool__ MGetBoolean(
 		const registry_ &Registry,
 		const rgstry::tentry___ &Entry );
 
-# define SCLRGSTRY__UN( type, name, limit )\
+# define SCLR_UN_( type, name, limit )\
 	type MGet##name(\
 		const registry_ &Registry,\
 		const rgstry::tentry__ &Entry,\
@@ -310,15 +308,15 @@ namespace sclrgstry {
 		type DefaultValue,\
 		type Limit = limit );
 
-	SCLRGSTRY__UN( bso::uint__, UInt, BSO_UINT_MAX )
+	SCLR_UN_( bso::uint__, UInt, BSO_UINT_MAX )
 # ifdef BSO__64BITS_ENABLED
-		SCLRGSTRY__UN( bso::u64__, U64, BSO_U64_MAX )
+		SCLRG_UN_( bso::u64__, U64, BSO_U64_MAX )
 # endif
-	SCLRGSTRY__UN( bso::u32__, U32, BSO_U32_MAX )
-	SCLRGSTRY__UN( bso::u16__, U16, BSO_U16_MAX )
-	SCLRGSTRY__UN( bso::u8__, U8, BSO_U8_MAX )
+	SCLR_UN_( bso::u32__, U32, BSO_U32_MAX )
+	SCLR_UN_( bso::u16__, U16, BSO_U16_MAX )
+	SCLR_UN_( bso::u8__, U8, BSO_U8_MAX )
 
-# define SCLRGSTRY__SN( type, name, min, max )\
+# define SCLR_SN_( type, name, min, max )\
 	type MGet##name(\
 		const registry_ &Registry,\
 		const rgstry::tentry__ &Entry,\
@@ -331,16 +329,16 @@ namespace sclrgstry {
 		type Min = min,\
 		type Max = max );
 
-	SCLRGSTRY__SN( bso::sint__, SInt, BSO_SINT_MIN, BSO_SINT_MAX )
+	SCLR_SN_( bso::sint__, SInt, BSO_SINT_MIN, BSO_SINT_MAX )
 # ifdef BSO__64BITS_ENABLED
-	SCLRGSTRY__SN( bso::s64__, S64, BSO_S64, BSO_S64_MAX )
+	SCLR_SN_( bso::s64__, S64, BSO_S64, BSO_S64_MAX )
 #endif
-	SCLRGSTRY__SN( bso::s32__, S32, BSO_S32_MIN, BSO_S32_MAX )
-	SCLRGSTRY__SN( bso::s16__, S16, BSO_S16_MIN, BSO_S16_MAX )
-	SCLRGSTRY__SN( bso::s8__, S8, BSO_S8_MIN, BSO_S8_MAX )
+	SCLR_SN_( bso::s32__, S32, BSO_S32_MIN, BSO_S32_MAX )
+	SCLR_SN_( bso::s16__, S16, BSO_S16_MIN, BSO_S16_MAX )
+	SCLR_SN_( bso::s8__, S8, BSO_S8_MIN, BSO_S8_MAX )
 
 		// To define function retrieving mandatory registry value.
-# define SCLRGSTRY_MV( name, entry )\
+# define SCLR_MV( name, entry )\
 		const registry_ &Registry,\
 		inline const char *name(\
 		TOL_CBUFFER___ &Buffer )\
@@ -355,7 +353,7 @@ namespace sclrgstry {
 	}
 
 		// To define function retrieving optional registry value.
-# define SCLRGSTRY_OV( name, entry )\
+# define SCLR_OV( name, entry )\
 	inline const char *name(\
 		const registry_ &Registry,\
 		TOL_CBUFFER___ &Buffer,\
@@ -376,11 +374,10 @@ namespace sclrgstry {
 /***** NEW *****/
 /***************/
 
-namespace sclrgstry {
+namespace sclr {
 	typedef registry_ dRegistry;
 	qW( Registry );
 
-	typedef rgstry::entry___ rEntry;
-}
+	typedef rgstry::entry___ rEntry;}
 
 #endif

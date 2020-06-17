@@ -17,8 +17,8 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef LCL__INC
-# define LCL__INC
+#ifndef LCL_INC_
+# define LCL_INC_
 
 # define LCL_NAME		"LCL"
 
@@ -35,7 +35,7 @@
 # define LCL_TAG_MARKER_C	'%'
 # define LCL_TAG_MARKER_S	"%"
 
-# define LCL_UNDEFINED_LEVEL	RGSTRY_UNDEFINED_LEVEL
+# define LCL_UNDEFINED_LAYER	RGSTRY_UNDEFINED_LAYER
 
 /*************/
 /**** OLD ****/
@@ -44,9 +44,9 @@
 namespace lcl {
 	using rgstry::status__;
 	using rgstry::context___;
-	using rgstry::level__;
-	using str::strings_;
-	using str::strings;
+	using rgstry::layer__;
+	typedef str::dStrings strings_;
+    typedef str::wStrings strings;
 
 	E_ROW( vrow__ );	// 'value row'.
 	E_ROW( brow__ );	// 'basic row'.
@@ -241,7 +241,7 @@ namespace lcl {
 		}
 		template <typename i> void AddTag( i I )
 		{
-			bso::bInteger Buffer;
+			bso::pInteger Buffer;
 
 			AddTag( bso::Convert( I, Buffer ) );
 		}
@@ -273,7 +273,7 @@ namespace lcl {
 	E_AUTO( meaning )
 
 	namespace {
-		typedef rgstry::multi_level_registry_ _registry_;
+		typedef rgstry::multi_layer_registry_ _registry_;
 	}
 
 	class locale_
@@ -283,12 +283,12 @@ namespace lcl {
 		void _GetCorrespondingLabels(
 			const strings_ &Labels,
 			strings_ &Wordings ) const;
-		// A des fins de compatibilité ascendente.
+		// A des fins de compatibilitï¿½ ascendente.
 		bso::bool__ _GetTranslationFollowingLanguageThenMessage(
 			const str::string_ &Text,
 			const char *Language,
 			str::string_ &Translation ) const;
-		// A des fins de compatibilité ascendente.
+		// A des fins de compatibilitï¿½ ascendente.
 		bso::bool__ _GetTranslationFollowingMessageThenLanguage(
 			const str::string_ &Text,
 			const char *Language,
@@ -400,16 +400,16 @@ namespace lcl {
 
 	E_AUTO( locale );
 
-	// Fonction utilisée dans le cadre de l'internationalisation, qui sert juste à contrôler l'existence du premier paramètre, qui correspond généralement à une entrée d'un 'enum'.
+	// Fonction utilisï¿½e dans le cadre de l'internationalisation, qui sert juste ï¿½ contrï¿½ler l'existence du premier paramï¿½tre, qui correspond gï¿½nï¿½ralement ï¿½ une entrï¿½e d'un 'enum'.
 	inline const char *Control_(
-		int,	// Sert juste à vérifier l'existence d'une entrée d'un 'enum'.
+		int,	// Sert juste ï¿½ vï¿½rifier l'existence d'une entrï¿½e d'un 'enum'.
 		const char *Text )
 	{
 		return Text;
 	}
 }
 
-// A utiliser dans une macro '_( name )', qui prédéfini le paramètre 'prefix'.
+// A utiliser dans une macro '_( name )', qui prï¿½dï¿½fini le paramï¿½tre 'prefix'.
 # define LCL_M( prefix, name ) lcl::Control_( prefix##name, #name )
 
 /*************/

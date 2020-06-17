@@ -17,7 +17,7 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define LCL__COMPILATION
+#define LCL_COMPILATION_
 
 #include "lcl.h"
 
@@ -39,7 +39,7 @@ namespace {
 		while ( !Flow.EndOfFlow() ) {
 			if ( ( C = Flow.Get() ) == '\\' )
 				Normalized.Append('\\' );
-			
+
 			Normalized.Append( C );
 		}
 	qRR
@@ -352,7 +352,7 @@ void lcl::locale_::GetLanguages(
 {
 	sdr::row__ PathErrorRow = qNIL;
 
-	_registry_::GetValues( str::string( "Languages/Language/@label" ), Labels, &PathErrorRow );
+	_registry_::GetValues( str::wString( "Languages/Language/@label" ), Labels, &PathErrorRow );
 
 	_GetCorrespondingLabels( Labels, Wordings );
 

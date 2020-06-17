@@ -21,8 +21,4 @@
 
 using namespace xdwrgstry;
 
-entry___ xdwrgstry::parameter::ModuleFilename( "ModuleFilename", sclrgstry::Parameters );
-entry___ xdwrgstry::parameter::script::Fallback( "Fallback", xdwrgstry::Scripts );
-
-
-
+rEntry xdwrgstry::parameter::ModuleFilename( "ModuleFilename", sclr::Parameters );

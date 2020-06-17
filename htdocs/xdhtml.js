@@ -14,12 +14,14 @@
 	Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
-	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
+// 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
 const onEventAttributeName = "data-xdh-onevent";
 const onEventsAttributeName = "data-xdh-onevents";
 const widgetAttributeName = "data-xdh-widget";
+ // Method to retrieve widget content, but also if present, then the widget is already handled.
+const widgetContentRetrievingMethodAttribute = "data-xdh-widget-content-retrieving-method";
 const valueAttributeName = "data-xdh-value";
 const styleId = "XDHStyle";
 
@@ -206,9 +208,11 @@ function getLayoutHTML(xml, xsl) {
 }
 
 function prependLayout(id, xml, xsl) {
+/*    
 	element = getElement(id);
-
 	element.innerHTML = getLayoutHTML(xml, xsl) + element.innerHTML;
+*/
+    getElement(id).insertAdjacentHTML("afterbegin", getLayoutHTML(xml, xsl));
 }
 
 function setLayout(id, xml, xsl) {
@@ -216,9 +220,11 @@ function setLayout(id, xml, xsl) {
 }
 
 function appendLayout(id, xml, xsl) {
+/*
 	element = getElement(id);
-
 	element.innerHTML = element.innerHTML + getLayoutHTML(xml, xsl);
+*/
+    getElement(id).insertAdjacentHTML("beforeend", getLayoutHTML(xml, xsl));
 }
 
 function handleBooleanAttribute(element, name, flag) {
@@ -304,12 +310,13 @@ function patchATag(node) {
 	}
 }
 
-function fetchEventHandlers(id) {
+function fetchEventHandlersAndWidgest(id) {
 	var root = getElement(id);
 	var node = root;	// Handling root, due to 'About'/'Refresh' corresponding action handling.
 	var cont = true;
 	var candidate;
-	var digests = "";
+	var eventDigests = "";
+    var widgetDigests = ""
 
 	if (node.firstChild === null)
 		cont = false;
@@ -317,10 +324,14 @@ function fetchEventHandlers(id) {
 	while (cont) {
 		if (node.nodeType === Node.ELEMENT_NODE) {
 			if (node.hasAttribute(onEventAttributeName))
-				digests += "(" + getOrGenerateId(node) + "|" + getPatchedNodeName( node ) + "|((" + node.getAttribute(onEventAttributeName) + ")))|";
+				eventDigests += "(" + getOrGenerateId(node) + "|" + getPatchedNodeName( node ) + "|((" + node.getAttribute(onEventAttributeName) + ")))|";
 
 			if (node.hasAttribute(onEventsAttributeName))
-				digests += "(" + getOrGenerateId(node) + "|" + getPatchedNodeName(node) + "|(" + node.getAttribute(onEventsAttributeName) + "))|";
+				eventDigests += "(" + getOrGenerateId(node) + "|" + getPatchedNodeName(node) + "|(" + node.getAttribute(onEventsAttributeName) + "))|";
+          
+            if (node.hasAttribute(widgetAttributeName))
+				widgetDigests += "(" + getOrGenerateId(node) + "|(" + node.getAttribute(widgetAttributeName) + "))|";
+
 
 			if (node.nodeName === "A")
 				patchATag(node);
@@ -342,7 +353,7 @@ function fetchEventHandlers(id) {
 	if (typeof convertTrees === 'function')
 		convertTrees();	// from 'mktree'.
 
-	return digests;
+	return "(" + eventDigests + ")|(" + widgetDigests + ")";
 }
 
 function fetchWidgets(id) {
@@ -380,6 +391,7 @@ function getValue(elementOrId)	// Returns the value of element of id 'id'.
 {
 	var element = getElement(elementOrId);
 	var tagName = element.tagName;
+	var value = ""
 
 //	console.log("VALUE:", element.textContent);
 
@@ -388,33 +400,75 @@ function getValue(elementOrId)	// Returns the value of element of id 'id'.
 			switch (element.getAttribute("type")) {
 				case "checkbox":
 				case "radio":
-					return element.checked;
+					value =  element.checked;
 					break;
 				default:
-					return element.value;
+					value =  element.value;
 					break;
 			}
 			break;
 		case "TEXTAREA":
-			return element.value;
+			value =  element.value;
 			break;
 		case "SELECT":
 			if (element.selectedIndex == -1)
-				return "";
+				value =  "";
 			else
-				return element.options[element.selectedIndex].value;
+				value =  element.options[element.selectedIndex].value;
 			break;
 		case "OPTION":
-			return element.value;
+			value =  element.value;
 			break;
 		case "text":	// SVG
 		case "tspan":	// SVG
-			return element.textContent;
+			value =  element.textContent;
 			break;
 		default:
-			return element.getAttribute(valueAttributeName);
+			value =  element.getAttribute(valueAttributeName);
 			break;
 	}
+
+	return value;
+}
+
+function getWidgetRetrievingMethod( elementOrId ) {
+    element = getElement( elementOrId );
+    
+    if (element.hasAttribute(widgetContentRetrievingMethodAttribute))
+        return element.getAttribute(widgetContentRetrievingMethodAttribute);
+    else
+        return "";
+    
+}
+
+function escapeQuotes(string) {
+	return string.toString().replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+	// 'toString()' as 'string' could, for example, be a boolean.
+}
+
+function prependToFlatStrings(string, strings) {
+	return '"' + escapeQuotes(string) + (strings ? '",' + strings : '"');
+}
+
+function appendToFlatStrings(string, strings) {
+	return (strings ? strings + ',"' : '"' ) + escapeQuotes(string) + '"';
+}
+
+function getContents(ids) {
+	var i = ids.length;
+	var contents = "";
+
+	while(i--) {
+        let element = getElement(ids[i]);
+        let widgetRetrievingMethod = getWidgetRetrievingMethod(element);
+        
+        if ( widgetRetrievingMethod !== "" )
+            contents = prependToFlatStrings(eval(widgetRetrievingMethod), contents);
+        else
+            contents = prependToFlatStrings(getValue(element), contents);
+	}
+
+	return contents;
 }
 
 function setValue(id, value) {
@@ -446,12 +500,20 @@ function setEventHandlers(ids, events) {
 	}
 }
 
-function instantiateWidget(id, type, parameters) {
-	var script = 'jQuery( document.getElementById( "' + id + '") ).' + type + '(' + parameters + ');';
-	return script;
+function instantiateWidget(id, type, parameters, contentRetrievingMethod, focusingMethod, selectionMethod) {
+    // 'focusingMethod' and 'selectionMethod' are currently not handled.
+    
+    element = getElement(id);
+    
+    if ( !element.hasAttribute(widgetContentRetrievingMethodAttribute)) {
+        element.setAttribute(widgetContentRetrievingMethodAttribute,'jQuery( document.getElementById( "' + id + '") ).' + contentRetrievingMethod);
+        
+        return 'jQuery( document.getElementById( "' + id + '") ).' + type + '(' + parameters + ');'
+    } else
+        return "";
 }
 
-function instantiateWidgets(ids, types, parametersSets) {
+function instantiateWidgets(ids, types, parametersSets, contentRetrievingMethods, focusingMethods, selectionMethods) {
 	var i = ids.length;
 	var script = "";
 
@@ -462,7 +524,7 @@ function instantiateWidgets(ids, types, parametersSets) {
 		throw "Inconsistency";
 
 	while (i--) {
-		script += instantiateWidget(ids[i], types[i], parametersSets[i]);
+		script += instantiateWidget(ids[i], types[i], parametersSets[i], contentRetrievingMethods[i], focusingMethods[i], selectionMethods[i]);
 	}
 
 	eval(script);

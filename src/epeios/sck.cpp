@@ -17,7 +17,7 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define SCK__COMPILATION
+#define SCK_COMPILATION_
 
 #include "sck.h"
 
@@ -34,6 +34,11 @@ using namespace sck;
 
 #ifdef CPE_S_WIN
 bool sck::Ready_ = false;
+// 'ssize_t' does not exist in Windows.
+// It is used as return type for 'select' and 'recv'
+// under POSIX, so we use the type returned by same
+// functions under windows.
+typedef int ssize_t;
 #else
 bool sck::Ready_ = true;
 #endif
@@ -45,7 +50,7 @@ flw::size__ sck::Read(
 	duration__ Timeout )
 {
 	fd_set fds;
-	int Result;
+	ssize_t Result;
 
 	FD_ZERO( &fds );
 	FD_SET( Socket, &fds );
@@ -172,4 +177,4 @@ Q37_GCTOR( sck )
 #ifdef SCK__IGNORE_SIGPIPE
 	signal( SIGPIPE, SIG_IGN );
 #endif
-}	
+}

@@ -24,6 +24,9 @@ var target = "";
 
 var queryInProgress = false;
 var queryQueue = [];
+var backendLost = false;
+var reportClosing = true;	// Set to 'false' int the scrip' defined in the
+							// 'ErrorScript' definition entry in the 'xdhwebq.xcfg'  file. 
 
 function log( message )
 {
@@ -42,57 +45,58 @@ function t( s )
 	log( s + " : " + String( d.getTime() - before ) );
 }
 		
-function handleQuery( query ) {
-
-//	log( "Q : " + query );
-    var xmlhttp;
-
-	if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
-		xmlhttp = new XMLHttpRequest();
-	} else {	// code for IE6, IE5
-		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            let query = "";
-
-//          log("R : " + xmlhttp.responseText);
-            let xdh_result = eval(xmlhttp.responseText);
-
-            if (query) {
-                if (typeof xdh_result !== "undefined" && typeof xdh_result !== "object")	// 'typeof xdh_result !== "object"' == 'xdh_result != null' !!!!
-                    query += "&_result=" + encodeURIComponent(xdh_result);
-                handleQuery(buildQuery() + query);
-            } else if (queryQueue.length)
-                handleQuery(queryQueue.shift());
-            else
-                queryInProgress = false;
-
-        }
-    };
-
-	if ( before === 0 ) {
-		d = new Date();
-		before = d.getTime();
-	}
-
-	xmlhttp.open("GET", query);
-
-	xmlhttp.send();
-}
+var socket;
 
 function launchEvent( digest )
 {
-	query = buildQuery() + "_action=_HandleEvent&digest=" + encodeURIComponent( digest );
-
-	if (queryInProgress) {
-		if (query !== queryQueue[queryQueue.length - 1])
-			queryQueue.push(query);
-	}  else {
+	if ( queryInProgress ) {
+		if (digest !== queryQueue[queryQueue.length - 1]) {
+			console.log("Queued: ", digest);
+			queryQueue.push(digest);
+		}
+	} else {
+		console.log("Sent: ", digest);
 		queryInProgress = true;
-		handleQuery(query);
+		socket.send(digest);
+	}
+}
+
+
+function connect(token) {
+	socket = new WebSocket((window.location.protocol === "http:" ? "ws" : "wss" ) + "://" + window.location.hostname + "/xdh/");
+
+    socket.onopen = function(e) {
+		socket.send(token)
 	}
 
-	return true;
+    socket.onmessage = function(event) {
+		if ( event.data !== "%StandBy" ) {
+			if ( event.data === "%Quit" ) {	// Only used in 'FaaS' mode, when quitting a backend.
+				log("Quitting !");
+				backendLost = true;
+				socket.close();	// Launches 'onclose' event.
+			} else {
+				log("Executed:", event.data);
+				let result = eval(event.data);
+	//			console.log(event.data);
+				
+				if ( ( typeof result !== "undefined" ) && ( typeof result !== "object" ) )	// 'typeof result !== "object"' == 'result != null' !!!!
+					socket.send(result);
+			}
+		} else if (queryQueue.length) {
+			console.log("Unqueued:", queryQueue[0]);
+			socket.send(queryQueue.shift());
+		} else {
+			console.log("Standby !");
+			queryInProgress = false;
+		}
+	};
+	
+    socket.onclose = function(event) {
+		if ( reportClosing )
+			if ( backendLost )
+				alert("Connection to backend lost!");
+			else if (confirm("Disconnected!\nPress OK to reload the application."))
+				location.reload(true);
+    }	
 }

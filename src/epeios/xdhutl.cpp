@@ -17,7 +17,7 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define XDHUTL__COMPILATION
+#define XDHUTL_COMPILATION_
 
 #include "xdhutl.h"
 
@@ -25,24 +25,6 @@ using namespace xdhutl;
 
 namespace {
 	stsfsm::automat ActionAutomat_;
-
-	template <typename type> inline type GetId_(
-		const nstring___ &Pattern,
-		const stsfsm::automat_ &Automat,
-		type UndefinedValue,
-		bso::uint__ Amount )
-	{
-		type Id = UndefinedValue;
-	qRH
-		str::string Buffer;
-	qRB
-		Buffer.Init();
-		Id = stsfsm::GetId( Pattern.UTF8( Buffer ), Automat, UndefinedValue, Amount );
-	qRR
-	qRT
-	qRE
-		return Id;
-	}
 
 	static void InitAndFillActionAutomat_( void )
 	{
@@ -72,9 +54,9 @@ const char *xdhutl::GetLabel( action__ Action )
 	return NULL;	// To avoid a 'warning'.
 }
 
-action__ xdhutl::GetAction( const nstring___ &Pattern )
+action__ xdhutl::GetAction( const str::dString &Pattern )
 {
-	return GetId_( Pattern, ActionAutomat_, a_Undefined, a_amount );
+	return stsfsm::GetId( Pattern, ActionAutomat_, a_Undefined, a_amount );
 }
 
 namespace {
@@ -140,7 +122,7 @@ inline void HandleKeyShortcutModifier_(
 {
 	sdr::row__ CharPos = qNIL, PlusPos = qNIL;
 
-	if ( ( ( CharPos = Pattern.Search(Char) ) != qNIL ) 
+	if ( ( ( CharPos = Pattern.Search(Char) ) != qNIL )
 		 && ( ( PlusPos = Pattern.Search( '+' ) ) != qNIL )
 		 && ( *CharPos < *PlusPos ) )
 		Shortcut.Append( Char );
@@ -165,7 +147,7 @@ void xdhutl::BuildKeyShortcut(
 			HandleKeyShortcutModifier_( 'C', Keys, Shortcut );	// Control
 			HandleKeyShortcutModifier_( 'M', Keys, Shortcut );	// Meta
 
-			Shortcut.Append( Keys, Keys.Next( PlusPos ) ); 
+			Shortcut.Append( Keys, Keys.Next( PlusPos ) );
 		} else // In this case, the shortcut is simply a '+', os the '+' is not the separator next to modifiers.
 			Shortcut.Append( Keys );
 	} else
@@ -460,7 +442,7 @@ qRE
 }
 
 void xdhutl::ExtractWidgetFeatures(
-	const xdhcmn::digest_ &Description,
+	const xdhcmn::digest_ &Digest,
 	str::string_ &Type,
 	str::string_ &Parameters,
 	str::string_ &ContentRetrievingMethod,
@@ -470,7 +452,7 @@ void xdhutl::ExtractWidgetFeatures(
 qRH
 	xdhcmn::retriever__ Retriever;
 qRB
-	Retriever.Init( Description );
+	Retriever.Init( Digest );
 
 	if ( Retriever.Availability() != strmrg::aNone )
 		Retriever.GetString( Type );
@@ -491,8 +473,9 @@ qRT
 qRE
 }
 
-void xdhutl::ExtractWidgetFeatures(
-	const str::string_ &RawDescription,
+void xdhutl::ExtractWidgetFeaturesAndId(
+	const xdhcmn::digest_ &XDigest,
+	str::dString &Id,
 	str::string_ &Type,
 	str::string_ &Parameters,
 	str::string_ &ContentRetrievingMethod,
@@ -501,200 +484,81 @@ void xdhutl::ExtractWidgetFeatures(
 
 {
 qRH
-	xdhcmn::digest Description;
+	xdhcmn::retriever__ Retriever;
+	xdhcmn::digest SubDigest;
 qRB
-	Description.Init();
-	xdhcmn::Split( RawDescription, Description );
+	Retriever.Init(XDigest);
+	Retriever.GetString(Id);
 
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod );
+	SubDigest.Init();
+	Retriever.GetTable(SubDigest);
+
+	ExtractWidgetFeatures( SubDigest, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod );
 qRR
 qRT
 qRE
 }
 
-
-void xdhutl::ExtractWidgetTypeAndParameters(
-	const xdhcmn::digest_ &Description,
-	str::string_ &Type,
-	str::string_ &Parameters )
+void xdhutl::ExtractWidgetsFeaturesAndIds(
+    const xdhcmn::digest_ &XDigests,
+    str::dStrings &Ids,
+    str::strings_ &Types,
+    str::strings_ &ParametersSet,
+    str::strings_ &ContentRetrievingMethods,
+    str::strings_ &FocusingMethods,
+    str::dStrings &SelectionMethods )
 {
 qRH
-	str::string ContentRetrievingMethod, FocusingMethod, SelectionMethod;
+	xdhcmn::retriever__ Retriever;
+	xdhcmn::digest XDigest;
+	str::wString Id, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod;
 qRB
-	ContentRetrievingMethod.Init();
-	FocusingMethod.Init();
-	SelectionMethod.Init();
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod );
+	Retriever.Init(XDigests);
+
+	while ( Retriever.Availability() != strmrg::aNone) {
+        XDigest.Init();
+        Retriever.GetTable(XDigest);
+
+        tol::Init(Id, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod);
+
+        ExtractWidgetFeaturesAndId( XDigest, Id, Type, Parameters, ContentRetrievingMethod, FocusingMethod, SelectionMethod );
+
+        Ids.Append(Id);
+        Types.Append(Type);
+        ParametersSet.Append(Parameters);
+        ContentRetrievingMethods.Append(ContentRetrievingMethod);
+        FocusingMethods.Append(FocusingMethod);
+        SelectionMethods.Append( SelectionMethod);
+   }
 qRR
 qRT
 qRE
 }
 
-void xdhutl::ExtractWidgetContentRetrievingMethod(
-	const xdhcmn::digest_ &Description,
-	str::string_ &Method )
+void xdhutl::ExtractWidgetsFeaturesAndIds(
+	const str::string_ &FlatXDigests,
+    str::dStrings &Ids,
+    str::strings_ &Types,
+    str::strings_ &ParametersSet,
+    str::strings_ &ContentRetrievingMethods,
+    str::strings_ &FocusingMethods,
+    str::dStrings &SelectionMethods )
 {
 qRH
-	str::string Type, Parameters, FocusingMethod, SelectionMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	FocusingMethod.Init();
-	SelectionMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, Method, FocusingMethod, SelectionMethod );
-qRR
-qRT
-qRE
-}
-
-void xdhutl::ExtractWidgetContentRetrievingMethod(
-	const str::string_ &Description,
-	str::string_ &Method )
-{
-qRH
-	str::string Type, Parameters, FocusingMethod, SelectionMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	FocusingMethod.Init();
-	SelectionMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, Method, FocusingMethod, SelectionMethod );
-qRR
-qRT
-qRE
-}
-
-void xdhutl::ExtractWidgetFocusingMethod(
-	const xdhcmn::digest_ &Description,
-	str::string_ &Method )
-{
-qRH
-	str::string Type, Parameters, ContentMethod, SelectionMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	ContentMethod.Init();
-	SelectionMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentMethod, Method, SelectionMethod );
-qRR
-qRT
-qRE
-}
-
-void xdhutl::ExtractWidgetFocusingMethod(
-	const str::string_ &Description,
-	str::string_ &Method )
-{
-qRH
-	str::string Type, Parameters, ContentMethod, SelectionMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	ContentMethod.Init();
-	SelectionMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentMethod, Method, SelectionMethod );
-qRR
-qRT
-qRE
-}
-
-void xdhutl::ExtractWidgetSelectionMethod(
-	const xdhcmn::digest_ &Description,
-	str::string_ &Method )
-{
-qRH
-	str::string Type, Parameters, ContentMethod, FocusingMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	ContentMethod.Init();
-	FocusingMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentMethod, FocusingMethod, Method );
-qRR
-qRT
-qRE
-}
-
-void xdhutl::ExtractWidgetSelectionMethod(
-	const str::string_ &Description,
-	str::string_ &Method )
-{
-qRH
-	str::string Type, Parameters, ContentMethod, FocusingMethod;
-qRB
-	Type.Init();
-	Parameters.Init();
-	ContentMethod.Init();
-	FocusingMethod.Init();
-
-	ExtractWidgetFeatures( Description, Type, Parameters, ContentMethod, FocusingMethod, Method );
-qRR
-qRT
-qRE
-}
-
-namespace {
-	void ExtractWidgetTypeAndParameters_(
-		const xdhcmn::digest_ &XDescription,	// Contains also the element id.
-		str::string_ &Id,
-		str::string_ &Type,
-		str::string_ &Parameters )
-	{
-	qRH
-		xdhcmn::digest Description;
-		xdhcmn::retriever__ Retriever;
-	qRB
-		Retriever.Init( XDescription );
-		
-		Retriever.GetString( Id );
-
-		Description.Init();
-		Retriever.GetTable( Description );
-
-		ExtractWidgetTypeAndParameters( Description, Type, Parameters );
-	qRR
-	qRT
-	qRE
-	}
-}
-
-void xdhutl::ExtractWidgetsTypesAndParametersSets(
-	const xdhcmn::digest_ &Descriptions,
-	str::strings_ &Ids,
-	str::strings_ &Types,
-	str::strings_ &ParametersSets )
-{
-qRH
-	xdhcmn::digest XDescription;
-	str::string Id, Type, Parameters;
+	xdhcmn::digest XDigests;
 	xdhcmn::retriever__ Retriever;
 qRB
-	Retriever.Init( Descriptions );
+	XDigests.Init();
+	xdhcmn::Split( FlatXDigests, XDigests );
 
-	while ( Retriever.Availability() != strmrg::aNone ) {
 
-		XDescription.Init();
-		Retriever.GetTable( XDescription );
-
-		Id.Init();
-		Type.Init();
-		Parameters.Init();
-
-		ExtractWidgetTypeAndParameters_( XDescription, Id, Type, Parameters );
-
-		Ids.Append( Id );
-		Types.Append( Type );
-		ParametersSets.Append( Parameters );
-	}
+	ExtractWidgetsFeaturesAndIds( XDigests, Ids, Types, ParametersSet, ContentRetrievingMethods, FocusingMethods, SelectionMethods );
 qRR
 qRT
 qRE
 }
+
+
 
 void xdhutl::GetTags(
 	const xdhcmn::digest_ &Digest,
@@ -733,14 +597,14 @@ namespace  {
 
 void xdhutl::GetTags(
 	const xdhcmn::digest_ &Digest,
-	str::strings_ &Ids,
-	str::strings_ &TagsSet )
+	str::dStrings &Ids,
+	str::dStrings &TagsSet )
 {
 qRH
 	xdhcmn::retriever__ Retriever;
 	xdhcmn::digest Description;
 	str::string Id;
-	str::wStrings Tags; 
+	str::wStrings Tags;
 qRB
 	Retriever.Init( Digest );
 

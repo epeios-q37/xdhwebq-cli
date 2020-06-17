@@ -17,44 +17,41 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef SCLLOCALE__INC
-# define SCLLOCALE__INC
+// SoCLe Locale
 
-# define SCLLOCALE_NAME		"SCLLOCALE"
+#ifndef SCLL_INC_
+# define SCLL_INC_
 
-# if defined( E_DEBUG ) && !defined( SCLLOCALE_NODBG )
-#  define SCLLOCALE_DBG
+# define SCLL_NAME		"SCLL"
+
+# if defined( E_DEBUG ) && !defined( SCLL_NODBG )
+#  define SCLL_DBG
 # endif
 
-// SoCLe LOCALE
-
 # include "err.h"
-# include "flw.h"
-# include "str.h"
 # include "lcl.h"
 
-namespace scllocale {
-
+namespace scll {
 	class rRack {
 	public:
 		lcl::locale Locale;
-		lcl::level__ SoftwareLevel;
-		lcl::level__ ConfigurationLevel;
-		lcl::level__ ProjectLevel;
+		lcl::layer__ SoftwareLayer;
+		lcl::layer__ ConfigurationLayer;
+		lcl::layer__ ProjectLayer;
 		void reset( bso::sBool P = true )
 		{
 			Locale.reset( P );
-			SoftwareLevel = LCL_UNDEFINED_LEVEL;
-			ConfigurationLevel = LCL_UNDEFINED_LEVEL;
-			ProjectLevel = LCL_UNDEFINED_LEVEL;
+			SoftwareLayer = LCL_UNDEFINED_LAYER;
+			ConfigurationLayer = LCL_UNDEFINED_LAYER;
+			ProjectLayer = LCL_UNDEFINED_LAYER;
 		}
 		qCDTOR( rRack );
 		void Init( void )
 		{
 			Locale.Init();
-			SoftwareLevel = Locale.CreateEmbedded( rgstry::name( "Software" ) );
-			ConfigurationLevel = Locale.CreateEmbedded( rgstry::name( "Configuration" ) );
-			ProjectLevel = Locale.CreateEmbedded( rgstry::name( "Project" ) );
+			SoftwareLayer = Locale.CreateEmbedded( rgstry::name( "Software" ) );
+			ConfigurationLayer = Locale.CreateEmbedded( rgstry::name( "Configuration" ) );
+			ProjectLayer = Locale.CreateEmbedded( rgstry::name( "Project" ) );
 		}
 	};
 
@@ -174,6 +171,7 @@ namespace scllocale {
 		const char *Language,
 		str::string_ &Out,
 		char Marker = DefaultMarker );
+
 }
 
 #endif

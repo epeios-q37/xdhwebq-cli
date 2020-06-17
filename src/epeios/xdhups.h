@@ -17,8 +17,8 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef XDHUPS__INC
-# define XDHUPS__INC
+#ifndef XDHUPS_INC_
+# define XDHUPS_INC_
 
 # define XDHUPS_NAME		"XDHUPS"
 
@@ -28,43 +28,43 @@
 
 // X(SL)/DH(TML) UPStream
 
-# include "xdhcmn.h"
+# include "xdhcdc.h"
 
 # include "err.h"
 # include "dlbrry.h"
 
 namespace xdhups {
+	namespace faas {
+		using namespace xdhcdc::faas;
+	}
+
 	typedef ntvstr::char__ nchar__;
 	typedef ntvstr::string___ nstring___;
 
-	typedef xdhcmn::cSession cSession_;
+	typedef xdhcdc::cSingle cDownstream_;
 
 	class sSession
 	{
 	private:
-		Q37_MRMDF( cSession_, C_, Callback_ );
+		Q37_MRMDF( cDownstream_, C_, Callback_ );
 	public:
 		void reset( bso::bool__ P = true )
 		{
 			Callback_ = NULL;
 		}
 		E_CVDTOR( sSession );
-		void Init( cSession_ *Callback )
+		void Init( cDownstream_ &Callback )
 		{
 			reset();
 
-			Callback_ = Callback;
-		}
-		cSession_ *Callback( void ) const
-		{
-			return Callback_;
+			Callback_ = &Callback;
 		}
 		bso::sBool Initialize(
-			xdhcmn::cUpstream *Callback,
-			const str::dString &Language,
-			const str::dString &Token )	// If empty, PROD session, else token used for the DEMO session.
+			xdhcuc::cSingle &Callback,
+			const char *Language,
+			const str::dString &Token)	// If empty, SlfH session, else token used for the FaaS session.
 		{
-			return C_().Initialize( Callback, Language, Token );
+			return C_().Initialize(Callback, Language, Token);
 		}
 		bso::bool__ Launch(
 			const char *Id,
@@ -74,38 +74,36 @@ namespace xdhups {
 		}
 	};
 
-    class rAgent
-    {
-    private:
+	class rAgent
+	{
+	private:
 		dlbrry::dynamic_library___ Library_;
-		Q37_MRMDF( xdhcmn::cDownstream, C_, Callback_ );
+		Q37_MRMDF( xdhcdc::cGlobal, C_, Callback_ );
 		TOL_CBUFFER___ Buffer_;
-    public:
-        void reset( bso::bool__ P = true )
-        {
+	public:
+		void reset( bso::bool__ P = true )
+		{
 			Library_.reset( P );
 			Callback_ = NULL;
-        }
-        E_CDTOR( rAgent );
+		}
+		E_CDTOR( rAgent );
 		bso::bool__ Init(
-			xdhcmn::eMode Mode,
+			xdhcuc::cGlobal &Upstream,
+			xdhcdc::eMode Mode,
 			const str::string_ &ModuleFileName,
 			dlbrry::eNormalization Normalization,	// Usually 'dlbrry::n_Default', except when used for 'Node.js' (set to 'dlbrry::nExtOnly').
 			const char *Identification );
-		cSession_ *RetrieveCallback(
-			const char *Language,
-			const str::dString &Token,	// If empty, PROD, otherwise DEMO.
-			xdhcmn::cUpstream *Callback )
+		cDownstream_ *FetchCallback(faas::sId Id)
 		{
-			return C_().RetrieveCallback( Language, Token, Callback );
+			return C_().FetchCallback(Id);
 		}
 		const char *BaseLanguage( TOL_CBUFFER___ &Buffer ) const
 		{
 			return C_().BaseLanguage( Buffer );
 		}
-		void ReleaseCallback( cSession_ *Callback )
+		void DismissCallback( cDownstream_ *Callback )
 		{
-			return C_().ReleaseCallback( Callback );
+			return C_().DismissCallback(Callback);
 		}
 		const str::dString &Info( str::dString &Info )
 		{
@@ -120,12 +118,14 @@ namespace xdhups {
 
 			return Info;
 		}
-		const str::dString &Head(
-			void *UP,
-			str::dString &Head )
+		bso::sBool GetHead(
+			const str::dString &Token,
+			str::dString &Head)
 		{
-			return C_().GetHead( UP, Head );
+			return C_().GetHead(Token, Head);
 		}
+		// Deprecated.
+		bso::sBool _IsValid(const str::dString &Token);
 	};
 }
 

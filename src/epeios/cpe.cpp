@@ -17,8 +17,6 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define CPE__COMPILATION
-
 #include "cpe.h"
 
 #include <string.h>

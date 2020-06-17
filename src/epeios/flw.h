@@ -19,8 +19,8 @@
 
 // FLoW.
 
-#ifndef FLW__INC
-# define FLW__INC
+#ifndef FLW_INC_
+# define FLW_INC_
 
 # define FLW_NAME		"FLW"
 
@@ -126,11 +126,12 @@ namespace flw {
 		{
 			byte__ C = 0;
 
-			if ( _D().Read( 1, &C, fdr::bBlocking ) != 1 )
+			if ( _D().Read( 1, &C, fdr::bBlocking ) != 1 ) {
 				if ( IsError != NULL )
 					*IsError = true;
 				else
 					qRFwk();
+            }
 
 			return C;
 		}
@@ -162,7 +163,7 @@ namespace flw {
 
 			_Driver->SetAutoDismissOnEOF( Value );
 		}
-		fdr::iflow_driver_base___ &IDriver( void ) const
+		fdr::iflow_driver_base___ &RDriver( void ) const
 		{
 			return _D();
 		}
@@ -294,7 +295,7 @@ namespace flw {
 	public:
 		void reset( bso::sBool P = true )
 		{
-			if ( Dummy != 0 )	
+			if ( Dummy != 0 )
 				qRFwk();	// 'Dummy' n'tant pas utilis, rien ne sert de modifier sa valeur.
 
 			_standalone_iflow__::reset( P );
@@ -377,11 +378,11 @@ namespace flw {
 		// its value is not changed. Returns false if the content of the cache
 		// could not be written.
 		bso::sBool DumpCache_(
-			bso::sBool *WasEmpty,
+			bso::sBool *WasEmpty,   // May be obsolete!
 			qRPN )
 		{
 			size__ Stayed = _Size - _Free;
-			
+
 			if ( Stayed != 0 ) {
 				if ( _DirectWrite( _Cache, Stayed, Stayed ) == Stayed ) {
 					_Free = _Size;
@@ -403,11 +404,11 @@ namespace flw {
 		{
 			if ( _Free < Amount )
 				Amount = _Free;
-				
+
 			memcpy( _Cache + _Size - _Free, Buffer, (size_t)Amount );
-			
+
 			_Free -= Amount;
-			
+
 			return Amount;
 		}
 		/* Put up to 'Amount' bytes from 'Buffer' directly or through the cache.
@@ -433,11 +434,11 @@ namespace flw {
 			bso::sBool WasEmpty = false;
 
 			if ( DumpCache_( &WasEmpty, ErrHandling ) ) {
-				if ( !WasEmpty )
+//				if ( !WasEmpty )
 					return _D().Commit( Unlock, ErrHandling );
-				else
+/*				else
 					return true;
-			} 
+*/			}
 
 			return false;
 		}
@@ -493,14 +494,14 @@ namespace flw {
 		{
 			if ( Owner == tht::Undefined )
 				Owner = tht::GetTID();
-			
+
 			return _D().WTake( tht::GetTID() );
 		}
 		tht::sTID Owner( void ) const
 		{
 			return _D().Owner();
 		}
-		fdr::oflow_driver_base___ &ODriver( void ) const
+		fdr::oflow_driver_base___ &WDriver( void ) const
 		{
 			return _D();
 		}
@@ -541,6 +542,10 @@ namespace flw {
 				return _Commit( Unlock, ErrHandling );
 			else
 				return true;
+		}
+		void DumpCache(void)
+		{
+		    DumpCache_(NULL, err::h_Default);
 		}
 		//f Return the amount of data written since last 'Synchronize()'.
 		size__ AmountWritten( void ) const
@@ -651,7 +656,7 @@ namespace flw {
 		{
 			if ( Owner == tht::Undefined )
 				Owner = tht::GetTID();
-			
+
 			return tol::Same( iflow__::Take( Owner ), oflow__::Take( Owner ) );
 		}
 		tht::sTID Owner( void ) const

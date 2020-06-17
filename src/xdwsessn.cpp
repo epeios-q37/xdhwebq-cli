@@ -17,25 +17,36 @@
     along with XDHWebQ.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef XDWMAIN_INC_
-# define XDWMAIN_INC_
+#include "xdwsessn.h"
 
-# include "query.h"
-# include "session.h"
+#include "websck.h"
 
-namespace xdwmain {
-	using query::dPairs;
-	using query::wPairs;
+#include "lstcrt.h"
 
-	using session::rAgent;
-	using session::dSessions;
-	using session::wSessions;
-	using session::rSessions;
+using namespace xdwsessn;
 
-	void Handle(
-		const dPairs &Pairs,
-		rSessions &Sessions,
-		str::dString &Response );
+bso::sBool xdwsessn::rUpstream_::XDHCUCProcess(
+	const str::string_ &Script,
+	str::dString *ReturnedValue )
+{
+	bso::sBool Success = true;
+qRFH
+	qCBUFFERh Buffer;
+	websck::rFlow Flow;
+qRFB
+	Flow.Init(D_(), websck::mWithTerminator);
+
+	Flow.Write( Script.Convert(Buffer), Script.Amount());
+	Flow.Commit();
+
+	if ( ReturnedValue != NULL)
+		websck::GetMessage(Flow, *ReturnedValue);
+
+	Flow.Dismiss();
+qRFR
+	Success = false;
+	ERRRst();
+qRFT
+qRFE(sclm::ErrorDefaultHandling())
+	return Success;
 }
-
-#endif

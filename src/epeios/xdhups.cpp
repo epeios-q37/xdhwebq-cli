@@ -17,23 +17,24 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define XDHUPS__COMPILATION
+#define XDHUPS_COMPILATION_
 
 #include "xdhups.h"
 
 using namespace xdhups;
 
-extern "C" typedef xdhcmn::retrieve retrieve;
+extern "C" typedef xdhcdc::retrieve retrieve;
 
 bso::bool__ xdhups::rAgent::Init(
-	xdhcmn::eMode Mode,
+	xdhcuc::cGlobal &Upstream,
+	xdhcdc::eMode Mode,
 	const str::string_ &ModuleFileName,
 	dlbrry::eNormalization Normalization,
 	const char *Identification )
 {
 	bso::bool__ Success = false;
 qRH
-	xdhcmn::shared_data__ Data;
+	xdhcdc::sData Data;
 	fnm::name___ Location;
 	TOL_CBUFFER___ Buffer;
 qRB
@@ -42,7 +43,7 @@ qRB
 
 	Library_.Init( ModuleFileName, Normalization );
 
-	retrieve *Retrieve = dlbrry::GetFunction<retrieve *>( E_STRING( XDHCMN_RETRIEVE_FUNCTION_NAME ), Library_ );
+	retrieve *Retrieve = dlbrry::GetFunction<retrieve *>( E_STRING( XDHCDC_RETRIEVE_FUNCTION_NAME ), Library_ );
 
 	if ( Retrieve != NULL ) {
 		Callback_ = Retrieve();
@@ -50,7 +51,7 @@ qRB
 		if ( Callback_ == NULL )
 			qRFwk();
 
-		Callback_->Initialize( Data );
+		Callback_->Initialize(Data, Upstream);
 
 		Success = true;
 	}
@@ -58,5 +59,20 @@ qRR
 qRT
 qRE
 	return Success;
+}
+
+bso::sBool xdhups::rAgent::_IsValid(const str::dString &Token)
+{
+	bso::sBool ReturnValue = false;
+qRH
+	str::wString DummmyHead;
+qRB
+	DummmyHead.Init();
+
+	ReturnValue = GetHead(Token, DummmyHead);
+qRR
+qRT
+qRE
+	return ReturnValue;
 }
 

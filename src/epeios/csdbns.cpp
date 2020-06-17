@@ -17,7 +17,7 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define CSDBNS__COMPILATION
+#define CSDBNS_COMPILATION_
 
 #include "csdbns.h"
 
@@ -54,7 +54,7 @@ bso::bool__ csdbns::listener___::Init(
 #if defined( CPE_S_POSIX )
 	int Val = ~0;
 
-	if ( setsockopt( Socket_, SOL_SOCKET, SO_REUSEADDR, &Val, sizeof( Val ) ) != 
+	if ( setsockopt( Socket_, SOL_SOCKET, SO_REUSEADDR, &Val, sizeof( Val ) ) !=
 0 )
 		qRSys();
 #endif
@@ -68,7 +68,7 @@ bso::bool__ csdbns::listener___::Init(
 
 	if ( listen( Socket_, Amount ) )
 		qRSys();
-		
+
 	return true;
 }
 
@@ -307,14 +307,14 @@ static void ErrFinal_( void )
 		qRH
 		qRB
 			if ( cio::IsInitialized() ) {
-				if ( cio::Target() == cio::tConsole ) {
+				if ( cio::Type() == cio::tTerminal ) {
 					cio::COut << txf::commit;
 					cio::CErr << txf::nl << txf::tab;
 				}
 
 				cio::CErr << "{ " << Message << " }";
 
-				if ( cio::Target() == cio::tConsole )
+				if ( cio::Type() == cio::tTerminal )
 					cio::CErr << txf::nl;
 
 				cio::CErr << txf::commit;
@@ -392,7 +392,7 @@ qRB
 		Continue = false;
 
 	while ( Continue ) {
-		mtk::RawLaunch( Traiter_, &Data );
+		mtk::RawLaunch(Traiter_, &Data, true);
 
 //		SCKClose( Socket );	// Only needed when using processes.
 

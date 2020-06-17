@@ -17,8 +17,8 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef XDHUTL__INC
-# define XDHUTL__INC
+#ifndef XDHUTL_INC_
+# define XDHUTL_INC_
 
 # define XDHUTL_NAME		"XDHUTL"
 
@@ -33,11 +33,6 @@
 # include "err.h"
 
 namespace xdhutl {
-	using xdhcmn::nchar__;
-	using xdhcmn::sNChar;
-	using xdhcmn::nstring___;
-	using xdhcmn::rNString;
-
 	E_ENUM( action ) {
 		aOpenFile,
 		aOpenFiles,
@@ -49,7 +44,7 @@ namespace xdhutl {
 
 	const char *GetLabel( action__ Action );
 
-	action__ GetAction( const nstring___ &Pattern );
+	action__ GetAction( const str::dString &Pattern );
 
 	inline bso::bool__ IsPredefined( action__ Action )
 	{
@@ -220,55 +215,39 @@ namespace xdhutl {
 		event_abstract_ &Abstract );	// If false, no digest found because the event is a key-related event but not with recognized key sequence.
 
 	void ExtractWidgetFeatures(
-		const xdhcmn::digest_ &Description,
+		const xdhcmn::digest_ &Digest,
 		str::string_ &Type,
 		str::string_ &Parameters,
 		str::string_ &ContentRetrievingMethod,
 		str::string_ &FocusingMethod,
 		str::dString &SelectionMethod );
 
-	void ExtractWidgetFeatures(
-		const str::string_ &Description,
+	void ExtractWidgetFeaturesAndId(
+		const xdhcmn::digest_ &XDigest,
+		str::dString &Id,
 		str::string_ &Type,
 		str::string_ &Parameters,
 		str::string_ &ContentRetrievingMethod,
 		str::string_ &FocusingMethod,
 		str::dString &SelectionMethod );
 
-	void ExtractWidgetTypeAndParameters(
-		const xdhcmn::digest_ &Description,
-		str::string_ &Type,
-		str::string_ &Parameters );
-
-	void ExtractWidgetContentRetrievingMethod(
-		const xdhcmn::digest_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetContentRetrievingMethod(
-		const str::string_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetFocusingMethod(
-		const xdhcmn::digest_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetFocusingMethod(
-		const str::string_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetSelectionMethod(
-		const xdhcmn::digest_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetSelectionMethod(
-		const str::string_ &Description,
-		str::string_ &Method );
-
-	void ExtractWidgetsTypesAndParametersSets(
-		const xdhcmn::digest_ &Descriptions,
-		str::strings_ &Ids,
+	void ExtractWidgetsFeaturesAndIds(
+		const xdhcmn::digest_ &XDigests,
+		str::dStrings &Ids,
 		str::strings_ &Types,
-		str::strings_ &ParametersSets );
+		str::strings_ &ParametersSet,
+		str::strings_ &ContentRetrievingMethods,
+		str::strings_ &FocusingMethods,
+		str::dStrings &SelectionMethods );
+
+	void ExtractWidgetsFeaturesAndIds(
+		const str::dString &XDigests,
+		str::dStrings &Ids,
+		str::strings_ &Types,
+		str::strings_ &ParametersSet,
+		str::strings_ &ContentRetrievingMethods,
+		str::strings_ &FocusingMethods,
+		str::dStrings &SelectionMethods );
 
 	void GetTags(
 		const xdhcmn::digest_ &Digest,
@@ -279,6 +258,18 @@ namespace xdhutl {
 		const xdhcmn::digest_ &Digest,
 		str::dStrings &Ids,
 		str::dStrings &Tags );
+}
+
+/*******/
+/* NEW */
+/*******/
+
+namespace xdhutl {
+    typedef event_abstract_ dEventAbstract;
+    qW(EventAbstract);
+
+    typedef event_abstracts_ dEventAbstracts;
+    qW(EventAbstracts);
 }
 
 #endif

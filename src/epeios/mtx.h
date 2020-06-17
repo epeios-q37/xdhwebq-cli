@@ -17,8 +17,8 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#ifndef MTX__INC
-# define MTX__INC
+#ifndef MTX_INC_
+# define MTX_INC_
 
 # define MTX_NAME		"MTX"
 
@@ -66,7 +66,6 @@ namespace mtx {
 		s_Undefined
 	};
 
-	// NOTA: 'lock_guard' is not always used in case of the use of the 'setjmp' version of the error (ERR) library.
 	typedef struct _mutex__ {
 	private:
 		std::mutex Mutex_;
@@ -89,7 +88,7 @@ namespace mtx {
 #ifdef MTX__CONTROL
 		void Release( void )
 		{
-			std::lock_guard<decltype(Mutex_)> Lock( Mutex_ );
+			ststd::unique_lock<decltype(Mutex_)> Lock( Mutex_ );
 
 			State_ = sReleased;
 		}
@@ -195,7 +194,7 @@ namespace mtx {
 	inline handler___ Create( bso::bool__ Disabled = false )	// Si True, utilisation dans un contexte mono-thread.
 	{
 		handler___ Handler;
-		
+
 		if ( ( Handler = new _mutex__( Disabled ) ) == NULL )
 			qRAlc();
 
@@ -300,16 +299,20 @@ namespace mtx {
 
 		}
 		E_CDTOR( mutex___ );
-		void Init( handler___ Handler )
+		void Init(
+			handler___ Handler,
+			bso::sBool Lock )
 		{
 			_UnlockIfInitializedAndLocked();
-			
+
 			Handler_ = Handler;
+
+			if ( Lock )
+				this->Lock();
 		}
 		void InitAndLock( handler___ Handler )
 		{
-			Init( Handler );
-			Lock();
+			Init( Handler, true );
 		}
 		bso::bool__ TryToLock( tol::sDelay TimeOut = 0 )	// Returns 'true' if lock successful, or return false after timeout.
 		{
@@ -337,8 +340,8 @@ namespace mtx {
 /***************/
 
 namespace mtx {
-	typedef mutex___ rMutex;
-	typedef handler___ rHandler;
+	typedef handler___ rMutex;	// The mutex itself; was 'rHandle'.
+	typedef mutex___ rHandle;	// To handle the mutex; wax 'rMutex'.
 }
 
 #endif

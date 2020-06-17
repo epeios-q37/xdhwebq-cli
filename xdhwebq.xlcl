@@ -192,151 +192,155 @@
   <Translation language="fr">Impossible de trouver le chemin de la racine</Translation>
   <Translation language="en">Unable to find root path</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadArgument">
+ <Translations text="SCLA_BadArgument">
   <Translation language="fr">'%1' : argument incorrect.</Translation>
   <Translation language="en">'%1' : bad argument.</Translation>
  </Translations>
- <Translations message="SCLARGMNT_BadArguments">
+ <Translations message="SCLA_BadArguments">
   <Translation language="fr">Arguments incorrects.</Translation>
   <Translation language="en">Bad arguments.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_UnknownFlag">
+ <Translations text="SCLA_UnknownFlag">
   <Translation language="fr">'%1' inconnu.</Translation>
   <Translation language="en">'%1' unknown.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_NoValueForFlag">
+ <Translations text="SCLA_NoValueForFlag">
   <Translation language="fr">Pas de valeur pour le fanion '%1' ('%1=&lt;valeur&gt;' si c'est une option).</Translation>
   <Translation language="en">No value for '%1' flag ('%1=&lt;valeur&gt;' as an option).</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadPathForFlag">
+ <Translations text="SCLA_BadPathForFlag">
   <Translation language="fr">Mauvais chemin pour le fanion '%1'.</Translation>
   <Translation language="en">Bad path for '%1' flag.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_UnknownOption">
+ <Translations text="SCLA_UnknownOption">
   <Translation language="fr">Option '%1' inconnue.</Translation>
   <Translation language="en">Unknown '%1' option.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_NoPathForOption">
+ <Translations text="SCLA_NoPathForOption">
   <Translation language="fr">Pas de chemin pour l'option '%1'.</Translation>
   <Translation language="en">No path for '%1' option.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadPathForOption">
+ <Translations text="SCLA_BadPathForOption">
   <Translation language="fr">Mauvais chemin pour l'option '%1'.</Translation>
   <Translation language="en">Bad path for '%1' option.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadAmountOfArguments">
+ <Translations text="SCLA_BadAmountOfArguments">
   <Translation language="fr">Nombre d'arguments incorrects.</Translation>
   <Translation language="en">Bad amount of arguments.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadCommand">
+ <Translations text="SCLA_BadCommand">
   <Translation language="fr">'%1' : bad command.</Translation>
   <Translation language="en">'%1' : bad command.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_NoPathForFlag">
+ <Translations text="SCLA_NoPathForFlag">
   <Translation language="fr">Pas de chemin pour le fanion '%1'.</Translation>
   <Translation language="en">No path for '%1' flag.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_NoPathForArgument">
+ <Translations text="SCLA_NoPathForArgument">
   <Translation language="fr">Pas de chemin pour l'argument '%1'.</Translation>
   <Translation language="en">No path for '%1' argument.</Translation>
  </Translations>
- <Translations text="SCLARGMNT_BadPathForArgument">
+ <Translations text="SCLA_BadPathForArgument">
   <Translation language="fr">Mauvais chemin pour l'argument '%1'.</Translation>
   <Translation language="en">Bad path for '%1' argument.</Translation>
  </Translations>
- <Translations text="SCLBACKND_BackendError">
+ <Translations text="SCLB_BackendError">
   <Translation language="fr">Erreur 'backend' : %1</Translation>
   <Translation language="en">Backend error : %1</Translation>
  </Translations>
- <Translations text="SCLDAEMON_ModuleClosing">
+ <Translations text="SCLD_ModuleClosing">
   <Translation language="fr">Veuillez patientez : module en cours de fermeture...</Translation>
   <Translation language="en">Please wait : closing module ...</Translation>
  </Translations>
- <Translations text="SCLDAEMON_ModuleClosed">
+ <Translations text="SCLD_ModuleClosed">
   <Translation language="fr">Module fermé.</Translation>
   <Translation language="en">Module closed.</Translation>
  </Translations>
- <Translations text="SCLFRNTND_UnableToLoad">
+ <Translations text="SCLF_UnableToLoad">
   <Translation language="fr">Impossible de charger '%1'.</Translation>
   <Translation language="en">Unable to load '%1'.</Translation>
  </Translations>
- <Translations text="SCLFRNTND__NoOrBadBackendType">
+ <Translations text="SCLF_NoOrBadBackendType">
   <Translation language="fr">Type de moteur de traitement incorrect ou absent.</Translation>
   <Translation language="en">Bad or no backend type.</Translation>
  </Translations>
- <Translations text="SCLFRNTND__MissingBackendDeclaration">
+ <Translations text="SCLF_MissingBackendDeclaration">
   <Translation language="fr">Déclaration de moteur de traitement manquante.</Translation>
   <Translation language="en">Missing backend declaration.</Translation>
  </Translations>
- <Translations text="SCLFRNTND_NoBackend">
+ <Translations text="SCLF_NoBackend">
   <Translation language="fr">(Non connecté à un 'backend'.)</Translation>
   <Translation language="en">(Not connected to a backend.)</Translation>
  </Translations>
- <Translations text="SCLFRNTND_RequestError">
+ <Translations text="SCLF_RequestError">
   <Translation language="fr">%1</Translation>
   <Translation language="en">%1</Translation>
  </Translations>
- <Translations text="SCLFRNTND_BackendError">
+ <Translations text="SCLF_BackendError">
   <Translation language="fr">%1</Translation>
   <Translation language="en">%1</Translation>
  </Translations>
- <Translations text="SCLFRNTND_Disconnection">
+ <Translations text="SCLF_Disconnection">
   <Translation language="fr">Deconnexion !</Translation>
   <Translation language="en">Disconnection !</Translation>
  </Translations>
- <Translations message="SCLLOCALE_LocaleParsingError ">
+ <Translations message="SCLL_LocaleParsingError ">
   <Translation language="fr">Erreur lors du chargement de la 'locale' : %1.</Translation>
   <Translation language="en">Error during loading of the locale : %1.</Translation>
  </Translations>
- <Translations message="SCLLOCALE__ConfigurationLocaleParsingError">
+ <Translations message="SCLL_ConfigurationLocaleParsingError">
   <Translation language="fr">Erreur lors du chargement de la 'locale' du fichier de configuration : %1.</Translation>
   <Translation language="en">Error during loading of the configuration file locale : %1.</Translation>
  </Translations>
- <Translations message="SCLLOCALE__ProjectLocaleParsingError">
+ <Translations message="SCLL_ProjectLocaleParsingError">
   <Translation language="fr">Erreur lors du chargement de la 'locale' du projet : %1.</Translation>
   <Translation language="en">Error during loading of the project locale : %1.</Translation>
  </Translations>
- <Translations text="SCLMISC_UnableToOpenConfigurationFile">
+ <Translations text="SCLM_UnableToOpenConfigurationFile">
   <Translation language="fr">Impossible d'ouvrir le fichier de configuration pour '%1'.</Translation>
   <Translation language="en">Unable to open configuration file for '%1'.</Translation>
  </Translations>
- <Translations text="SCLMISC_ConfigurationLocaleParsingError">
+ <Translations text="SCLM_ConfigurationLocaleParsingError">
   <Translation language="fr">Erreur durant l'analyse de la locale du fichier de configuration : %1</Translation>
   <Translation language="en">Configuration locale parsing error : %1</Translation>
  </Translations>
- <Translations message="SCLMISC_UnableToOpenFile">
+ <Translations message="SCLM_UnableToOpenFile">
   <Translation language="fr">Echec de l'ouverture du fichier '%1'</Translation>
   <Translation language="en">Unable to open file '%1'</Translation>
  </Translations>
- <Translations text="SCLMISC_EmptyPredefinedProjectId">
+ <Translations text="SCLM_EmptyPredefinedProjectId">
   <Translation language="fr">Identifiant de projet prédéfini vide.</Translation>
   <Translation language="en">Empty predefined project id.</Translation>
  </Translations>
- <Translations text="SCLMISC_NoOrBadProjectFileNameInPredefinedProject">
+ <Translations text="SCLM_NoOrBadProjectFileNameInPredefinedProject">
   <Translation language="fr">Pas de, ou mauvais nom de fichier projet défini dans le project prédefini d'identifiant '%1'.</Translation>
   <Translation language="en">No or bad project file name defined in predefined project of id '%1'.</Translation>
  </Translations>
- <Translations text="SCLMISC_NoProjectFileSelected">
+ <Translations text="SCLM_NoProjectFileSelected">
   <Translation language="fr">Fichier de projet non spécifié.</Translation>
   <Translation language="en">No specified project file.</Translation>
  </Translations>
- <Translations message="SCLRGSTRY_BadOrNoValueForEntry">
+ <Translations message="SCLR_BadOrNoValueForEntry">
   <Translation language="fr">Valeur absente ou incorrecte pour l'entrée '%1'.</Translation>
   <Translation language="en">Bad or no value for entry '%1'.</Translation>
  </Translations>
- <Translations message="SCLRGSTRY_ParsingError">
-  <Translation language="fr">Erreur dans '%1' : %2.</Translation>
-  <Translation language="en">Error in '%1' : %2.</Translation>
+ <Translations message="SCLR_ParsingError">
+  <Translation language="fr">Erreur dans '%1' : %2.</Translation>
+  <Translation language="en">Error in '%1': %2.</Translation>
  </Translations>
- <Translations text="SCLXDHTML_CloseText">
+ <Translations message="SCLR_UnableToOpenFile">
+  <Translation language="fr">Impossible d'ouvrir le fichier '%1'.</Translation>
+  <Translation language="en">Unable to open file '%1'.</Translation>
+ </Translations>
+ <Translations text="SCLX_CloseText">
   <Translation language="fr">Fermer</Translation>
   <Translation language="en">Close</Translation>
  </Translations>
- <Translations text="SCLXDHTML_NoBackendDeclaration">
+ <Translations text="SCLX_NoBackendDeclaration">
   <Translation language="fr">Déclaration de moteur de traitement absente.</Translation>
   <Translation language="en">No backend dclaration.</Translation>
  </Translations>
- <Translations text="SCLXHTML_Disconnected">
+ <Translations text="SCLX_Disconnected">
   <Translation language="fr">Perte de la connection au 'backend' !</Translation>
   <Translation language="en">Connexion to backend lost !</Translation>
  </Translations>
@@ -525,7 +529,7 @@
   <Translation language="en">Encoding discrepancy</Translation>
  </Translations>
  <Translations text="ProgramDescription">
-  <Translation language="fr">Utilitaire ('CGI') de lancement d'un module XDHTML en tant qu'application web.</Translation>
-  <Translation language="en">Tool (CGI) lauching a XDHTML module as web app.</Translation>
+  <Translation language="fr">Utilitaire de lancement d'un module XDHTML en tant qu'application web.</Translation>
+  <Translation language="en">Tool launching an XDHTML module as web application.</Translation>
  </Translations>
 </Locale>

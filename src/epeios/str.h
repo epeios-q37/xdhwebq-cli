@@ -17,10 +17,10 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-// STRing 
+// STRing
 
-#ifndef STR__INC
-# define STR__INC
+#ifndef STR_INC_
+# define STR_INC_
 
 # define STR_NAME		"STR"
 
@@ -36,21 +36,6 @@
 # include "cpe.h"
 # include "ctn.h"
 # include "crt.h"
-
-/*************************/
-/****** New version ******/
-/*************************/
-
-namespace str {
-	class string_;
-	class string;
-
-	typedef string_ dString;
-	typedef string wString;
-
-	typedef ctn::E_MCONTAINER_( str::dString ) dStrings;
-	typedef ctn::E_MCONTAINER( str::dString ) wStrings;
-}
 
 /*************************/
 /****** Old version ******/
@@ -198,7 +183,7 @@ namespace str {
 			Truncate(AmountOfTailChars(Model));
 		}
 		//f Remove characters 'Model' both beginning and ending the string.
-		void StripChars( char Model )
+		void StripChars(char Model = ' ')
 		{
 			StripLeadingChars( Model );
 			StripTailingChars( Model );
@@ -511,6 +496,14 @@ namespace str {
 			string_::Init();
 			string_::operator =( String );
 		}
+		string( const string &String )
+		: string_( static_ )
+		{
+			reset( false );
+
+			string_::Init();
+			string_::operator =( String );
+		}
 		~string( void )
 		{
 			reset( true );
@@ -543,8 +536,10 @@ namespace str {
 		}
 	};
 
-	typedef ctn::E_MCONTAINER_( str::string_ ) strings_;
-	E_AUTO( strings );
+	template <typename row> E_TTCLONE_( ctn::E_MCONTAINERt_( str::string_, row ), tstrings_ );
+
+	typedef tstrings_<sdr::sRow> strings_;
+	E_AUTO(strings)
 
 	inline bso::bool__ operator ==(
 		const str::string_ &Op1,
@@ -598,9 +593,9 @@ namespace str {
 		string_ &String,
 		bso::bool__ dontHandleAccent = false );
 
-	template <typename t> inline void Append(
+	template <typename t, typename row> inline void Append(
 		t Value,
-		str::strings_ &Values )
+		str::tstrings_<row> &Values )
 	{
 		bso::buffer__ Buffer;
 
@@ -660,10 +655,73 @@ namespace str {
 		return ctn::Search<row, string_>( String, Strings, First );
 	}
 
-	inline sdr::sRow NewAndInit( str::dStrings &Strings )
+	template <typename row> inline sdr::sRow NewAndInit( str::tstrings_<row> &Strings )
 	{
 		return crt::NewAndInit( Strings );
 	}
+}
+
+/*************************/
+/****** New version ******/
+/*************************/
+
+namespace str {
+	typedef string_ dString;
+	typedef string wString;
+
+	template <typename row> class dTStrings_
+	: public tstrings_<row>
+	{
+	public:
+        using tstrings_<row>::tstrings_;
+        using tstrings_<row>::Append;
+        sdr::sRow Append(const char *String)
+        {
+            return tstrings_<row>::Append(wString(String));
+        }
+	};
+
+//	template <typename row> qTCLONE(dTStrings_<row>, dTStrings);
+
+    typedef dTStrings_<sdr::sRow> dStrings;
+
+	qW1(TStrings_);
+
+	template <typename row> class wTStrings
+	: public wTStrings_<row>
+	{
+	public:
+        using wTStrings_<row>::wTStrings_;
+        using wTStrings_<row>::Init;
+        void Init( const str::dString &String)
+        {
+            Init();
+            wTStrings_<row>::Append(String);
+        }
+        void Init( const bso::sChar *String)
+        {
+            Init();
+            wTStrings_<row>::Append(String);
+        }
+		wTStrings(void) // Needed by 'Windows'.
+		: wTStrings_<row>()
+		{}
+		wTStrings(const dString &String)
+        : wTStrings_<row>()
+		{
+			Init(String);
+		}
+		wTStrings(const char *String)
+        : wTStrings_<row>()
+        {
+            Init(String);
+        }
+    };
+
+    typedef wTStrings<sdr::sRow> wStrings;
+
+
+    extern const string_ &Empty;   // An empty string.
 }
 
 #define qSTRING( name )\
@@ -675,7 +733,5 @@ namespace str {
 	typedef crt::qMCRATEw( str::dString, row ) w##name
 
 #define qSTRINGSl( name ) qSTRINGS( name, sdr::sRow )
-
-
 
 #endif
