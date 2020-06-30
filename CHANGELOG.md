@@ -1,5 +1,9 @@
 # *XDHWebQ* *CHANGELOG*
 
+## 2020-06-29:
+
+- adapting to changes needed to fix the *arora* web browser issue with the *Atlas* toolkit,
+
 ## 2020-06-08:
 
 - use of *WebSocket* instead of *XMLHttpRequest*,
