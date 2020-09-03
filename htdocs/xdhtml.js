@@ -14,7 +14,7 @@
 	Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
-	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
+// 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
 const onEventAttributeName = "data-xdh-onevent";
@@ -22,20 +22,52 @@ const onEventsAttributeName = "data-xdh-onevents";
 const widgetAttributeName = "data-xdh-widget";
  // Method to retrieve widget content, but also if present, then the widget is already handled.
 const widgetContentRetrievingMethodAttribute = "data-xdh-widget-content-retrieving-method";
-const valueAttributeName = "data-xdh-value";
+const contentAttributeName = "data-xdh-content";	// Deprecated.
+const oldContentAttributeName = "data-xdh-value";	// For compatibility with previous version.
 const styleId = "XDHStyle";
+const markAttributeName = "data-xdh-mark"
 
 var counter = 0;
 var drag = false;
 
+function getFrameDocument(frameId, doc) {
+	let ifrm = doc.getElementById(frameId);
+
+	return ifrm.contentDocument ? ifrm.contentDocument : ifrm.contentWindow.document;
+}
+
+function getDocument(id) {
+	let iframes = id.split('@');
+
+	if ( iframes.length === 1 )
+		return document;
+	else {
+		let doc = document;
+		let i = iframes.length - 1;
+
+		while (i >= 1) { 
+			doc = getFrameDocument(iframes[i], doc);
+			i--;
+		} 
+	
+		return doc;
+	}
+}
+
 function getElement(elementOrId) {
-	if (typeof elementOrId === "string")
-		if (elementOrId === "")
-			return document.body.firstElementChild;
+	if (typeof elementOrId === "string") {
+		let doc = getDocument(elementOrId);
+		let id = elementOrId.split('@')[0];
+
+		if (id === "")
+			if ( doc === document )
+				return doc.body.firstElementChild;
+			else
+				return doc.body;
 		else
-			return document.getElementById(elementOrId);
-	else if (elementOrId === document.body)	// To avoid defacement.
-		return getElement("");
+			return doc.getElementById(id);
+	} else if (elementOrId === document.body)
+		return getElement("");	// To avoid defacement.
 	else
 		return elementOrId;
 }
@@ -118,7 +150,7 @@ function convert(xml) {
 	let name = "";
 	let value = "";
 	let length = xml.length;
-
+	
 	[name, offset] = getNULString(xml, offset);	// Currently ignored.
 
 	[name, offset] = getString(xml, offset);
@@ -195,7 +227,9 @@ function removeChildren(elementOrId) {
 }
 
 function getLayoutHTML(xml, xsl) {
-	if (xml.trim().substring(0, 1) !== "<")
+	if ( xml.trim() === "" )
+		return xml;
+	else if (xml.trim().substring(0, 1) !== "<")
 		xml = convert(xml);
 
 	if (xsl === "") {
@@ -208,10 +242,6 @@ function getLayoutHTML(xml, xsl) {
 }
 
 function prependLayout(id, xml, xsl) {
-/*    
-	element = getElement(id);
-	element.innerHTML = getLayoutHTML(xml, xsl) + element.innerHTML;
-*/
     getElement(id).insertAdjacentHTML("afterbegin", getLayoutHTML(xml, xsl));
 }
 
@@ -220,10 +250,6 @@ function setLayout(id, xml, xsl) {
 }
 
 function appendLayout(id, xml, xsl) {
-/*
-	element = getElement(id);
-	element.innerHTML = element.innerHTML + getLayoutHTML(xml, xsl);
-*/
     getElement(id).insertAdjacentHTML("beforeend", getLayoutHTML(xml, xsl));
 }
 
@@ -263,15 +289,23 @@ function patchATags(node)  // Patches the 'A' tags, so it does open in another b
 	}
 }
 
-function setContent(doc, id, content) {
-	var element = doc.getElementById(id);
+function setContent(idOrElement, content) {
+	var element = getElement(idOrElement);
 
 	if (element !== null) {
 		var tagName = element.tagName;
 
 		switch (tagName) {
 			case "INPUT":
-				element.value = content;
+				switch (element.getAttribute("type")) {
+					case "checkbox":
+					case "radio":
+						element.checked = content.toLowerCase().trim() === 'true';
+						break;
+					default:
+						element.value = content;
+						break;
+				}
 				break;
 			case "SPAN":
 				element.innerHTML = content;
@@ -289,14 +323,71 @@ function setContent(doc, id, content) {
 	}
 }
 
-function setContents(ids, contents) {
-	var i = ids.length;
+function setValue(idOrElement, value) {
+	var element = getElement(idOrElement);
+
+	if (element !== null) {
+		var tagName = element.tagName;
+
+		switch (tagName) {
+			case "INPUT":
+				switch (element.getAttribute("type")) {
+					case "checkbox":
+					case "radio":
+						element.checked = value.toLowerCase().trim() === 'true';
+						break;
+					default:
+						element.value = value;
+						break;
+				}
+				break;
+			case "TEXTAREA":
+				element.value = value;
+				break;
+			default:
+				element.innerHTML = value;
+				// throw tagName + ": content setting not handled !";
+				break;
+		}
+
+		patchATags(element);
+	}
+}
+
+function setMark(idOrElement,mark) {
+	getElement(idOrElement).setAttribute(markAttributeName, mark);
+}
+
+function setContents(ids, contents) {	// Deprecated!
+	let i = ids.length;
 
 	if (ids.length !== contents.length)
 		throw "Inconsistency";
 
 	while (i--) {
-		setContent(document, ids[i], contents[i]);
+		setContent(getElement(ids[i]), contents[i]);
+	}
+}
+
+function setValues(ids, values) {
+	let i = ids.length;
+
+	if (ids.length !== values.length)
+		throw "Inconsistency";
+
+	while (i--) {
+		setValue(ids[i], values[i]);
+	}
+}
+
+function setMarks(ids, marks) {
+	let i = ids.length;
+
+	if (ids.length !== marks.length)
+		throw "Inconsistency";
+
+	while (i--) {
+		setMark(ids[i], marks[i]);
 	}
 }
 
@@ -316,7 +407,7 @@ function fetchEventHandlersAndWidgest(id) {
 	var cont = true;
 	var candidate;
 	var eventDigests = "";
-    var widgetDigests = ""
+    var widgetDigests = "";
 
 	if (node.firstChild === null)
 		cont = false;
@@ -387,13 +478,54 @@ function fetchWidgets(id) {
 	return digests;
 }
 
+function getContent(elementOrId)	// Deprecated!
+{
+	var element = getElement(elementOrId);
+	var tagName = element.tagName;
+	var content = ""
+
+	switch (tagName) {
+		case "INPUT":
+			switch (element.getAttribute("type")) {
+				case "checkbox":
+				case "radio":
+					content =  element.checked;
+					break;
+				default:
+					content =  element.value;
+					break;
+			}
+			break;
+		case "TEXTAREA":
+			content =  element.value;
+			break;
+		case "SELECT":
+			if (element.selectedIndex == -1)
+				content =  "";
+			else
+				content =  element.options[element.selectedIndex].value;
+			break;
+		case "OPTION":
+			content =  element.value;
+			break;
+		case "text":	// SVG
+		case "tspan":	// SVG
+			content =  element.textContent;
+			break;
+		default:
+			content = element.hasAttribute(contentAttributeName) ? element.getAttribute(contentAttributeName) :
+				( element.hasAttribute(oldContentAttributeName) ? element.getAttribute(oldContentAttributeName) : "" );
+			break;
+	}
+
+	return content;
+}
+
 function getValue(elementOrId)	// Returns the value of element of id 'id'.
 {
 	var element = getElement(elementOrId);
 	var tagName = element.tagName;
 	var value = ""
-
-//	console.log("VALUE:", element.textContent);
 
 	switch (tagName) {
 		case "INPUT":
@@ -424,11 +556,24 @@ function getValue(elementOrId)	// Returns the value of element of id 'id'.
 			value =  element.textContent;
 			break;
 		default:
-			value =  element.getAttribute(valueAttributeName);
+			content = element.innerHTML;
 			break;
 	}
 
-	return value;
+	return content;
+}
+
+function getMark(idOrElement) {
+	var element = getElement(idOrElement);
+	mark = "";
+	
+	while ( (element !== null) && !element.hasAttribute(markAttributeName))
+		element = element.parentNode;
+	
+	if ( element !== null )
+		mark = element.getAttribute(markAttributeName);
+	
+	return mark;
 }
 
 function getWidgetRetrievingMethod( elementOrId ) {
@@ -454,7 +599,7 @@ function appendToFlatStrings(string, strings) {
 	return (strings ? strings + ',"' : '"' ) + escapeQuotes(string) + '"';
 }
 
-function getContents(ids) {
+function getContents(ids) {	// Deprecated!
 	var i = ids.length;
 	var contents = "";
 
@@ -465,38 +610,47 @@ function getContents(ids) {
         if ( widgetRetrievingMethod !== "" )
             contents = prependToFlatStrings(eval(widgetRetrievingMethod), contents);
         else
-            contents = prependToFlatStrings(getValue(element), contents);
+            contents = prependToFlatStrings(getContent(element), contents);
 	}
 
 	return contents;
 }
 
-function setValue(id, value) {
-	var element = document.getElementById(id);
-	var tagName = element.tagName;
+function getValues(ids) {
+	var i = ids.length;
+	var values = "";
 
-	switch (tagName) {
-		case "INPUT":
-			element.value = value;
-			break;
-		case "TEXTAREA":
-			element.innerHTML = value;
-			break;
-		default:
-			throw tagName + ": value setting not handled !";
-			break;
+	while(i--) {
+        let element = getElement(ids[i]);
+        let widgetRetrievingMethod = getWidgetRetrievingMethod(element);
+        
+        if ( widgetRetrievingMethod !== "" )
+            contents = prependToFlatStrings(eval(widgetRetrievingMethod), values);
+        else
+            contents = prependToFlatStrings(getValue(element), values);
 	}
+
+	return values;
+}
+
+function getMarks(ids) {
+	var i = ids.length;
+	var marks = "";
+
+	while(i--)
+		marks = prependToFlatStrings(getMark(getElement(ids[i])), marks);
+
+	return marks;
 }
 
 function setEventHandlers(ids, events) {
-	var i = ids.length;
+	let i = ids.length;
 
 	if (ids.length !== events.length)
 		throw "Inconsistency !";
 
 	while (i--) {
-		document.getElementById(ids[i]).addEventListener(events[i], handleEvent, false);
-		//		jQuery( document.getElementById( ids[i] ) ).on( "select_node.jstree", function (e, data) {  alert( "toto" );} );
+		getElement(ids[i]).addEventListener(events[i], handleEvent, false);
 	}
 }
 
@@ -506,9 +660,9 @@ function instantiateWidget(id, type, parameters, contentRetrievingMethod, focusi
     element = getElement(id);
     
     if ( !element.hasAttribute(widgetContentRetrievingMethodAttribute)) {
-        element.setAttribute(widgetContentRetrievingMethodAttribute,'jQuery( document.getElementById( "' + id + '") ).' + contentRetrievingMethod);
+        element.setAttribute(widgetContentRetrievingMethodAttribute,'jQuery( getElement( "' + id + '") ).' + contentRetrievingMethod);
         
-        return 'jQuery( document.getElementById( "' + id + '") ).' + type + '(' + parameters + ');'
+        return 'jQuery( getElement( "' + id + '") ).' + type + '(' + parameters + ');'
     } else
         return "";
 }
@@ -645,7 +799,7 @@ function getCSSRules(id) {
 	if (id === "")
 		id = styleId;
 
-	return document.getElementById(id).sheet;
+	return getElement(id).sheet;
 }
 
 function insertCSSRule(id, rule, index) {
@@ -680,32 +834,32 @@ function handleClasses(ids, classes, method) {
 }
 
 function addClasses(ids, classes) {
-	handleClasses(ids, classes, (id, clas) => document.getElementById(id).classList.add(clas));
+	handleClasses(ids, classes, (id, clas) => getElement(id).classList.add(clas));
 }
 
 function removeClasses(ids, classes) {
-	handleClasses(ids, classes, (id, clas) => document.getElementById(id).classList.remove(clas));
+	handleClasses(ids, classes, (id, clas) => getElement(id).classList.remove(clas));
 }
 
 function toggleClasses(ids, classes) {
-	handleClasses(ids, classes, (id, clas) => document.getElementById(id).classList.toggle(clas));
+	handleClasses(ids, classes, (id, clas) => getElement(id).classList.toggle(clas));
 }
 
 function enableElements(ids) {
-	var i = 0;
+	let i = 0;
 
 	while (i < ids.length) {
-		document.getElementById(ids[i]).disabled = false;
+		getElement(ids[i]).disabled = false;
 
 		i++;
 	}
 }
 
 function disableElements(ids) {
-	var i = 0;
+	let i = 0;
 
 	while (i < ids.length) {
-		document.getElementById(ids[i]).disabled = true;
+		getElement(ids[i]).disabled = true;
 
 		i++;
 	}

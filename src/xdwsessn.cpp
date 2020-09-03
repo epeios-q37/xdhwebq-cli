@@ -37,12 +37,20 @@ qRFH
 qRFB
 	Flow.Init(D_(), websck::mWithTerminator);
 
+# if 0
 	Flow.Write( Script.Convert(Buffer), Script.Amount());
+# else	// Facilitates debugging.
+	Script.Convert(Buffer);
+
+	Flow.Write( Buffer, Script.Amount());
+# endif
 	Flow.Commit();
 
 	if ( ReturnedValue != NULL) {
-		if ( Blocker != NULL)
+		if ( Blocker != NULL) {
 			Blocker->Unblock();
+			Blocker = NULL;	// To avoid unblocking twice below.
+		}
 		websck::GetMessage(Flow, *ReturnedValue);
 	} else if ( Blocker != NULL )
 		qRGnr();
@@ -50,8 +58,9 @@ qRFB
 	Flow.Dismiss();
 qRFR
 	Success = false;
-	ERRRst();
 qRFT
+		if ( Blocker != NULL)
+			Blocker->Unblock();
 qRFE(sclm::ErrorDefaultHandling())
 	return Success;
 }

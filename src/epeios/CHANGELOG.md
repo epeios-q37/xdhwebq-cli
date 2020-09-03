@@ -10,6 +10,26 @@
 - [trvl]: trivial modifications;
 - [warn]: fixing compiler warning messages;
 
+## 2020-08-27:
+
+- SCLM, SCLR:
+  - fixing inconsistency with the `[B|M|O]GetBoolean(…)` functions.
+
+## 2020-07-26:
+
+- WEBSCK:
+  - fixing size handling bug,
+
+## 2020-07-25:
+
+- CSDCMN:
+  - introducing `LastVersion` to `GetProtocolVersion`, to avoid older protocol versions being accepted for new protocol,
+  - modifying returned values by same function,
+- ERR:
+  - introducing *unexpected* error,
+- XDHDWS:
+  - a failure on layout handling now thows an error,
+
 ## 2020-06-29:
 
 - MTK:
