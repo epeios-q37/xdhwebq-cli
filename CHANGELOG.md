@@ -1,5 +1,9 @@
 # *XDHWebQ* *CHANGELOG*
 
+## 2020-10-01:
+
+- exporting HTML tag's default handling to XDHQ module,'
+
 ## 2020-06-29:
 
 - adapting to changes needed to fix the *arora* web browser issue with the *Atlas* toolkit,
