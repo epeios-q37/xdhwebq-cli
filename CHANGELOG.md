@@ -1,5 +1,13 @@
 # *XDHWebQ* *CHANGELOG*
 
+## 2020-12-13:
+
+- introducing user id to differentiate sessions,
+
+## 2020-12-12:
+
+- fixing tokenless request issue in SaaS mode,
+
 ## 2020-10-01:
 
 - exporting HTML tag's default handling to XDHQ module,'

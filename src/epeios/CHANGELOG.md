@@ -10,6 +10,25 @@
 - [trvl]: trivial modifications;
 - [warn]: fixing compiler warning messages;
 
+## 2020-12-13:
+
+- XDHCDC, XDHUPS:
+  - introducing optional extraneous parameter set by user to differentiate sessions,
+
+## 2020-11-18:
+
+- SCK:
+  - introducing `Shutdown(…)`;
+  - simplification;
+
+## 2020-11-17:
+
+- SCLM: on error, when the *CIO* library is not initialized, error is displayed on standard *cerr* to have a chance to be noticed,
+
+## 2020-10-30:
+
+- IDXBTR: [stdz],
+
 ## 2020-09-25:
 
 - XDHUTL:
@@ -2910,9 +2929,7 @@
   - Replacing all 'GetTranslation(...)' with one based on variadics;
 - STSFSM:
   - Adding 'Fill(...)' function variant;
-    - Adding 'qRP' parameters to 'GetId(...)' functions;
-
-..;
+  - Adding 'qRP' parameters to 'GetId(...)' functions;
 
 ## 2016-05-23:
 
@@ -3150,12 +3167,7 @@
 ## 2016-03-09:
 
 - Global:
-
   - Simplification;
-
-    ;
-    ;
-    ;
 
 ## 2016-02-29
 
@@ -3189,14 +3201,8 @@
 ## 2016-02-21:
 
 - GLOBAL:
-
   - misc;
-
   - Huge rewriting of the 'hook's and 'file hooks';
-
-          ;
-          ;
-          ;
 
 ## 2016-02-12:
 
@@ -3827,7 +3833,7 @@
 ## 2015-07-15:
 
 - NTVSTR:
-  - The methods returning a 'const bso::char__ *' return now an empty string when core pointer == 'NULL';
+  - The methods returning a 'const bso::char__ \*' return now an empty string when core pointer == 'NULL';
 
 ## 2015-07-10:
 
@@ -4343,7 +4349,7 @@
     - 'location' for the location (the list of the parent directories) of a file;
     - 'affix' the 'basename' of a file without its extension;
 - NTVSTR:
-  - Adding method for int, to avoid to have to cast NULL (defined as '0') into '(const ntvstr::char__ *)'.
+  - Adding method for int, to avoid to have to cast NULL (defined as '0') into '(const ntvstr::char__ \*)'.
 
 ## Notes
 
