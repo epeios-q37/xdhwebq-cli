@@ -620,7 +620,7 @@ namespace xpp {
 			const fnm::name___ &Directory,
 			const str::string_ &CypherKey,
 			bso::bool__ Preserve,
-			bso::char__ SubstitutionMarker )
+			bso::char__ SubstitutionMarker)
 		{
 			// _Repository.Init();
 			// _Tags.Init();
@@ -635,7 +635,7 @@ namespace xpp {
 			Preserve_= Preserve;
 			PreservationLevel_ = 0;
 			XMarkers_.Init();
-			CurrentXMarker_.Init();
+			CurrentXMarker_.Init(SubstitutionMarker);
 
 			return sOK;
 		}
@@ -700,7 +700,7 @@ namespace xpp {
 			CypherKey,
 			Namespace;
 		bso::bool__ Preserve;
-		bso::char__ SubstitutionTag;
+		bso::char__ SubstitutionMarker;
 		void reset( bso::bool__ P = true )
 		{
 			Directory.reset( P);
@@ -708,7 +708,7 @@ namespace xpp {
 			CypherKey.reset( P );
 			Namespace.reset( P );
 			Preserve = false;
-			SubstitutionTag = 0;
+			SubstitutionMarker = 0;
 		}
 		~criterions___( void )
 		{
@@ -720,11 +720,11 @@ namespace xpp {
 			const str::string_ &CypherKey = str::string() ,
 			const str::string_ &Namespace = str::string(),
 			bso::bool__ Preserve = false,
-			bso::char__ SubstitutionTag = 0 )
+			bso::char__ SubstitutionMarker = 0 )
 		{
 			reset( false );
 
-			Init( Directory, Level, CypherKey, Namespace, Preserve, SubstitutionTag );
+			Init( Directory, Level, CypherKey, Namespace, Preserve, SubstitutionMarker );
 		}
 		void Init(
 			const fnm::name___ &Directory,
@@ -732,14 +732,14 @@ namespace xpp {
 			const str::string_ &CypherKey = str::string(),
 			const str::string_ &Namespace = str::string(),
 			bso::bool__ Preserve = false,
-			bso::char__ SubstitutionTag = 0 )
+			bso::char__ SubstitutionMarker = 0)
 		{
 			this->Directory.Init( Directory );
 			this->Level = Level;
 			this->CypherKey.Init( CypherKey );
 			this->Namespace.Init( Namespace );
 			this->Preserve = Preserve;
-			this->SubstitutionTag = SubstitutionTag;
+			this->SubstitutionMarker = SubstitutionMarker;
 		}
 		bso::bool__ IsNamespaceDefined( void ) const
 		{
@@ -751,7 +751,7 @@ namespace xpp {
 	: public _iflow_driver___
 	{
 	private:
-		status__ _Status;
+		status__ Status_;
 		_qualified_preprocessor_directives___ _Directives;
 		_repository _Repository;
 		_variables _Variables;
@@ -805,7 +805,7 @@ namespace xpp {
 			_iflow_driver___::reset( P );
 			_Parsers.reset( P );
 			_CurrentParser = NULL;
-			_Status = s_Undefined;
+			Status_ = s_Undefined;
 		}
 		_preprocessing_iflow_driver___( void )
 		{
@@ -818,7 +818,7 @@ namespace xpp {
 		void Init(
 			xtf::extended_text_iflow__ &XFlow,
 			fdr::thread_safety__ ThreadSafety,
-			const criterions___ &Criterions )
+			const criterions___ &Criterions)
 		{
 		qRH
 			str::wString Buffer;
@@ -841,9 +841,9 @@ namespace xpp {
 			_iflow_driver___::Init( ThreadSafety );
 			_CurrentParser = NewParser( _Repository, _Variables, _Directives );
 			_Parsers.Init();
-			if ( _Parser().Init( XFlow, str::string(), Criterions.Directory, Criterions.CypherKey, Criterions.Preserve, Criterions.SubstitutionTag ) != sOK )
+			if ( _Parser().Init( XFlow, str::string(), Criterions.Directory, Criterions.CypherKey, Criterions.Preserve, Criterions.SubstitutionMarker ) != sOK )
 				qRFwk();
-			_Status = sOK;
+			Status_ = sOK;
 		qRR
 		qRT
 		qRE
@@ -851,12 +851,12 @@ namespace xpp {
 		}
 		status__ Status( void ) const
 		{
-			return _Status;
+			return Status_;
 		}
 		const context___ &GetContext( context___ &Context ) const
 		{
 			Context.Coordinates = coords___( _Parser().Position(), _Parser().LocalizedFileName() );
-			Context.Status = _Status;
+			Context.Status = Status_;
 
 			return Context;
 		}
@@ -885,9 +885,9 @@ namespace xpp {
 		}
 		void Init(
 			xtf::extended_text_iflow__ &XFlow,
-			const criterions___ &Criterions )
+			const criterions___ &Criterions)
 		{
-			_FlowDriver.Init( XFlow, fdr::tsDisabled, Criterions );
+			_FlowDriver.Init(XFlow, fdr::tsDisabled, Criterions);
 			_iflow__::Init( _FlowDriver );
 		}
 		const context___ &GetContext( context___ &Context ) const
@@ -926,8 +926,8 @@ namespace xpp {
 	status__ Encrypt(
 		const str::string_ &Namespace,
 		flw::iflow__ &IFlow,
-		xml::outfit__ Outfit,
-		utf::format__ Format,
+		const xml::outfit__ Outfit,
+		const utf::format__ Format,
 		txf::text_oflow__ &OFlow,
 		context___ &Context );
 
@@ -935,13 +935,6 @@ namespace xpp {
 		xtf::extended_text_iflow__ &XFlow,
 		const criterions___ &Criterions,
 		xml::rWriter &Writer,
-		context___ &Context );
-
-	status__ Process(
-		xtf::extended_text_iflow__ &XFlow,
-		const criterions___ &Criterions,
-		xml::outfit__ Outfit,
-		txf::text_oflow__ &OFlow,
 		context___ &Context );
 
 	inline status__ Process(
@@ -962,10 +955,17 @@ namespace xpp {
 		return Status;
 	}
 
+	status__ Process(
+		xtf::extended_text_iflow__ &XFlow,
+		const criterions___ &Criterions,
+		const xml::outfit__ Outfit,
+		txf::text_oflow__ &OFlow,
+		context___ &Context );
+
 	inline status__ Process(
 		xtf::extended_text_iflow__ &XFlow,
 		const criterions___ &Criterions,
-		xml::outfit__ Outfit,
+		const xml::outfit__ Outfit,
 		txf::text_oflow__ &OFlow )
 	{
 		status__ Status = s_Undefined;
@@ -981,11 +981,31 @@ namespace xpp {
 		return Status;
 	}
 
-	void Process(
+	status__ Process(
 		const str::string_ &In,
-		xml::outfit__ Outfit,
+		const xml::outfit__ Outfit,
 		str::string_ &Out,
-		const criterions___ &Criterions );
+		const criterions___ &Criterions,
+		context___ &Context);
+
+	inline status__ Process(
+		const str::string_ &In,
+		const xml::outfit__ Outfit,
+		str::string_ &Out,
+		const criterions___ &Criterions)
+		{
+			status__ Status = s_Undefined;
+		qRH;
+			context___ Context;
+		qRB;
+			Context.Init();
+
+			Status = Process(In, Outfit, Out, Criterions, Context);
+		qRR;
+		qRT;
+		qRE;
+			return Status;
+		}
 }
 
 /*************/
@@ -995,6 +1015,7 @@ namespace xpp {
 namespace xpp {
 	typedef preprocessing_iflow___ rRFlow;
 	typedef criterions___ rCriterions;
+	typedef context___ rContext;
 }
 
 

@@ -1514,9 +1514,9 @@ sdr::size__ xpp::_preprocessing_iflow_driver___::FDRRead(
 
 		Parser = NULL;
 
-		_Status = _Parser().Handle( Parser, _Data );
+		Status_ = _Parser().Handle( Parser, _Data );
 
-		while ( _Status == s_Pending ) {
+		while ( Status_ == s_Pending ) {
 #ifdef XPP_DBG
 			if ( Parser != NULL )
 				qRFwk();
@@ -1531,25 +1531,20 @@ sdr::size__ xpp::_preprocessing_iflow_driver___::FDRRead(
 					if ( _Parser().GetFormat() == utf::f_Guess )
 						_Parser().SetFormat( Format );
 					else if ( _Parser().GetFormat() != Format )
-						_Status = ( xpp::status__ )xml::eEncodingDiscrepancy;
+						Status_ = ( xpp::status__ )xml::eEncodingDiscrepancy;
 				}
 
-				if ( _Status == s_Pending )
-					_Status = _Parser().Handle( Parser, _Data );
+			if ( Status_ == s_Pending )
+				Status_ = _Parser().Handle( Parser, _Data );
 			} else {
 				Maximum = 0;	// Pour sortir de la boucle.
-				_Status = (xpp::status__)xml::sOK;
+				Status_ = (xpp::status__)xml::sOK;
 			}
 
 		}
 
-		if ( _Status != sOK ) {
-#if 0
-			*Buffer = XTF_EOXC;	// Pour provoquer une erreur.
-			CumulativeRed++;
-#else
+		if ( Status_ != sOK ) {
 			_Position = _Data.Amount();
-#endif
 			break;
 		}
 
@@ -1566,6 +1561,19 @@ sdr::size__ xpp::_preprocessing_iflow_driver___::FDRRead(
 	return CumulativeRed;
 }
 
+namespace {
+	// Returns true if exiting because EOX reached.
+	bso::sBool SkipSpaces_(xtf::sRFlow &Flow)
+	{
+		while( !Flow.EndOfFlow() && isspace(Flow.View()) )
+			Flow.Get();
+
+		return Flow.EndOfFlow();
+	}
+}
+
+#undef EOF
+
 status__ xpp::Process(
 	xtf::extended_text_iflow__ &XFlow,
 	const criterions___ &Criterions,
@@ -1576,13 +1584,21 @@ status__ xpp::Process(
 qRH
 	preprocessing_iflow___ PFlow;
 	xtf::extended_text_iflow__ RelayXFlow;
+	bso::sBool EOF = false;
 qRB
 	PFlow.Init( XFlow, Criterions );
 	RelayXFlow.Init( PFlow, XFlow.Format() );
 
-	if ( !Writer.Put( RelayXFlow ) ) {
+	while ( ( ( Status = _Convert(Writer.Put(RelayXFlow)) ) == sOK ) && !( EOF = SkipSpaces_(RelayXFlow) ) );
+
+	if ( ( Status != xpp::sOK ) || EOF ) {
 		PFlow.GetContext( Context );
-		Status = Context.Status;
+		if ( Context.Status != sOK ) {
+			Status = Context.Status;
+		} else {
+			Context.Status = Status;	// When no error, 'Status' will be 'sOK', and below line does not matter.
+			Context.Coordinates = XFlow.Position();
+		}
 	}
 
 	if ( RelayXFlow.Format() != utf::f_Guess )
@@ -1770,8 +1786,8 @@ qRE
 status__ xpp::Encrypt(
 	const str::string_ &Namespace,
 	flw::iflow__ &IFlow,
-	xml::outfit__ Outfit,
-	utf::format__ Format,
+	const xml::outfit__ Outfit,
+	const utf::format__ Format,
 	txf::text_oflow__ &OFlow,
 	context___ &Context )
 {
@@ -1792,7 +1808,7 @@ qRE
 status__ xpp::Process(
 	xtf::extended_text_iflow__ &XFlow,
 	const criterions___ &Criterions,
-	xml::outfit__ Outfit,
+	const xml::outfit__ Outfit,
 	txf::text_oflow__ &OFlow,
 	context___ &Context )
 {
@@ -1809,12 +1825,14 @@ qRE
 	return Status;
 }
 
-void xpp::Process(
+status__ xpp::Process(
 	const str::string_ &In,
-	xml::outfit__ Outfit,
+	const xml::outfit__ Outfit,
 	str::string_ &Out,
-	const criterions___ &Criterions )
+	const criterions___ &Criterions,
+	context___ &Context)
 {
+	status__ Status = s_Undefined;
 qRH
 	flx::E_STRING_IFLOW__ IFlow;
 	xtf::extended_text_iflow__ XFlow;
@@ -1826,8 +1844,9 @@ qRB
 	OFlow.Init( Out );
 	TFlow.Init( OFlow );
 
-	xpp::Process( XFlow, Criterions, xml::oIndent, TFlow );
+	Status = xpp::Process(XFlow, Criterions, xml::oIndent, TFlow, Context);
 qRR
 qRT
 qRE
+	return Status;
 }

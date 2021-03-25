@@ -46,7 +46,6 @@ const char *xml::GetLabel( status__ Status )
 	CASE( MissingEqualSign );
 	CASE( BadAttributeValueDelimiter );
 	CASE( UnexpectedCharacter );
-	CASE( EmptyTagName );
 	CASE( MismatchedTag );
 	default:
 		qRFwk();
@@ -689,7 +688,7 @@ qRB
 					GetName_( _Flow, _TagName );
 
 					if ( _TagName.Amount() == 0 )
-						RETURN( sEmptyTagName );
+						RETURN( sUnexpectedCharacter );
 
 					_Tags.Push( _TagName );
 
@@ -732,9 +731,9 @@ qRB
 					if ( ( 1 << _Token ) & TokenToReport )
 						Continue = false;
 
-					_EmptyTag = true;
+					SelfClosing_ = true;
 
-				break;
+					break;
 				case '>':
 					_Flow.Get();
 
@@ -744,7 +743,7 @@ qRB
 
 					_Token = tStartTagClosed;
 
-					_EmptyTag = false;
+					SelfClosing_ = false;
 
 					if ( ( 1 << _Token ) & TokenToReport )
 						Continue = false;
@@ -756,7 +755,7 @@ qRB
 				}
 				break;
 			case tStartTagClosed:
-				if ( _EmptyTag ) {
+				if ( SelfClosing_ ) {
 					_TagName.Init();
 
 					_Tags.Top( _TagName );
@@ -841,9 +840,7 @@ qRB
 						if ( ( 1 << _Token ) & TokenToReport )
 							Continue = false;
 
-						_EmptyTag = true;
-
-
+						SelfClosing_ = true;
 					} else {
 						_Flow.Get();	// Pour la mise  jour des coordonnes.
 						RETURN( sUnexpectedCharacter );
@@ -860,14 +857,14 @@ qRB
 					if ( ( 1 << _Token ) & TokenToReport )
 						Continue = false;
 
-					_EmptyTag = false;
+					SelfClosing_ = false;
 				}/* else {
 					_Flow.Get();	// Pour la mise  jour des coordonnes.
 					RETURN( sUnexpectedCharacter );
 				}
 */				break;
 			case tStartTagClosed:
-				if ( _EmptyTag ) {
+				if ( SelfClosing_ ) {
 					_TagName.Init();
 
 					_Tags.Top( _TagName );
@@ -1241,9 +1238,9 @@ void xml::rWriter::Indent_( bso::size__ Amount ) const
 
 void xml::rWriter::PutRawValue( flw::rRFlow &Flow )
 {
-	if ( TagNameInProgress_ ) {
+	if ( OpeningTagInProgress_ ) {
 		F_() << '>';
-		TagNameInProgress_ = false;
+		OpeningTagInProgress_ = false;
 	}
 
 	flx::Copy( Flow, RF_() );
@@ -1309,7 +1306,7 @@ void xml::rWriter::PutRawAttribute(
 	flw::rRFlow &Flow,
 	eDelimiter Delimiter )
 {
-	if ( !TagNameInProgress_ )
+	if ( !OpeningTagInProgress_ )
 		qRFwk();
 
 	F_() << ' ' << Name << '=' << GetAttributeDelimiter_( Delimiter );
@@ -1384,9 +1381,9 @@ void xml::rWriter::PutRawAttribute(
 
 void xml::rWriter::PutCData( flw::rRFlow &Flow )
 {
-	if ( TagNameInProgress_ ) {
+	if ( OpeningTagInProgress_ ) {
 		F_() << '>';
-		TagNameInProgress_ = false;
+		OpeningTagInProgress_ = false;
 	}
 
 	F_() << "<![CDATA[";
@@ -1406,7 +1403,9 @@ void xml::rWriter::PutCData( const value_ &Value )
 	PutCData( Flow );
 }
 
-sMark xml::rWriter::PopTag( sMark Mark )
+sMark xml::rWriter::PopTag(
+	bso::sBool NoSelfClosing,
+	sMark Mark)
 {
 qRH
 	name Name;
@@ -1414,19 +1413,22 @@ qRB
 	if ( Tags_.IsEmpty() )
 		qRFwk();
 
-	if ( Mark != Tags_.Last() )
-		if ( Mark != qNIL )
+	if ( Mark != Undefined )
+		if ( Mark != Tags_.Last() )
 			qRFwk();
 
-	if ( TagNameInProgress_ ) {
+	if ( OpeningTagInProgress_ && !NoSelfClosing ) {
 		F_() << "/>";
 		Tags_.Pop();
 	}  else {
 		Name.Init();
 		Tags_.Pop( Name );
-		if ( !TagValueInProgress_ && ( Outfit_ == oIndent ) )
+		if ( OpeningTagInProgress_ ) {
+			OpeningTagInProgress_ = false;	// Otherwise, below 'F_()' could return an unexpected 'txf::WVoid'.
+			F_() << '>';
+		} else if ( !TagValueInProgress_ && ( Outfit_ == oIndent ) )
 			Indent_( Tags_.Amount() );
-		F_() << "</" << Name << ">";
+		F_() << "</" << Name << '>';
 	}
 
 	if ( Outfit_ == oIndent )
@@ -1434,7 +1436,7 @@ qRB
 
 	Commit_();
 
-	TagNameInProgress_ = false;
+	OpeningTagInProgress_ = false;
 	TagValueInProgress_ = false;
 qRR
 qRT
@@ -1447,9 +1449,12 @@ void xml::rWriter::Rewind( sMark Mark )
 	while ( PopTag() != Mark );
 }
 
-bso::sBool xml::rWriter::Put( rParser &Parser )
+// Input data is handled until EOF.
+// If no input data, return false.
+
+eStatus xml::rWriter::Put(rParser &Parser)
 {
-	bso::sBool Continue = true, Success = false;
+	bso::sBool Continue = true;
 
 	while ( Continue ) {
 		switch( Parser.Parse( xml::tfAll & ~xml::tfStartTagClosed ) ) {
@@ -1471,17 +1476,13 @@ bso::sBool xml::rWriter::Put( rParser &Parser )
 			PutValue( Parser.Value() );
 			break;
 		case xml::tEndTag:
-			PopTag();
+			PopTag(!Parser.SelfClosing());
 			break;
 		case xml::tCData:
 			PutCData( Parser.Value() );
 			break;
 		case xml::t_Processed:
-			Continue = false;
-			Success = true;
-			break;
 		case xml::t_Error:
-			Success = false;
 			Continue = false;
 			break;
 		default:
@@ -1490,27 +1491,29 @@ bso::sBool xml::rWriter::Put( rParser &Parser )
 		}
 	}
 
-	return Success;
+	return Parser.Status();
 }
 
-bso::sBool xml::rWriter::Put( xtf::extended_text_iflow__ &XFlow )
+eStatus xml::rWriter::Put(xtf::extended_text_iflow__ &XFlow)
 {
-	bso::sBool Success = true;
+	eStatus Status = s_Undefined;
 qRH
 	rParser Parser;
 qRB
 	Parser.Init( XFlow, ehKeep );
 
-	Success = Put( Parser );
+	Status = Put( Parser );
 qRR
 qRT
 qRE
-	return Success;
+	return Status;
 }
 
-bso::sBool xml::rWriter::Put( const str::dString &XML )
+eStatus xml::rWriter::Put(
+	const str::dString &XML,
+	xtf::sPos &ErrorPosition)
 {
-	bso::sBool Success = false;
+	eStatus Status = s_Undefined;
 qRH
 	flx::sStringIFlow SFlow;
 	xtf::extended_text_iflow__ XFlow;
@@ -1518,11 +1521,12 @@ qRB
 	SFlow.Init( XML );
 	XFlow.Init( SFlow, utf::f_Default );
 
-	Success = Put( XFlow );
+	Status = Put( XFlow );
+	ErrorPosition = XFlow.Position();	// Only of use when 'Status != sOk',
 qRR
 qRT
 qRE
-	return Success;
+	return Status;
 }
 
 Q37_GCTOR( xml )

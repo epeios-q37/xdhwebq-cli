@@ -22,34 +22,55 @@ var cgi = "";
 var session = "";
 var target = "";
 
+const exit = {
+	values : {
+	NONE: 0,		// The software is currently running.
+	// If below is modified, also modify the 'ErrorScript' entry in the 'xdhwebq.xcfg" file.
+	TOKEN: 1,		// Token does not exists.
+	BACKEND: 2,	// Backend has been shut down.
+	SOCKET: 3,	// Socket has been closed (websocket timeout, for example.).
+	},
+	messages : {
+		NONE: `
+		<span>Unknown exit value (<a href="http://q37.info/s/7mdgqk4z" target="_blank">exit message #0</a>)!!!</span>
+		`,	// This one is ued for unknown exit value.
+			TOKEN: `
+		<span>No (more) application corresponding to given token (<a href="http://q37.info/s/7mdgqk4z" target="_blank">exit message #1</a>)!</span>
+			`,
+			BACKEND: `
+		<span>Application halted! The backend has been shut down (<a href="http://q37.info/s/7mdgqk4z" target="_blank">exit message #2</a>)!</span>	
+		`,
+			SOCKET: `
+		<span>You are disconnected from the backend (<a href="http://q37.info/s/7mdgqk4z" target="_blank">exit message #3</a>)!</span>
+		<p></p>
+		<button onclick="window.parent.document.location.reload()">Reload</button>
+		`,
+	}
+};
+
+var exitValue = exit.values.NONE;
+
 var queryInProgress = false;
 var queryQueue = [];
-var backendLost = false;
-var reportClosing = true;	// Set to 'false' int the scrip' defined in the
-							// 'ErrorScript' definition entry in the 'xdhwebq.xcfg'  file. 
 
-function log( message )
-{
-	if ( navigator.userAgent.search( "Edge" ) === -1 )	// MS Edge web browser does not like too much log messages...
-		console.log( message );
+function log(message) {
+	if (navigator.userAgent.search("Edge") === -1)	// MS Edge web browser does not like too much log messages...
+		console.log(message);
 }
 
-function buildQuery()
-{
+function buildQuery() {
 	return cgi + "?_session=" + session + "&_target=" + target + "&";
 }
 
-function t( s )
-{
+function t(s) {
 	d = new Date();
-	log( s + " : " + String( d.getTime() - before ) );
+	log(s + " : " + String(d.getTime() - before));
 }
-		
+
 var socket;
 
-function launchEvent( digest )
-{
-	if ( queryInProgress ) {
+function launchEvent(digest) {
+	if (queryInProgress) {
 		if (digest !== queryQueue[queryQueue.length - 1]) {
 			console.log("Queued: ", digest);
 			queryQueue.push(digest);
@@ -61,27 +82,39 @@ function launchEvent( digest )
 	}
 }
 
+function adjustExitIFrameHeight() {
+	let iframe = window.parent.document.body.firstElementChild.firstElementChild.firstElementChild;
+	iframe.height = "1";
+	iframe.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+}
 
-function connect(token,id) {
-	socket = new WebSocket((window.location.protocol === "http:" ? "ws" : "wss" ) + "://" + window.location.hostname + "/xdh/");
+function displayExit(html) {
+	let wrappedHTML = '<span style="border-radius: 25px; padding: 10px;border: 5px solid red; background-color: bisque; text-align: center; display: table; margin: auto;">' + html + "</span>";
+	let src = "Exit.php?text=" + encodeURIComponent(btoa(wrappedHTML));
+	document.body.firstElementChild.insertAdjacentHTML('afterbegin','<div style="width: 100%;"><iframe style="border: none;" width="100%" src="' + src + '"></iframe></div>');
+	window.scroll(0,0);
+}
 
-    socket.onopen = function(e) {
+function connect(token, id) {
+	socket = new WebSocket((window.location.protocol === "http:" ? "ws" : "wss") + "://" + window.location.hostname + "/xdh/");
+
+	socket.onopen = function (e) {
 		socket.send(token);
 		socket.send(id);
 	}
 
-    socket.onmessage = function(event) {
-		if ( event.data !== "%StandBy" ) {
-			if ( event.data === "%Quit" ) {	// Only used in 'FaaS' mode, when quitting a backend.
+	socket.onmessage = function (event) {
+		if (event.data !== "%StandBy") {
+			if (event.data === "%Quit") {	// Only used in 'FaaS' mode, when quitting a backend.
 				log("Quitting !");
-				backendLost = true;
+				exitValue = exit.values.BACKEND;
 				socket.close();	// Launches 'onclose' event.
 			} else {
 				log("Executed:", event.data);
 				let result = eval(event.data);
-	//			console.log(event.data);
-				
-				if ( ( typeof result !== "undefined" ) && ( typeof result !== "object" ) )	// 'typeof result !== "object"' == 'result != null' !!!!
+				//			console.log(event.data);
+
+				if ((typeof result !== "undefined") && (typeof result !== "object"))	// 'typeof result !== "object"' == 'result != null' !!!!
 					socket.send(result);
 			}
 		} else if (queryQueue.length) {
@@ -92,12 +125,28 @@ function connect(token,id) {
 			queryInProgress = false;
 		}
 	};
-	
-    socket.onclose = function(event) {
-		if ( reportClosing )
-			if ( backendLost )
-				alert("Connection to backend lost!");
-			else if (confirm("Disconnected!\nPress OK to reload the application."))
-				location.reload();
-    }	
+
+	socket.onclose = function (event) {
+		let message = "???";
+
+		if ( exitValue === exit.values.NONE )	// Probably a websocket timeout.
+			exitValue = exit.values.SOCKET;
+
+		switch ( exitValue ) {
+		case exit.values.TOKEN:
+			message = exit.messages.TOKEN;
+			break;
+		case exit.values.BACKEND:
+			message = exit.messages.BACKEND;
+			break;
+		case exit.values.SOCKET:
+			message = exit.messages.SOCKET
+			break;
+		default:
+			message = exit.messages.NONE;
+			break;
+		}
+
+		displayExit(message);
+	}
 }

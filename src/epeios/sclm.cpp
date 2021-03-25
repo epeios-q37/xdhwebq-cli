@@ -703,38 +703,6 @@ void sclm::EraseProjectRegistry( void )
 	scll::Erase( scll::tProject );
 }
 
-#define C( name ) case pt##name: return #name; break
-
-const char *sclm::GetLabel( eProjectType ProjectType )
-{
-	switch ( ProjectType ) {
-	C( New );
-	C( Predefined );
-	C( Remote );
-	C( Embedded );
-	default:
-		qRFwk();
-		break;
-	}
-
-	return NULL;	// Pour viter un 'warning'.
-}
-
-static stsfsm::automat ProjectAutomat_;
-
-static void FillProjectAutomat_( void )
-{
-	ProjectAutomat_.Init();
-	stsfsm::Fill( ProjectAutomat_, pt_amount, GetLabel );
-}
-
-eProjectType sclm::GetProjectType( const str::string_ &Pattern )
-{
-	return stsfsm::GetId( Pattern, ProjectAutomat_, pt_Undefined, pt_amount );
-}
-
-
-
 void sclm::LoadProject(
 	flw::iflow__ &Flow,
 	const fnm::name___ &Directory,
@@ -756,9 +724,9 @@ void sclm::LoadProject(
 	LoadLocale_( sclr::GetRawLayer( sclr::lProject ), scll::tProject );
 }
 
-static void LoadProject_(
-	const str::string_ &FileName,
-	const sInfo &Info )
+void sclm::LoadProject(
+	const fnm::rName &FileName,
+	const sInfo &Info)
 {
 qRH
 	str::string Id;
@@ -769,6 +737,8 @@ qRR
 qRT
 qRE
 }
+
+#if 0	// Will perhaps be reactivated when handling predefined projects.
 
 static void LoadPredefinedProject_(
 	const str::string_ &Id,
@@ -793,42 +763,32 @@ qRT
 qRE
 }
 
-void sclm::LoadProject(
-	eProjectType ProjectType,
-	const str::string_ &ProjectFeature,
-	const sInfo &Info )
-{
-	switch ( ProjectType ) {
-	case ptNew:
-		sclr::Erase( sclr::lProject );
-		break;
-	case ptPredefined:
-		LoadPredefinedProject_( ProjectFeature, Info );
-		break;
-	case ptRemote:
-		if ( ProjectFeature.Amount() == 0  )
-			sclm::ReportAndAbort( SCLM_NAME "_NoProjectFileSelected" );
-		LoadProject_( ProjectFeature, Info );
-		break;
-	case ptEmbedded:
-		qRVct();
-		break;
-	case pt_Undefined:
-		qRFwk();
-		break;
-	default:
-		qRFwk();
-		break;
-	}
-}
+#endif
 
+#if 1
+
+void sclm::LoadProject( const sInfo &Info )
+{
+qRH
+	str::string Feature;
+qRB
+	Feature.Init();
+	OGetValue( sclr::parameter::project::Feature, Feature );
+
+	if ( Feature.Amount() != 0 ) {
+		LoadProject( Feature, Info );
+	}
+qRR
+qRT
+qRE
+}
+#else // Old handling. To restore when (if ?) handling predefined projects defined in 'Definitions' section.
 
 void sclm::LoadProject( const sInfo &Info )
 {
 qRH
 	str::string Feature;
 	str::string RawType;
-	eProjectType Type = pt_Undefined;
 qRB
 	Feature.Init();
 	OGetValue( sclr::parameter::project::Feature, Feature );
@@ -849,6 +809,8 @@ qRR
 qRT
 qRE
 }
+
+#endif
 
 void sclm::CreateBackupFile(
 	const fnm::name___ &FileName,
@@ -988,14 +950,23 @@ void sclm::LoadXMLAndTranslateTags(
 qRH;
 	str::string Unprocessed, Untranslated;
 	fnm::name___ FileNameLocation;
+	xpp::rContext Context;
+	lcl::wMeaning Meaning;
 qRB;
 	Unprocessed.Init();
 	Load( Filename, Unprocessed );
 
 	fnm::GetLocation( Filename, FileNameLocation );
 
-	Untranslated.Init();
-	xpp::Process( Unprocessed, xml::oIndent, Untranslated, xpp::criterions___( FileNameLocation, StartLevel ) );
+	tol::Init(Untranslated, Context);
+
+	if ( xpp::Process(Unprocessed, xml::oIndent, Untranslated, xpp::criterions___(FileNameLocation, StartLevel), Context) != xpp::sOK ) {
+		Meaning.Init();
+		xpp::GetMeaning(Context, Meaning);
+
+		ReportAndAbort(SCLM_NAME "_ErrorInXMLFile", Filename, Meaning);
+	}
+
 
 	scll::TranslateTags( Untranslated, Language, Content, Marker );
 qRR;
@@ -1499,5 +1470,4 @@ void (* mtk::MTKErrorHandling)(void) = sclm::ErrorDefaultHandling;
 Q37_GCTOR( sclm )
 {
 	BinPath_.Init();
-	FillProjectAutomat_();
 }

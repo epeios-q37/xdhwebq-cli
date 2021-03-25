@@ -229,19 +229,6 @@ namespace sclm {
 
 	void EraseProjectRegistry( void );
 
-	qENUM( ProjectType ) {
-		ptNew,			// Empty project.
-		ptPredefined,	// Use of a project defined in the 'Definitions' section in the configuration file.
-		ptRemote,		// Project stored in a file.
-		ptEmbedded,		// The content of the project is embedded in the its declaration (not implemented yet)
-		pt_amount,
-		pt_Undefined
-	};
-
-	const char *GetLabel( eProjectType ProjectType );
-
-	eProjectType GetProjectType( const str::string_ &Pattern );
-
 	void LoadProject(
 		flw::iflow__ &Flow,
 		const fnm::name___ &Directory,
@@ -254,9 +241,8 @@ namespace sclm {
 		str::string_ &Id );
 
 	void LoadProject(
-		eProjectType ProjectType,
-		const str::string_ &ProjectFeature,
-		const scli::sInfo &Info );
+		const fnm::name___ &FileName,
+		const scli::sInfo &Info);
 
 	void LoadProject( const scli::sInfo &Info );	// Load project, if applies, following configuration file indications.
 

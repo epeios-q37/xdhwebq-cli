@@ -9,7 +9,7 @@
   <Definitions>
    <ErrorHead><![CDATA[
 <title>Error: no application!</title>]]>   </ErrorHead>
-   <ErrorScript><![CDATA[
+   <OldErrorScript><![CDATA[
 document.body.innerHTML = `
 <div style="display: table; margin: auto; padding: 10px; text-align: center;">
     <span style="color: red; font-size: larger;">Unknown token, or corresponding application is no more running!</span>
@@ -18,6 +18,9 @@ document.body.innerHTML = `
 </div>
 ` + document.body.innerHTML;
 reportClosing = false;
+                ]]>   </OldErrorScript>
+   <ErrorScript><![CDATA[
+exitValue = exit.values.TOKEN;
                 ]]>   </ErrorScript>
   </Definitions>
   <Locale>

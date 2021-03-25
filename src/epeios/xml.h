@@ -52,6 +52,25 @@ namespace xml {
 	typedef str::string_	value_;
 	typedef str::string		value;
 
+		// Code d'erreur 'retourn' par 'Parse()'.
+	qENUM(Status) {
+		sOK,
+		s_FirstXTFError,
+		eUnsupportedEncoding = s_FirstXTFError + xtf::eUnsupportedEncoding,
+		eUnexpectedEncoding = s_FirstXTFError + xtf::eUnexpectedEncoding,
+		eEncodingDiscrepancy = s_FirstXTFError + xtf::eEncodingDiscrepancy,
+		s_FirstNonXTFError,
+		sUnexpectedEOF = s_FirstNonXTFError,
+		sUnknownEntity,
+		sMissingEqualSign,
+		sBadAttributeValueDelimiter,
+		sUnexpectedCharacter,
+		sMismatchedTag,
+		s_amount,
+		s_Undefined,
+	};
+
+
 	// Output layout.
 	qENUM( Layout ) {
 		lCompact,	// All of one line.
@@ -196,7 +215,7 @@ namespace xml {
 	private:
 		stkctn::qMCSTACKwl( name_ ) Tags_;
 		txf::text_oflow__ *Flow_;
-		bso::bool__ TagNameInProgress_;
+		bso::bool__ OpeningTagInProgress_;
 		bso::bool__ TagValueInProgress_;
 		eLayout Outfit_;
 		eSpecialCharHandling SpecialCharHandling_;
@@ -211,7 +230,7 @@ namespace xml {
 			if ( Flow_ == NULL )
 				qRFwk();
 
-			if ( LevelsToIgnore_ >= ( Tags_.Amount() + ( TagNameInProgress_ ? 0 : 1 ) ) )
+			if ( LevelsToIgnore_ >= ( Tags_.Amount() + ( OpeningTagInProgress_ ? 0 : 1 ) ) )
 				return txf::WVoid;
 			else
 				return *Flow_;
@@ -251,7 +270,7 @@ namespace xml {
 			if ( P )
 				CloseAllTags_();
 
-			TagNameInProgress_ = false;
+			OpeningTagInProgress_ = false;
 			TagValueInProgress_ = false;
 
 			Tags_.reset( P );
@@ -306,7 +325,7 @@ namespace xml {
 		}
 		sMark PushTag( const name_ &Name )	// See 'PopTag(...)' for the returned value.
 		{
-			if ( TagNameInProgress_ ) {
+			if ( OpeningTagInProgress_ ) {
 				F_() << '>';
 
 				if ( Outfit_ == oIndent )
@@ -315,7 +334,7 @@ namespace xml {
 
 			sMark Mark = Tags_.Push( Name );
 
-			TagNameInProgress_ = true;
+			OpeningTagInProgress_ = true;
 			TagValueInProgress_ = false;
 
 			if ( Outfit_ == oIndent )
@@ -506,7 +525,15 @@ namespace xml {
 		{
 			PutCData( value( Value ) ) ;
 		}
-		sMark PopTag( sMark Mark = Undefined );	// 'Mark', is used,is returned by a 'Push(...)', and is used to control if we are at the same level as the concerned 'Push(...)'.
+		sMark PopTag(
+			bso::sBool NoSelfClosing = false,	// Forces '<tag></tag>' instead of '<tag/>' for empty tag.
+			sMark Mark = Undefined );	// 'Mark', is used,is returned by a 'Push(...)', and is used to control if we are at the same level as the concerned 'Push(...)'.
+		sMark PopTag(
+			sMark Mark,
+			bso::sBool NoSelfClosing = false)
+		{
+			return PopTag(NoSelfClosing, Mark);
+		}
 		void Rewind( sMark Mark );	// Unwind to 'Mark' level.
 		txf::text_oflow__ &GetFlow( void )
 		{
@@ -516,11 +543,13 @@ namespace xml {
 		{
 			AlwaysCommit_ = Value;
 		}
-		bso::sBool Put( rParser &Parser );
+		eStatus Put(rParser &Parser);
 		// Indent and put the content of 'XFlow' (reparse it).
-		bso::sBool Put( xtf::extended_text_iflow__ &XFlow );
+		eStatus Put(xtf::extended_text_iflow__ &XFlow);
 		// Indent and put the content of 'XML' (reparse it).
-		bso::sBool Put( const str::dString &XML );
+		eStatus Put(
+			const str::dString &XML,
+			xtf::sPos &ErrorPosition);	// Only valid when returned valus != 'sOK'.
 		qRODISCLOSEr( eLayout, Outfit )
 		qRODISCLOSEr( eSpecialCharHandling, SpecialCharHandling )
 	};
@@ -533,24 +562,7 @@ namespace xml {
 namespace xml {
 	using xtf::pos__;
 
-	// Code d'erreur 'retourn' par 'Parse()'.
-	enum status__ {
-		sOK,
-		s_FirstXTFError,
-		eUnsupportedEncoding = s_FirstXTFError + xtf::eUnsupportedEncoding,
-		eUnexpectedEncoding = s_FirstXTFError + xtf::eUnexpectedEncoding,
-		eEncodingDiscrepancy = s_FirstXTFError + xtf::eEncodingDiscrepancy,
-		s_FirstNonXTFError,
-		sUnexpectedEOF = s_FirstNonXTFError,
-		sUnknownEntity,
-		sMissingEqualSign,
-		sBadAttributeValueDelimiter,
-		sUnexpectedCharacter,
-		sEmptyTagName,
-		sMismatchedTag,
-		s_amount,
-		s_Undefined,
-	};
+	typedef eStatus status__;
 
 	const char *GetLabel( status__ Status );
 
@@ -784,7 +796,7 @@ namespace xml {
 		_context__ _Context;
 		token__ _Token;
 		stkctn::qMCSTACKwl( str::dString ) _Tags;
-		bso::bool__ _EmptyTag;	// A 'true' pour '<tag/>', sinon  'false'.
+		bso::bool__ SelfClosing_;	// A 'true' pour '<tag/>', sinon  'false'.
 		_flow___ _Flow;
 		str::string _TagName;
 		str::string AttributeName_;
@@ -792,22 +804,27 @@ namespace xml {
 		str::string _Value;
 		status__ _Status;
 		entities_handling__ _EntitiesHandling;
-	public:
-		void reset( bso::bool__ P = true )
+		void PartialReset_(bso::sBool P)
 		{
 			_Context = c_Undefined;
 			_Token = t_Undefined;
-			_EmptyTag = false;
-			_Flow.reset( P );
+			SelfClosing_ = false;
 
 			_TagName.reset( P );
 			AttributeName_.reset( P );
 			AttributeDelimiter_ = delimiter::sUndefined;
 			_Value.reset( P );
 			_Status = s_Undefined;
-			_EntitiesHandling = eh_Undefined;
 
 			_Tags.reset( P );
+		}
+	public:
+		void reset( bso::bool__ P = true )
+		{
+			PartialReset_(P);
+
+			_Flow.reset( P );
+			_EntitiesHandling = eh_Undefined;
 		}
 		parser___( void )
 		{
@@ -829,10 +846,21 @@ namespace xml {
 
 			_TagName.Init();
 			AttributeName_.Init();
-			AttributeDelimiter_ = delimiter::sUndefined;
+
 			_Value.Init();
 
 			_EntitiesHandling = EntitiesHandling;
+		}
+		// If input data contains more then one root, allows to process next tree.
+		void Reset(void)
+		{
+			if ( _Token != t_Processed )
+				qRFwk();
+
+			PartialReset_(true);
+			tol::Init(_Tags, _TagName, AttributeName_, _Value);
+
+			_Context = cHeaderExpected;
 		}
 		token__  Parse( int TokenToReport = tfAll );
 		token__ Parse(
@@ -874,6 +902,7 @@ namespace xml {
 		E_RODISCLOSE__( status__, Status );
 		E_RODISCLOSE__( token__, Token );
 		E_RODISCLOSE__( entities_handling__, EntitiesHandling );
+		qRODISCLOSEs(bso::sBool, SelfClosing);
 		const xtf::pos__ &GetCurrentPosition( void ) const
 		{
 			return _Flow.GetCurrentPosition();

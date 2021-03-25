@@ -10,6 +10,104 @@
 - [trvl]: trivial modifications;
 - [warn]: fixing compiler warning messages;
 
+## 2021-01-28:
+
+- SCLF: introducing setup handling,
+
+## 2021-01-27:
+
+- SCLR: exposing setup section for external use,
+
+## 2021-01-26:
+
+- SCLF: improving preset handling,
+- SCLM: moving preset related stuf to SCLF,
+- SCLX: [adpt],
+
+## 2021-01-25:
+
+- RGSTRY: [stdz],
+- SCLM: handling presets,
+- SCLM: using presets instead of projects,
+- SCLR: modifying setup handling,
+- SCLX: [adpt],
+
+## 2021-01-24:
+
+- SCLF, SCLX: [adpt],
+- SCLM: replacing predefined project by presets,
+
+## 2021-01-23:
+
+- SCLM:
+  - removing embedded projet type,
+- SCLX: [adpt],
+
+## 2021-01-22:
+
+- SCLM: remove unused `rSession` member,
+- XDHCDC, XDHUPS: [adpt],
+
+## 2021-01-21:
+
+- XDHCDC: [warn],
+
+## 2021-01-20:
+
+- RGSTRY, SCLM: [adpt],
+- XPP: improving error detection,
+
+## 2021-01-19:
+
+- XML:
+  - [rvrt] : `rWriter::Put(…)` again only handles the first element (and its content); other root elements are ignored,
+  - The empty tag name error is removed in favor of the unexpected character error,
+
+## 2021-01-18:
+
+- XTF: [stdz],
+
+## 2021-01-17:
+
+- RGSTRY: [adpt],
+- SCLM: `sclm::LoadXMLAndTranslateTags` now displays errors,
+- SCLX:
+  - the head file can contain more then one root, as long they are enclosed by a 'xpp:bloc' tag,
+  - in the head file, '<tag></tag>' (tag with no value) are kept '<tag></tag>' and no more tranformed in '<tag/>' (useful for the HTML 'script' tag, for example; see [[#2021-01-15]]),
+  - errors when reading head file are now displayed,
+- XML:
+  - introducing `parser___::Reset(…)`,
+  - with input data containing multiple roots, `rWriter::Put(…)` handles now all roots and no more only the first one,
+- XPP:
+  - [trvl],
+  - fixing use of 'SubstitutionMarker',
+
+## 2021-01-15:
+
+- XML:
+  - introducing the possibility to force '<tag></tag>' instead of '<tag/>' for empty tags,
+  - `rWriter::Put(…)` keeps non self closing empty tags (useful for HTML; for example `<script src="…"></script>` are NOT transformed in the in HTML not allowed `<script src="…"/>` form)
+
+## 2021-01-13:
+
+- SCLX:
+  - [adpt],
+  - relocating `HeadFile` registry entry,
+
+## 2021-01-07:
+
+- STRMRG, XDHCMN: [stdz],
+- XDHUTL: introducing *PseudoDigest* handling,
+
+## 2021-01-05:
+
+- SCLX: ,
+- XDHUTL: retrieving `Extract(…)` from *xdhqxdh* tool,
+
+## 2020-12-27:
+
+- HTP, TOL: [adpt]
+
 ## 2020-12-13:
 
 - XDHCDC, XDHUPS:
