@@ -20,17 +20,19 @@ along with xdhwebq. If not, see <http://www.gnu.org/licenses/>.
 
 $out = str_replace(array("\r", "\n", "\t"), '',<<<MLS
 	<!DOCTYPE html>
-	<html>
+	<html xmlns:xdh="http://q37.info/ns/xdh">
 		<head>
 			<!-- If modified, report modification in "xdhcefq.html" from "xdhcefq" -->
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="Cache-Control" content="no-cache"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<!-- Below both scripts are for DEV environment. -->
 			<script src="xdhtml.js"></script>
 			<script src="xdhwebq.js"></script>
 			<!-- Below both scripts are for PROD environment. -->
-			<script src="xdhtml_20201217.js"></script>
-			<script src="xdhwebq_20210227.js"></script>
+			<script src="xdhtml_20210801.js"></script>
+			<script src="xdhwebq_20210528.js"></script>
+			<script data-goatcounter="https://faas.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>			
 			<style id="XDHStyle">
 				.xdh_style {
 					display: table;
@@ -59,7 +61,7 @@ $head
 				}
 			</script>
 		</head>
-		<!--body id="Root" data-xdh-onevents="(keypress|About|SC+a)(keypress|Q37Refresh|SC+r)"-->
+		<!--body id="Root" xdh:onevents="(keypress|About|SC+a)(keypress|Q37Refresh|SC+r)"-->
 		<body onload="ignition('$token','$id',$qrcodeOnly);">
 			<div class="xdh_style">
 				<noscript>

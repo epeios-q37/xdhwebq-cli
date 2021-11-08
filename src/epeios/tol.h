@@ -65,9 +65,11 @@
 
 # include "bso.h"
 
-// Predeclarations
-namespace uys {
-	struct sHook;
+// Predeclarations.
+
+// Should be 'uys::sHook …", but cannot predeclare typedefs.
+namespace sdr {
+  class storage_driver__;
 }
 
 namespace ags {
@@ -91,6 +93,8 @@ namespace str {
 # define TOL_ROW_( name ) E_TMIMIC__( sdr::bRow, name )
 
 # define qROW( name ) TOL_ROW_( s##name )
+// Nota: although a static object, defining it as resource containing object
+// that it is pointing to an object which has to be released by the proper function.
 # define qROWr( name ) TOL_ROW_( r##name )
 
 #define qROWS( name )\
@@ -656,7 +660,7 @@ namespace tol {
 //			S_.Object.reset( P );	// The object is already destroyed by the one which features the reference.
 		}
 		qCVDTOR( dObject );
-		void plug( uys::sHook &Hook )
+		void plug(sdr::storage_driver__ &Hook)  // Should be 'uys::sHook …", but cannot predeclare typedefs (see top of file).
 		{
 			// Standardization.
 		}
@@ -1115,7 +1119,7 @@ Utile pour afficher le numro de ligne dans un #pragma message (...). */
 // #pragma message(__LOC__ " : Message")
 
 // Checkpoint.
-# define CPq	cio::COut << __FILE__ "(" E_STRING(__LINE__) ")" << txf::nl << txf::commit
+# define CPq	cio::COut << '(' << tol::TUTime() << ") " __FILE__ ":" E_STRING(__LINE__) << txf::nl << txf::commit
 
 
 # define E_AUTO_( Name )	\
@@ -1357,26 +1361,41 @@ namespace tol {
 	bso::size__ GetMemoryUsage( void );
 # endif
 
-#ifndef CPE_F_MT
-	inline const char *Date( void )
+	inline const char *TUDate( void )
 	{
 		static buffer__ Buffer;
 
 		return Date( Buffer );
 	}
 
-	inline const char *Time( void )
+	inline const char *TUTime( void )
 	{
 		static buffer__ Buffer;
 
 		return Time( Buffer );
 	}
 
-	inline const char *DateAndTime( void )
+	inline const char *TUDateAndTime( void )
 	{
 		static buffer__ Buffer;
 
 		return DateAndTime( Buffer );
+	}
+
+#ifndef CPE_F_MT
+	inline const char *Date( void )
+	{
+	  return TUDate();
+	}
+
+	inline const char *Time( void )
+	{
+	  return TUTime();
+	}
+
+	inline const char *DateAndTime( void )
+	{
+	  return TUDateAndTime();
 	}
 #endif
 

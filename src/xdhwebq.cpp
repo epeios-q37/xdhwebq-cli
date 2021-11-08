@@ -34,6 +34,7 @@
 #include "xpp.h"
 #include "fnm.h"
 #include "flf.h"
+#include "flw.h"
 #include "mtk.h"
 #include "websck.h"
 
@@ -118,6 +119,27 @@ namespace {
 			}
 
 			namespace {
+			  namespace {
+			    bso::sBool SendConnectEvent_(flw::rRWFlow &Flow)
+          {
+          qRH;
+            str::wString Script;
+            qCBUFFERh Buffer;
+          qRB;
+            Script.Init("launchEvent('');");  // Launch an event with an empty digest.
+
+            Flow.Write(Script.Convert(Buffer), Script.Amount());
+
+            Flow.Commit();
+            Flow.Dismiss();
+          qRR;
+          qRT;
+          qRE;
+
+          return true;
+          }
+			  }
+
 				void HandleRegular_(
 					xdhups::rAgent &Agent,
 					fdr::rRWDriver &Driver,
@@ -133,11 +155,12 @@ namespace {
 				qRB
 					Flow.Init(Driver, websck::mWithTerminator);
 
-					if ( !Session.Init(Callback, Driver, "", Token, UserId) ) {
+					if ( Session.Init(Callback, Driver, "", Token, UserId) ==  qNIL ) {
 						Script.Init();
 						sclm::MGetValue(registry::definition::ErrorScript, Script);
 						Session.Execute(Script);
-					} else if ( Session.Handle(NULL) ) {
+					// } else if ( Session.Handle(NULL) ) { // Reponses of the connect event were mixed the ones from upcoming events.
+					 } else if ( SendConnectEvent_(Flow) ) {  // To queue upcoming events.
 						while ( true ) {
 							Digest.Init();
 							if ( !websck::GetMessage(Flow, Digest) )
@@ -219,7 +242,6 @@ namespace {
 				fdr::rRWDriver *Driver,
 				void *UP ) override
 			{
-
 				if ( UP == NULL )
 					qRGnr();
 

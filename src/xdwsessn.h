@@ -41,6 +41,7 @@ namespace xdwsessn {
 		virtual bso::sBool XDHCUCProcess(
 			const str::string_ &Script,
 			tht::rBlocker *Blocker,
+			bso::sBool *Success,
 			str::dString *ReturnedValue ) override;
 	public:
 		void reset( bso::bool__ P = true )
@@ -66,7 +67,7 @@ namespace xdwsessn {
 			tol::reset(P, Upstream_, Broadcaster_, Session_ );
 		}
 		E_CDTOR( rSession );
-		bso::sBool Init(
+		xdhbrd::sCRow Init(
 			xdhcdc::cSingle &Callback,
 			fdr::rRWDriver &Driver,
 			const char *Language,
@@ -75,7 +76,11 @@ namespace xdwsessn {
 		{
 			Upstream_.Init(Driver);
 			Session_.Init(Callback);
-			return Session_.Initialize(Upstream_, Language, Token, UserId) && Broadcaster_.Init(Upstream_, Token);
+
+      if ( Session_.Initialize(Upstream_, Language, Token, UserId) )
+        return Broadcaster_.Init(Upstream_, Token);
+      else
+        return qNIL;
 		}
 		bso::sBool Handle( const char *EventDigest )
 		{
@@ -84,9 +89,10 @@ namespace xdwsessn {
 		bso::sBool Execute(
 			const str::dString &Script,
 			tht::rBlocker *Blocker,
+			bso::sBool *Success,
 			str::dString &ReturnedValue)
 		{
-			return Upstream_.Process(Script, Blocker,&ReturnedValue);
+			return Upstream_.Process(Script, Blocker, Success, &ReturnedValue);
 		}
 		bso::sBool Execute(const str::dString &Script)
 		{

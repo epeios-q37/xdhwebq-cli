@@ -27,6 +27,7 @@ $detailsOpenAttribute = strpos($rawUrl, PATTERN) ? 'open="open"' : "";
 echo <<<EOS
 <head>
   <script src="qrcode.min.js"></script>
+  <script src="clipboard.min.js"></script>
   <script>
     function adjustHeight() {
       let iframe = window.frameElement;
@@ -44,7 +45,7 @@ echo <<<EOS
       background: #ffffff;
       border-radius: 8px;
       position: relative;
-      width: 500px;
+      width: 400px;
     }
 
     details .summary-title {
@@ -137,13 +138,16 @@ echo <<<EOS
     </summary>
     <div class="summary-content">
       <hr />
-      <span style="display: table; margin: 10px auto 5px auto;">QR code to scan with a mobile device,</span>
+      <span style="display: table; margin: 10px auto 5px auto; text-align: center;">
+        <span><a href="https://en.wikipedia.org/wiki/QR_code" target="_blank">QR code</a> to scan with a mobile device,</span>
+        <br />
+        <span style="margin: auto;">or to click to open a new session.</span>
+      </span>
       <div style="display: flex; justify-content: space-around;">
         <a style="cursor: pointer;" target="_blank" href="$url">
           <div id="qrcode"></div>
         </a>
       </div>
-      <span style="display: table; margin: 10px auto 5px auto;">or to click on for a new instance.</span>
       <hr />
       <div style="display: table; padding: 10px; margin: auto;">
         <div style="display: table; padding: 10px;">

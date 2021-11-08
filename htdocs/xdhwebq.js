@@ -17,10 +17,19 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// Displays some debug log when uncommented.
+// Can be activated programmatically with 'atlastk.debugLog()'.
+// var debugLog = true;
+
 var before = 0;
 var cgi = "";
 var session = "";
 var target = "";
+
+// By using 'geval' instead of directly 'eval',
+// variable defined in the 'geval' executed script
+// are of global scope, instead of local scope…
+var geval = eval
 
 const exit = {
 	values : {
@@ -28,7 +37,7 @@ const exit = {
 	// If below is modified, also modify the 'ErrorScript' entry in the 'xdhwebq.xcfg" file.
 	TOKEN: 1,		// Token does not exists.
 	BACKEND: 2,	// Backend has been shut down.
-	SOCKET: 3,	// Socket has been closed (websocket timeout, for example.).
+	SOCKET: 3,	// Socket has been closed (websocket timeout, for example).
 	},
 	messages : {
 		NONE: `
@@ -54,6 +63,9 @@ var queryInProgress = false;
 var queryQueue = [];
 
 function log(message) {
+	if ( ( typeof debugLog === 'undefined' ) || !debugLog)
+		return;
+
 	if (navigator.userAgent.search("Edge") === -1)	// MS Edge web browser does not like too much log messages...
 		console.log(message);
 }
@@ -72,11 +84,11 @@ var socket;
 function launchEvent(digest) {
 	if (queryInProgress) {
 		if (digest !== queryQueue[queryQueue.length - 1]) {
-			console.log("Queued: ", digest);
+			log("Queued: ", digest);
 			queryQueue.push(digest);
 		}
 	} else {
-		console.log("Sent: ", digest);
+		log("Sent: ", digest);
 		queryInProgress = true;
 		socket.send(digest);
 	}
@@ -110,18 +122,17 @@ function connect(token, id) {
 				exitValue = exit.values.BACKEND;
 				socket.close();	// Launches 'onclose' event.
 			} else {
-				log("Executed:", event.data);
-				let result = eval(event.data);
-				//			console.log(event.data);
+				log("Executed:" + event.data);
+				let result = geval(event.data);
 
 				if ((typeof result !== "undefined") && (typeof result !== "object"))	// 'typeof result !== "object"' == 'result != null' !!!!
 					socket.send(result);
 			}
 		} else if (queryQueue.length) {
-			console.log("Unqueued:", queryQueue[0]);
+			log("Unqueued:", queryQueue[0]);
 			socket.send(queryQueue.shift());
 		} else {
-			console.log("Standby !");
+			log("Standby !");
 			queryInProgress = false;
 		}
 	};

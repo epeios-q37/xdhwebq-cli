@@ -17,28 +17,9 @@
 	along with the Epeios framework.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#define BCH_COMPILATION_
+#define OSD_COMPILATION_
 
-#include "bch.h"
+#include "osd.h"
 
-#include "sdr.h"
+using namespace osd;
 
-using namespace bch;
-
-void bch::GetRelations_(
-	const uys::untyped_storage_ &Sorted,
-	const uys::untyped_storage_ &Unsorted,
-	sdr::size__ Size,
-	sdr::row_t__ Limit,
-	sdr::byte__ *Buffer,
-	E_BUNCH_( sdr::row__ ) &Relations )
-{
-	sdr::row_t__ Row = 0;
-
-	while ( Row < Limit ) {
-		Sorted.Recall( Row, Size, Buffer );
-		Relations.Append( Unsorted.Search( Buffer, Size, 0, Limit ) / Size );
-
-		Row += Size;
-	}
-}

@@ -35,11 +35,6 @@
 # include "dtfptb.h"
 # include "flsq.h"
 
-# ifndef IAS_INC_
-#  undef BCH_INC_
-#  include "ias.h"
-# else
-
 /*************************/
 /****** New version ******/
 /*************************/
@@ -106,7 +101,7 @@ namespace bch {
 			if ( Quantity > mng::Amount() )
 				Allouer_( Quantity, aem::m_Default );
 		}
-		bso::bool__ _AppendInsteadOfInsert(	row Row )
+		bso::bool__ AppendInsteadOfInsert_(	row Row )
 		{
 			return ( ( Row == qNIL ) || ( ( mng::Amount() == 0 ) && ( Row == 0 ) ) );
 		}
@@ -142,7 +137,7 @@ namespace bch {
 			sdr::size__ Size )
 		{
 			this->Init();
-			
+
 			StoreAndAdjust( Seed, Size );
 		}
 		//f Allocate 'Size' objects. Extent is forced to 'Size' when 'Mode' = 'mFitted'.
@@ -261,7 +256,7 @@ namespace bch {
 		//f Append the object 'Object'. Return the position where the object is put.
 		row Append( const type &Object )
 		{
-			return Append( &Object, 1 );
+			return Append( &Object, (sdr::sSize)1 );
 		}
 		//f Append 'Amount' 'Object's. Return the position where appended.
 		void Append(
@@ -300,6 +295,19 @@ namespace bch {
 			row Position = 0 )
 		{
 			return Append( Bunch, Bunch.Amount() - *Position, Position );
+		}
+		template <typename a> row AppendMulti(const a &Alone)
+		{
+			return Append(Alone);
+		}
+		template <typename f, typename ...o> row AppendMulti(
+			const f &First,
+			const o & ...Others )
+		{
+			row Row = Append(First);
+			AppendMulti(Others...);
+
+			return Row;
 		}
 		// Les mthodes 'Add(...)' sont l pour faciliter interchangeabilit avec les object du module 'lstbch'.
 		row Add( const type *Buffer )
@@ -370,7 +378,7 @@ namespace bch {
 			row RowSource,
 			row Row = 0 )
 		{
-			if ( _AppendInsteadOfInsert( Row ) )
+			if ( AppendInsteadOfInsert_( Row ) )
 				Append( Source, Amount, RowSource );
 			else
 				InsertAt_( Source, Amount, *RowSource, *Row );
@@ -387,7 +395,7 @@ namespace bch {
 			sdr::size__ Amount,
 			row Row = 0 )
 		{
-			if ( _AppendInsteadOfInsert( Row ) )
+			if ( AppendInsteadOfInsert_( Row ) )
 				Append( Source, Amount );
 			else
 				InsertAt_( Source, Amount, *Row );
@@ -618,7 +626,7 @@ namespace bch {
 		}
 		void plug( sHook &Hook )
 		{
-			aem::size__ Amount = Hook.D.Size() / sizeof( type );
+			aem::size__ Amount = Hook.Size() / sizeof( type );
 
 			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::plug( Hook );
 
@@ -637,17 +645,6 @@ namespace bch {
 		{
 			return *this;
 		}
-/*		void Init( void )
-		{
-			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::Init();
-		}
-		void Init(
-			const type *Seed,
-			sdr::size__ Size )
-		{
-			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::Init( Seed, Size );
-		}
-		*/
 	};
 
 	E_AUTO3( bunch )
@@ -675,7 +672,7 @@ namespace bch {
 	typedef E_BUNCH_( sdr::row__ ) relations_;
 	E_AUTO( relations )
 
-	void _GetRelations(
+	void GetRelations_(
 		const uys::untyped_storage_ &Sorted,
 		const uys::untyped_storage_ &Unsorted,
 		sdr::size__ Size,
@@ -772,7 +769,7 @@ namespace bch {
 	public:
 		struct s
 		: public _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >::s {} S_;
-		_bunch__( void ) 
+		_bunch__( void )
 		: _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >( S_ ) {}
 		_bunch__ &operator =( const _bunch__ &S )
 		{
@@ -804,12 +801,12 @@ namespace bch {
 	public:
 		struct s
 		: public _bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::s {} S_;
-		_bunch___( void ) 
+		_bunch___( void )
 		: _bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >( S_ ) {}
 		_bunch___ &operator =( const _bunch___ &S )
 		{
 			_bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::StoreAndAdjust( S, S.Amount_ );
-	
+
 			return *this;
 		}
 		void Init( void )
@@ -855,7 +852,5 @@ namespace bch {
 		return Row;
 	}
 }
-
-# endif
 
 #endif
