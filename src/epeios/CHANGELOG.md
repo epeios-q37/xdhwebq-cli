@@ -10,6 +10,22 @@
 - [trvl]: trivial modifications;
 - [warn]: fixing compiler warning messages;
 
+## 2021-12-08
+- MTX, THT: `Lock()` returns now `true` when it as not alreay locked,
+- XDHDWS: fixing bug callback being desroyed while being used (in another thread),
+- XDHCDC, XDHUPS: adding locker to avoid above bug,
+
+## 2021-11-26
+- XDHCMN: removing thing unrelated to FaaS from `faas` namespace,
+- XDHDWS: [trvl],
+
+## 2021-11-24
+- CSDCMN: adding `GetVersion(…)`
+
+## 2021-11-18
+- SCLX:  [adpt],
+- XDHDWS: introducing the handling of the API version,
+
 ## 2021-10-31
 - XDHCUC: introducing the `Success` parameter, needed to fix some looping issue,
 - XDHDWS: [adpt],
