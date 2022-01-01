@@ -123,7 +123,7 @@ qRB
 	qRFwk();
 #else
 	Command.Init( LAUNCH_COMMAND " \"" );
-	
+
 	Buffer.Init();
 	Command.Append( Document.UTF8( Buffer ) );
 
@@ -136,7 +136,7 @@ qRT
 qRE
 }
 
-#ifdef TOL__WIN		
+#ifdef TOL__WIN
 LARGE_INTEGER	tol::_TickFrequence;
 #else
 static const char *PosixCoreDateAndTime_(
@@ -234,7 +234,7 @@ const char *tol::UUIDGen( bUUID &UUID )
 	// http://stackoverflow.com/questions/2174768/generating-random-uuids-in-linux
 	// Modified, because, with the original, the size of the UUID can vary.
 
-	sprintf(UUID, "%04x%04x-%04x-%04x-%04x-%04x%04x%04x", 
+	sprintf(UUID, "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
 		rand()&0xffff, rand()&0xffff,
 		rand()&0xffff,
 		((rand() & 0x0fff) | 0x4000),
@@ -264,59 +264,120 @@ qRE
 }
 
 namespace {
-	tht::rLocker EnvLocker_;
+  namespace {
+    namespace {
+      tht::rLocker EnvLocker_;
 
-	bso::sBool GetEnv_(
-		const ntvstr::sChar *Name,
-		ntvstr::rString &Value )
-	{
-		ntvstr::sChar *Result = NULL;
+      ntvstr::sChar *TUGetEnv_(const ntvstr::sChar *Name)
+      {
+   #ifdef CPE_S_WIN
+        return _wgetenv( Name );
+    #elif defined( CPE_S_POSIX )
+        return getenv( Name );
+    #else
+    #  error
+    #endif
+      }
+    }
 
-		EnvLocker_.Lock();
+    bso::sBool EnvExists_(const ntvstr::sChar *Name)
+    {
+      bso::sBool Exists = false;
 
-#ifdef CPE_S_WIN 
-		Result = _wgetenv( Name );
-#elif defined( CPE_S_POSIX )
-		Result = getenv( Name );
-#else
-#  error
-#endif
+      EnvLocker_.Lock();
 
-		if ( Result != NULL )
-			Value.Init( Result );
+      Exists = TUGetEnv_(Name) != NULL;
 
-		EnvLocker_.Unlock();
+      EnvLocker_.Unlock();
 
-		return Result != NULL;
-	}
+      return Exists;
+    }
+
+    bso::sBool GetEnv_(
+      const ntvstr::sChar *Name,
+      ntvstr::rString &Value )
+    {
+      ntvstr::sChar *Result = NULL;
+
+      EnvLocker_.Lock();
+
+      Result = TUGetEnv_(Name);
+
+      if ( Result != NULL )
+        Value.Init( Result );
+
+      EnvLocker_.Unlock();
+
+      return Result != NULL;
+    }
+  }
+
+  template <typename sc> bso::sBool EnvExists_(const sc &Name)
+  {
+    bso::sBool Found = false;
+  qRH
+    ntvstr::rString NativeName;
+  qRB
+    NativeName.Init( Name );
+
+    Found =  EnvExists_(NativeName.Internal());
+  qRR
+  qRT
+  qRE
+    return Found;
+  }
+
+  template <typename sc> bso::sBool GetEnv_(
+    const sc &Name,
+    str::dString &Value )
+  {
+    bso::sBool Found = false;
+  qRH
+    ntvstr::rString NativeName, NativeValue;
+  qRB
+    NativeName.Init( Name );
+    NativeValue.Init();
+
+    if ( GetEnv_( NativeName.Internal(), NativeValue ) ) {
+      NativeValue.UTF8( Value );
+      Found = true;
+    }
+  qRR
+  qRT
+  qRE
+    return Found;
+  }
+}
+
+bso::sBool tol::EnvExists(const str::dString &Name)
+{
+  return EnvExists_(Name);
+}
+
+bso::sBool tol::EnvExists(const char *Name)
+{
+  return EnvExists_(Name);
 }
 
 bso::sBool tol::GetEnv(
 	const str::dString &Name,
 	str::dString &Value )
 {
-	bso::sBool Found = false;
-qRH
-	ntvstr::rString NativeName, NativeValue;
-qRB
-	NativeName.Init( Name );
-	NativeValue.Init();
+  return GetEnv_(Name, Value);
+}
 
-	if ( GetEnv_( NativeName.Internal(), NativeValue ) ) {
-		NativeValue.UTF8( Value );
-		Found = true;
-	}
-qRR
-qRT
-qRE
-	return Found;
+bso::sBool tol::GetEnv(
+	const char *Name,
+	str::dString &Value )
+{
+  return GetEnv_(Name, Value);
 }
 
 Q37_GCTOR( tol )
 {
 	SetSystemCommandAvailabitity_();
 	EnvLocker_.Init();
-#ifdef TOL__WIN		
+#ifdef TOL__WIN
 	if ( QueryPerformanceFrequency( &tol::_TickFrequence ) == 0 )
 		qRSys();
 #elif defined( TOL__DARWIN)

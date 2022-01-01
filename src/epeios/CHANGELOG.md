@@ -10,6 +10,31 @@
 - [trvl]: trivial modifications;
 - [warn]: fixing compiler warning messages;
 
+## 2021-12-31
+- SCLX: adding log features,
+- TOL: improving environment variables handling,
+
+## 2021-12-30
+- SCLX: [stdz],
+
+## 2021-12-28
+- SCLX, XDHCMN, XDHCDC, XDHDWS, XDHUPS: chaging handling of scripts version,
+
+## 2021-12-27
+- SCLX, XDHCDC : [adpt],
+- XDHCMN: fixing typo,
+- XDHUPS: splitting to simplify use with *FaaSq*,
+
+## 2021-12-26
+- XDHBRD, XDHCDC, XDHCMN, XDHDWS, XDHUPS: [adpt],
+- XDHCUC: upstream handles now primitives, and no more raw scripts,
+
+## 2021-12-25
+- TOL: new variant of `GetEnv(…)`,
+
+## 2021-12-24
+- SCLX: [adpt],
+
 ## 2021-12-08
 - MTX, THT: `Lock()` returns now `true` when it as not alreay locked,
 - XDHDWS: fixing bug callback being desroyed while being used (in another thread),

@@ -2347,10 +2347,25 @@ namespace tol {
 
 	/* End 'Init' serialization */
 
+	bso::sBool EnvExists(const str::dString &Name);
+
+	bso::sBool EnvExists(const char *Name);
+
 	// 'false' if env var doesn't exist.
 	bso::sBool GetEnv(
 		const str::dString &Name,
 		str::dString &Value );
+
+	// 'false' if env var doesn't exist.
+	bso::sBool GetEnv(
+		const char *Name,
+		str::dString &Value );
+
+  // Returns true if in dev environment.
+  inline bso::sBool IsDev(void)
+  {
+    return EnvExists("Q37_EPEIOS");
+  }
 
 	template <typename row, typename container> inline row Search(
 		const str::dString &ID,
