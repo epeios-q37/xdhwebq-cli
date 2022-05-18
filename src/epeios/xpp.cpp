@@ -181,8 +181,8 @@ void xpp::_qualified_preprocessor_directives___::Init( const str::string_ &Names
 	CypherTag.Init( NamespaceWithSeparator );
 	CypherTag.Append( CYPHER_TAG );
 
-	_AttributeAttribute.Init( NamespaceWithSeparator );
-	_AttributeAttribute.Append( ATTRIBUTE_ATTRIBUTE );
+	AttributeAttribute.Init( NamespaceWithSeparator );
+	AttributeAttribute.Append( ATTRIBUTE_ATTRIBUTE );
 
 	MarkerAttribute.Init( NamespaceWithSeparator );
 	MarkerAttribute.Append( MARKER_ATTRIBUTE );
@@ -235,7 +235,7 @@ enum directive__ {
 	dCData,
 	dSet,
 	dCypher,
-	d_Attribute,
+	dAttribute,
 	dMarker,
 	d_amount,
 	d_Undefined
@@ -265,8 +265,8 @@ static inline directive__ GetDirective_(
 			Directive = dSet;
 		else if ( Directives.CypherTag == Name )
 			Directive = dCypher;
-		else if ( Directives._AttributeAttribute == Name )
-			Directive = d_Attribute;
+		else if ( Directives.AttributeAttribute == Name )
+			Directive = dAttribute;
 		else if ( Directives.MarkerAttribute == Name )
 			Directive = dMarker;
 		else
@@ -324,17 +324,11 @@ static status__ GetDefineNameAttributeValue_(
 	return sOK;
 }
 
-void Dump_(
+inline void Dump_(
 	const str::string_ &Data,
 	flw::oflow__ &Flow )
 {
-qRH
-	TOL_CBUFFER___ Buffer;
-qRB
-	Flow.Write( Data.Convert( Buffer ), Data.Amount() );
-qRR
-qRT
-qRE
+  Data.WriteToFlow(Flow, false);
 }
 
 static status__ RetrieveTree_(
@@ -442,6 +436,8 @@ qRB
 
 	if ( ( Status = GetDefineNameAndContent_( _Parser, Name, Content ) ) == sOK )
 		_Repository.Store( Name, Position, _LocalizedFileName, Content );
+
+  _Parser.PurgeDumpData();
 qRR
 qRT
 qRE
@@ -490,7 +486,7 @@ qRE
 	return Type;
 }
 
-typedef tagsbs::long_tags_callback__ ltcallback_;
+typedef tagsbs::cLongTagsString ltcallback_;
 
 class attribute_value_substitution_callback
 : public ltcallback_
@@ -499,16 +495,27 @@ private:
 	qCRMV( _variables_, V_, Variables_ );
 	qCRMV( fnm::name___, S_, SelfPath_ );
 protected:
-	virtual bso::bool__ TAGSBSGetTagValue(
+	virtual bso::bool__ TAGSBSHandleTag(
 		const str::string_ &Tag,
-		str::string_ &Value ) override
-	{
-		return GetValue_(V_(), Tag, S_(), Value );
-	}
+		flw::rWFlow &Output) override
+		{
+		  bso::sBool Found = false;
+		qRH;
+		  str::wString Value;
+		qRB;
+      Value.Init();
+
+      // '( ( … ) ) ' to avoid warning.
+      if ( ( Found = GetValue_(V_(), Tag, S_(), Value) ) )
+        Value.WriteToFlow(Output,false);
+		qRR;
+		qRT;
+		qRE;
+      return Found;
+		}
 public:
 	void reset( bso::bool__ P = true )
 	{
-		ltcallback_::reset( P );
 		Variables_ = NULL;
 		SelfPath_ = NULL;
 
@@ -518,7 +525,6 @@ public:
 		const _variables_ &Variables,
 		const fnm::name___ &SelfPath )
 	{
-		ltcallback_::Init();
 		Variables_ = &Variables;
 		SelfPath_ = &SelfPath;
 	}
@@ -687,7 +693,6 @@ qRB
 		Status = AwaitingToken_( _Parser, xml::tEndTag, sMustBeEmpty );
 
 	_Parser.PurgeDumpData();
-
 qRR
 qRT
 qRE
@@ -1191,34 +1196,36 @@ status__ xpp::_extended_parser___::_InitCypher(
 	return Init( _XFlow, FileName, Directory, CypherKey, Preserve, SubstitutionMarker );
 }
 
-
-static bso::bool__ StripHeadingSpaces_(
-	xml::token__ PreviousToken,
-	const xml::parser___ &Parser,
-	const str::string_ &NamespaceWithSeparator )
-{
-	return ( PreviousToken == xml::tValue )
-		   || ( ( PreviousToken == xml::tEndTag )
-		      && ( BelongsToNamespace_( Parser.TagName(), NamespaceWithSeparator )
-			  || ( Parser.Token() == xml::tEndTag ) ) );
-}
-
-static void StripHeadingSpaces_( str::string_ &Data )
-{
-	while ( ( Data.First() != qNIL ) && ( isspace( Data( Data.First() ) ) ) )
-		Data.Remove( Data.First() );
-}
-
 #define CDATA_NESTING_MAX	BSO_UINT_MAX
+
+namespace {
+  inline void AppendUpToAttributeValueDelimiter_(
+    const str::dString &Source,
+    bso::sChar Delimiter,
+    str::dString &Target)
+  {
+    sdr::sRow Position = Source.Search(Delimiter);
+
+    if ( Position == qNIL )
+      qRFwk();
+
+    if ( Position == Source.First() )
+      qRFwk();
+
+    Target.Append(Source, (sdr::sSize)(*Position + 1));
+  }
+}
 
 status__ xpp::_extended_parser___::Handle(
 	_extended_parser___ *&Parser,
-	str::string_ &Data )
+	str::string_ &Data,
+	bso::sBool SwitchedParser)
 {
 	status__ Status = s_Undefined;
-	bso::bool__ Continue = true;
-	xml::token__ PreviousToken = xml::t_Undefined;
-	bso::bool__ StripHeadingSpaces = false;
+	bso::bool__
+    Continue = true,
+    IsDirectiveEndTag = SwitchedParser,
+    WasDirectiveEndTag = false;
 	directive__ Directive = d_Undefined;
 
 	Parser = NULL;
@@ -1230,7 +1237,9 @@ status__ xpp::_extended_parser___::Handle(
 
 	while ( Continue ) {
 		Continue = false;
-		PreviousToken = _Parser.Token();
+		WasDirectiveEndTag = IsDirectiveEndTag;
+		IsDirectiveEndTag = false;
+
 		switch ( _Parser.Parse() ) {
 		case  xml::tProcessingInstruction:
 			if ( _IgnorePreprocessingInstruction ) {
@@ -1270,6 +1279,8 @@ status__ xpp::_extended_parser___::Handle(
 				default:
 					Status = HandlePreprocessorDirective_( Directive, Parser );
 
+					IsDirectiveEndTag = true;
+
 					if ( Parser == NULL )
 						Continue = true;
 					break;
@@ -1285,18 +1296,17 @@ status__ xpp::_extended_parser___::Handle(
 					switch ( GetDirective_( _Parser.AttributeName(), _Directives, PreservationLevel_ ) ) {
 					case dNone:
 						if ( Marker_() != 0 ) {
+							AppendUpToAttributeValueDelimiter_(_Parser.DumpData(), _Parser.AttributeDelimiter(), Data);
 							_Parser.PurgeDumpData();
-							Data.Append (_Parser.AttributeName() );
-							Data.Append( "=\"") ;
-							Status = HandleAttributeValueSubstitution_( _Parser.Value(), Marker_(), Data );
-							Data.Append('"');
+							Status = HandleAttributeValueSubstitution_(_Parser.Value(), Marker_(), Data);
+							Data.Append(_Parser.AttributeDelimiter());
 						} else
 							Status = sOK;
 						break;
 					case dUnknown:
 						Status = sUnknownDirective;
 						break;
-					case d_Attribute:
+					case dAttribute:
 						_Parser.PurgeDumpData();
 						Status = HandleAttributeDirective_( _Parser.Value(), Parser, Data );
 						break;
@@ -1323,17 +1333,17 @@ status__ xpp::_extended_parser___::Handle(
 						} else
 							Status = sOK;
 					} else if ( _Parser.AttributeName() == BLOC_TAG_MARKER_ATTRIBUTE ) {
-					    if ( PreservationLevel_ == 0 ) {
-                            status__ IntermediateStatus = HandleMarkerDirective_( _Parser.Value(), Parser );
+            if ( PreservationLevel_ == 0 ) {
+              status__ IntermediateStatus = HandleMarkerDirective_( _Parser.Value(), Parser );
 
-                            if ( IntermediateStatus == sOK) {
-                                Continue = true;
-                            } else
-                                Status = IntermediateStatus;
-                        } else
-                            Status = sOK;
-					} else
-						Status = sUnexpectedAttribute;
+              if ( IntermediateStatus == sOK) {
+                  Continue = true;
+              } else
+                  Status = IntermediateStatus;
+            } else
+                Status = sOK;
+            } else
+              Status = sUnexpectedAttribute;
 					break;
 				case dCData:
 					Status = sUnexpectedAttribute;
@@ -1360,7 +1370,6 @@ status__ xpp::_extended_parser___::Handle(
 					break;
 				}
 			}
-
 			Status = sOK;
 			break;
 		case xml::tStartTagClosed:
@@ -1377,7 +1386,6 @@ status__ xpp::_extended_parser___::Handle(
 					Data.Append( "<![CDATA[" );
 
 				_CDataNesting++;
-				StripHeadingSpaces = true;
 				break;
 			case dBloc:
 				if ( PreservationLevel_ > 1 )
@@ -1399,9 +1407,9 @@ status__ xpp::_extended_parser___::Handle(
 		case xml::tEndTag:
 			switch ( GetDirective_( _Parser.TagName(), _Directives, PreservationLevel_ ) ) {
 			case dNone:
-				if ( _CDataNesting == 0 )
-					StripHeadingSpaces = StripHeadingSpaces_( PreviousToken, _Parser, _Directives.NamespaceWithSeparator );
 				Status = sOK;
+				if ( WasDirectiveEndTag)
+          _Parser.TrimDumpDataHeadingSpaces();
 				break;
 			case dCData:
 				switch ( _CDataNesting ) {
@@ -1410,7 +1418,8 @@ status__ xpp::_extended_parser___::Handle(
 					break;
 				case 1:
 					Continue = true;
-					Data.Append( "]]>" );
+          IsDirectiveEndTag = true;
+          Data.Append( "]]>" );
 					break;
 				default:
 					Status = sOK;
@@ -1419,7 +1428,7 @@ status__ xpp::_extended_parser___::Handle(
 				_CDataNesting--;
 				break;
 			case dBloc:
-				if ( PreservationLevel_ != 0 ) {
+        if ( PreservationLevel_ != 0 ) {
 					PreservationLevel_--;
 					if ( PreservationLevel_ > 0 ) {
 						Status = sOK;
@@ -1430,13 +1439,15 @@ status__ xpp::_extended_parser___::Handle(
 			// fall through
 			case dCypher:
 				if ( _CDataNesting == 0 ) {
-					StripHeadingSpaces = StripHeadingSpaces_( PreviousToken, _Parser, _Directives.NamespaceWithSeparator );
 					Continue = true;
+          IsDirectiveEndTag = true;
 				} else
 					Status = sOK;
 				break;
 			case dExpand:
-				Status = sOK;
+			  IsDirectiveEndTag = true;
+			  Continue = true;
+				// Status = sOK;
 				break;
 			default:
 				qRFwk();
@@ -1482,9 +1493,6 @@ status__ xpp::_extended_parser___::Handle(
 
 	if ( Parser == NULL ) {
 		Data.Append( _Parser.DumpData() );
-
-		if ( StripHeadingSpaces )
-			StripHeadingSpaces_( Data );
 	}
 
 	return Status;
@@ -1514,7 +1522,7 @@ sdr::size__ xpp::_preprocessing_iflow_driver___::FDRRead(
 
 		Parser = NULL;
 
-		Status_ = _Parser().Handle( Parser, _Data );
+		Status_ = _Parser().Handle(Parser, _Data, false);
 
 		while ( Status_ == s_Pending ) {
 #ifdef XPP_DBG
@@ -1535,7 +1543,7 @@ sdr::size__ xpp::_preprocessing_iflow_driver___::FDRRead(
 				}
 
 			if ( Status_ == s_Pending )
-				Status_ = _Parser().Handle( Parser, _Data );
+				Status_ = _Parser().Handle(Parser, _Data, true);
 			} else {
 				Maximum = 0;	// Pour sortir de la boucle.
 				Status_ = (xpp::status__)xml::sOK;

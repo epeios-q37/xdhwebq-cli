@@ -80,10 +80,10 @@ qRT
 qRE
 }
 
-static status__ SkipSpaces_( _flow___ &Flow )
+static status__ SkipSpaces_(_flow___ &Flow)
 {
 	while ( !Flow.EndOfFlow() && isspace( Flow.View() ) )
-		Flow.Get();
+    Flow.Get();
 
 	if ( Flow.EndOfFlow() )
 		return sUnexpectedEOF;
@@ -509,12 +509,12 @@ static status__ GetAttribute_(
 		return sUnexpectedCharacter;
 	}
 
-	HANDLE( SkipSpaces_( Flow ) );
+	HANDLE( SkipSpaces_(Flow) );
 
 	if ( Flow.Get() != '=' )
 		return sMissingEqualSign;
 
-	HANDLE( SkipSpaces_( Flow ) );
+  HANDLE( SkipSpaces_(Flow) );
 
 	Delimiter = Flow.Get();
 
@@ -561,6 +561,16 @@ inline static bso::bool__ IsSpecialAttribute_( const str::string_ &Attribute )
 		return false;
 
 	return true;
+}
+
+namespace {
+  inline bso::sBool IsDualEOL_(
+    bso::sChar First,
+    bso::sChar Second )
+  {
+    return ( ( First == '\r') && ( Second == '\n' ) )
+             || ( ( First == '\n' ) && ( Second == '\r') );
+  }
 }
 
 #undef HANDLE
@@ -697,9 +707,14 @@ qRB
 					if ( _Flow.EndOfFlow() )
 						RETURN( sUnexpectedEOF );
 
-					// Pour faciliter la localisation d'une erreur.
-					if ( isspace( _Flow.View() ) )
-						_Flow.Get();
+					// To facilitate localization of errors.
+					if ( isspace( _Flow.View() ) ) {
+						bso::sChar C = _Flow.Get();
+
+						if ( !_Flow.EndOfFlow() )
+              if ( IsDualEOL_(C, _Flow.View() ) )
+                _Flow.Get();
+					}
 
 					if ( ( 1 << _Token ) & TokenToReport )
 						Continue = false;

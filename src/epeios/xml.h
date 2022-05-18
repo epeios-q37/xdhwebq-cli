@@ -627,7 +627,17 @@ namespace xml {
 			else
 				Data.Append( Dump.Data );
 		}
-		void PurgeData( void )
+		void TrimHeadingSpaces(void)
+		{
+		  sdr::sRow Row = Data.First();
+
+      while ( ( Row != qNIL ) && isspace(Data(Row)) )
+        Row = Data.Next(Row);
+
+      if ( Row != qNIL )
+        Data.Crop(Row, Data.Last());
+		}
+    void PurgeData( void )
 		{
 			Init();
 		}
@@ -694,6 +704,10 @@ namespace xml {
 				qRFree();
 
 			return EOFlow;
+		}
+		void TrimHeadingSpaces(void)
+		{
+		  Dump.TrimHeadingSpaces();
 		}
 		void Purge( void )
 		{
@@ -891,6 +905,10 @@ namespace xml {
 		{
 			return _Flow.Dump.Data;
 		}
+		void TrimDumpDataHeadingSpaces(void)
+		{
+		  _Flow.Dump.TrimHeadingSpaces();
+		}
 		void PurgeDumpData( void )
 		{
 			_Flow.Dump.PurgeData();
@@ -940,13 +958,13 @@ namespace xml {
 		virtual bso::bool__ XMLAttribute(
 			const str::string_ &TagName,
 			const str::string_ &Name,
-			bso::sChar Delimiter,
+			bso::sChar AttributeDelimiter,
 			const str::string_ &Value,
 			const dump_ &Dump ) = 0;
 		virtual bso::bool__ XMLSpecialAttribute(
 			const str::string_ &TagName,
 			const str::string_ &Name,
-			bso::sChar Delimiter,
+			bso::sChar AttributeDelimiter,
 			const str::string_ &Value,
 			const dump_ &Dump )
 		{

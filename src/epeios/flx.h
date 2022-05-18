@@ -83,9 +83,9 @@ namespace flx {
 	typedef string_text_oflow___ rStringTOFlow;
 	typedef rStringTOFlow rStringTWFlow;
 
-	class string_text_iflow___;
-	typedef string_text_iflow___ rStringTIFlow;
-	typedef rStringTIFlow rStringTIFlow;
+	class string_text_iflow__;
+	typedef string_text_iflow__ sStringTIFlow;
+	typedef sStringTIFlow sStringTRFlow;
 
 	class string_text_oflow___;
 	typedef string_text_oflow___ rStringTOFlow;
@@ -1464,9 +1464,9 @@ namespace flx {
 		}
 	};
 
-	typedef _exec_flow___<flw::standalone_iflow__<>, exec_iflow_driver___> exec_iflow__;
+	typedef _exec_flow___<flw::standalone_iflow__<>, exec_iflow_driver___> exec_iflow___;
 
-	typedef _exec_flow___<flw::standalone_oflow__<>, exec_oflow_driver___> exec_oflow__;
+	typedef _exec_flow___<flw::standalone_oflow__<>, exec_oflow_driver___> exec_oflow___;
 }
 
 /***************/
@@ -1758,7 +1758,7 @@ namespace flx {
 		{
 			if ( Head_ != 0 ) {
 				if ( Amount_ != 0 )
-					memmove( Buffer_, Buffer_+ Head_, Amount_ );
+					memmove( Buffer_, Buffer_ + Head_, Amount_ );
 				Head_ = 0;
 			}
 		}
@@ -1804,7 +1804,7 @@ namespace flx {
 			fdr::sSize Size )
 		{
 			Locker_.Init();
-			Blocker_.Init( true );
+			Blocker_.Init();
 
 			Buffer_ = Buffer;
 
@@ -2088,6 +2088,12 @@ namespace flx {
 			return rASync_::Init( Relay_, Driver );
 		}
 	};
+
+	typedef exec_iflow_driver___ rExecRDriver;
+	typedef exec_oflow_driver___ rExecWDriver;
+
+	typedef exec_iflow___ rExecRFlow;
+	typedef exec_oflow___ rExecWFlow;
 
 	extern fdr::rRDriver &VoidRDriver;
 	extern fdr::rWDriver &VoidWDriver;

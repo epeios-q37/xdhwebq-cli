@@ -5,10 +5,120 @@
 - [adpt]: adaptation to changes in underlying modules;
 - [cont]: continuation of previous modifications;
 - [crtn]: creation;
+- [obvs]: obvious modifications;
 - [rvrt]: reverting modifications;
 - [stdz]: modification to comply with current standards;
 - [trvl]: trivial modifications;
+- [typo]: typography;
 - [warn]: fixing compiler warning messages;
+
+## 2022-05-17
+- XDHCMN: [cont],
+
+## 2022-05-16
+- XDHCMN: [cont],
+
+## 2022-05-14
+- XDHCMN: [typo],
+- XDHUPS:
+  - improving error management,
+  - changing marker for raw tag values in scripts to fit with modifications in *TAGSBS*.
+
+## 2022-05-12
+- XDHCMN: introducing new HTML's head section handling,
+
+## 2022-05-11
+- XDHUPS: [adpt],
+
+## 2022-04-24
+- CDGB64: [stdz],
+
+## 2022-03-17
+- XPP: [cont],
+
+## 2022-03-14
+- XML: [obvs],
+- XPP: [cont],
+
+## 2022-03-13
+- XPP: fixing spaces issue between tags.
+
+## 2022-03-11
+- JNIQ: adding missing functions,
+- N4JRE, SCLJRE: introducing `jCore`,
+- TOL: `qDELETE(pointer)` sets now pointer to `NULL`,
+
+## 2022-03-09
+- BCH:
+  - typo,
+  - adding method to avoid ambiguity,
+- RGSTRY: [adpt],
+- XML: [rvrt] betwwen attribute spaces,
+- XPP: [adpt],
+
+## 2022-03-08
+- XPP: fixing output layout,
+
+## 2022-03-06
+- RGSTRY: [adpt],
+- TOL: `qDELETE(Object)` returns now a boolean to indicate wether `Object` was or not set,
+- XML: fixing vanishing `\n` after `\r` after tag followed by attribute,
+- XPP: adding missing space between attributes in raw output,
+
+## 2022-03-04
+- XPP: [stdz],
+
+## 2022-02-26
+- N4ALL: introducing index handling,
+- N4ALLW, SCLN4A: [adpt],
+- SCLNJS: introducing `rObject_::GetP(…)`,
+
+## 2022-02-24
+- FDR: [stdz],
+- FLX: typo,
+
+## 2022-02-19
+- N4NJS: removing `cURStream`.
+- SCLNJS: [adpt],
+
+## 2022-02-18
+- THT: renaming blocker preset items,
+- TOL: introducing `qNEW(…]) and `qDELETE(…)`,
+
+## 2022-02-16
+- FLX: fixing first reading not blocked when no writing occured wirg *relay* object,
+- THT: using *enum* instead of *booleanù for blocker preset,
+
+## 2022-01-13
+- TAGSBS: fixing unknown tag not detected issue when at the vary end of the input flow,
+
+## 2022-01-12
+- DTFPTB: fixing typo,
+
+## 2022-01-08
+- SCLA, SCLL, XPP: [adpt],
+- TAGSBS:
+  - [cont],
+  - limiting tag label to ASCCII letters, digits and '_'.
+- TXMTBL: fixing UTF issue,
+
+## 2022-01-07
+- XTF: [stdz],
+- TAGSBS:
+  - using 'xtf' flow insted of 'flw' one,
+  - new callback,
+
+## 2022-01-06
+- LCL, RGSTRY, SCLA, SCLI, XPP: [adpt],
+- SCLM, SXLR: adding char related functions,
+- TAGSBS:
+  - [stdz],
+  - callbacks handles now flow, so the substitutions are done on-the-fly, reducing memory footprint,
+
+## 2022-01-05
+- FLX:
+  - fixing typo,
+  - [stdz],
 
 ## 2021-12-31
 - SCLX: adding log features,
@@ -4138,35 +4248,45 @@
 [adpt]:#Adaptation
 [cont]:#Continuation
 [crtn]:#Creation
+[obvs]:#Obvious
 [rvrt]:#Reverting
 [stdz]:#Standardization
 [trvl]:#Trivial
+[typo]:#Typography
 [warn]:#Warning
 
-### Adaptation
+### Adaptation (adpt)
 
 Adaptation to changes in underlying modules.
 
-### Continuation
+### Continuation (cont)
 
-Continuation of the modifications.
+Continuation of the in progress modifications.
 
-### Creation
+### Creation (crtn)
 
 Creation of the library.
 
-### Reverting
+### Obvious (obvs)
+
+Obvious modifications; look at source code diffs.
+
+### Reverting (rvrt)
 
 Reverting previous modifications.
 
-### Standardization
+### Standardization (stdz)
 
 Modification to comply with current standards.
 
-### Trivial
+### Trivial (trvl)
 
 Trivial modifications.
 
-### Warning
+### Typography
+
+Typographical error.
+
+### Warning (warn)
 
 Fixing warning message issued by compilers.

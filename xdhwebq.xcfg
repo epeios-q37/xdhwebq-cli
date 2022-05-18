@@ -23,14 +23,14 @@ reportClosing = false;
 exitValue = exit.values.TOKEN;
                 ]]>   </ErrorScript>
    <Scripts Version="0">
-    <Script name="@SetEventHandlers_1" Arguments="#Ids,#Events"><![CDATA[
+    <Script name="@SetEventHandlers_1" Arguments="_Ids,_Events"><![CDATA[
 {
-  setEventHandlers( %#Ids%, %#Events% );
+  setEventHandlers( %_Ids%, %_Events% );
 }
         ]]>    </Script>
-    <Script name="@InstantiateWidgets_1" Arguments="#Ids,#Types,#ParametersSets,#ContentRetrievingMethods,#FocusingMethods,#SelectionMethods"><![CDATA[
+    <Script name="@InstantiateWidgets_1" Arguments="_Ids,_Types,_ParametersSets,_ContentRetrievingMethods,_FocusingMethods,_SelectionMethods"><![CDATA[
 {
-  instantiateWidgets( %#Ids%, %#Types%, %#ParametersSets%, %#ContentRetrievingMethods%, %#FocusingMethods%, %#SelectionMethods% );
+  instantiateWidgets( %_Ids%, %_Types%, %_ParametersSets%, %_ContentRetrievingMethods%, %_FocusingMethods%, %_SelectionMethods% );
 }
         ]]>    </Script>
     <Script name="@BroadcastAction_1" Arguments="Action,Id"><![CDATA[
@@ -39,10 +39,10 @@ exitValue = exit.values.TOKEN;
 }
 		        ]]>    </Script>
     <Script name="@Quit_1" Arguments="">%%Quit</Script>
-    <Script name="RawSend_1" Arguments="#Data"><![CDATA[%#Data%]]>    </Script>
-    <Script name="Execute_1" Arguments="#Script"><![CDATA[
+    <Script name="RawSend_1" Arguments="_Data"><![CDATA[%_Data%]]>    </Script>
+    <Script name="Execute_1" Arguments="_Script"><![CDATA[
 {
-  %#Script%
+  %_Script%
 }
         ]]>    </Script>
     <Script name="Alert_1" Arguments="Message"><![CDATA[
@@ -88,59 +88,59 @@ exitValue = exit.values.TOKEN;
   digests;  // Not returned to user. Splitted and given after processing to 'SetEnventHandlers_1' and  InstantiateWidgets_1' above internal scripts.
 }
         ]]>    </Script>
-    <Script name="GetContents_1" Arguments="#Ids"><![CDATA[
+    <Script name="GetContents_1" Arguments="_Ids"><![CDATA[
 {
-  getContents(%#Ids%);
+  getContents(%_Ids%);
 }
         ]]>    </Script>
-    <Script name="SetContents_1" Arguments="#Ids,#Contents"><![CDATA[
+    <Script name="SetContents_1" Arguments="_Ids,_Contents"><![CDATA[
 {
-  setContents( %#Ids%, %#Contents% );
+  setContents( %_Ids%, %_Contents% );
 }
         ]]>    </Script>
-    <Script name="GetValues_1" Arguments="#Ids"><![CDATA[
+    <Script name="GetValues_1" Arguments="_Ids"><![CDATA[
 {
-  getValues(%#Ids%);
+  getValues(%_Ids%);
 }
         ]]>    </Script>
-    <Script name="SetValues_1" Arguments="#Ids,#Values"><![CDATA[
+    <Script name="SetValues_1" Arguments="_Ids,_Values"><![CDATA[
 {
-  setValues( %#Ids%, %#Values% );
+  setValues( %_Ids%, %_Values% );
 }
         ]]>    </Script>
-    <Script name="GetMarks_1" Arguments="#Ids"><![CDATA[
+    <Script name="GetMarks_1" Arguments="_Ids"><![CDATA[
 {
-  getMarks(%#Ids%);
+  getMarks(%_Ids%);
 }
         ]]>    </Script>
-    <Script name="SetMarks_1" Arguments="#Ids,#Marks"><![CDATA[
+    <Script name="SetMarks_1" Arguments="_Ids,_Marks"><![CDATA[
 {
-  setMarks( %#Ids%, %#Marks% );
+  setMarks( %_Ids%, %_Marks% );
 }
         ]]>    </Script>
-    <Script name="HandleClasses_1" Arguments="Variant,#Ids,#Classes"><![CDATA[
+    <Script name="HandleClasses_1" Arguments="Variant,_Ids,_Classes"><![CDATA[
 {
   switch ( "%Variant%" ) {
   case 'Add':
-    addClasses(%#Ids%, %#Classes%);
+    addClasses(%_Ids%, %_Classes%);
     break;
   case 'Remove':
-    removeClasses(%#Ids%, %#Classes%);
+    removeClasses(%_Ids%, %_Classes%);
     break;
   case 'Toggle':
-    toggleClasses(%#Ids%, %#Classes%);
+    toggleClasses(%_Ids%, %_Classes%);
     break;
   }
 }
         ]]>    </Script>
-    <Script name="EnableElements_1" Arguments="#Ids"><![CDATA[
+    <Script name="EnableElements_1" Arguments="_Ids"><![CDATA[
 {
-  enableElements( %#Ids% );
+  enableElements( %_Ids% );
 }
         ]]>    </Script>
-    <Script name="DisableElements_1" Arguments="#Ids"><![CDATA[
+    <Script name="DisableElements_1" Arguments="_Ids"><![CDATA[
 {
-  disableElements( %#Ids% );
+  disableElements( %_Ids% );
 }
         ]]>    </Script>
     <Script name="SetAttribute_1" Arguments="Id,Name,Value"><![CDATA[
@@ -158,14 +158,14 @@ exitValue = exit.values.TOKEN;
   getElement( "%Id%" ).removeAttribute( "%Name%" );
 }
         ]]>    </Script>
-    <Script name="SetProperty_1" Arguments="Id,#Name,#Value"><![CDATA[
+    <Script name="SetProperty_1" Arguments="Id,_Name,_Value"><![CDATA[
 {
-  getElement( "%Id%" ).%#Name% = %#Value%;
+  getElement( "%Id%" ).%_Name% = %_Value%;
 }
         ]]>    </Script>
-    <Script name="GetProperty_1" Arguments="Id,#Name"><![CDATA[
+    <Script name="GetProperty_1" Arguments="Id,_Name"><![CDATA[
 {
-  getElement( "%Id%" ).%#Name%;
+  getElement( "%Id%" ).%_Name%;
 }
         ]]>    </Script>
     <Script name="Focus_1" Arguments="Id"><![CDATA[

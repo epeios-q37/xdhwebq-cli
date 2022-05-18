@@ -929,7 +929,7 @@ namespace {
 		virtual bso::bool__ XMLAttribute(
 			const str::string_ &TagName,
 			const str::string_ &Name,
-			bso::sChar Delimiter,
+			bso::sChar AttributeDelimiter,
 			const str::string_ &Value,
 			const xml::dump_ &Dump ) override
 		{
@@ -1782,7 +1782,7 @@ const str::string_ &rgstry::entry___::_GetPath(
 {
 qRH
 	str::string Buffer;
-	tagsbs::short_tags_callback__ *TagSubstitutionCallback = NULL;
+	tagsbs::cShortTags *TagSubstitutionCallback = NULL;
 qRB
 	Buffer.Init( _Path );
 

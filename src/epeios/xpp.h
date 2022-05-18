@@ -48,17 +48,12 @@
 #endif
 
 /*************/
-/**** OLD ****/
+/**** NEW ****/
 /*************/
 
 namespace xpp {
-
-	typedef bso::uint__ level__;	// Imbrication level.
-
-	#define XPP_LEVEL_MAX	BSO_UINT_MAX
-
-	// NOTA : Si modifi�, modifier 'GetTranslation()' en cons�quent, ainsi que le contenu du ficher 'xpp.xlcl'.
-	enum status__ {
+	// NOTA : if modified, modify also 'GetTranslation()', and the content of thez 'xpp.xlcl' file.
+	qENUM(Status) {
 		sOK = xml::sOK,
 		sNoTagsAllowedHere = xml::s_amount,
 		sUnexpectedValue,
@@ -90,6 +85,20 @@ namespace xpp {
 		s_Undefined,
 		s_Pending,
 	};
+}
+
+/*************/
+/**** OLD ****/
+/*************/
+
+
+namespace xpp {
+
+	typedef bso::uint__ level__;	// Imbrication level.
+
+	#define XPP_LEVEL_MAX	BSO_UINT_MAX
+
+	typedef eStatus status__;
 
 	inline status__ _Convert( xml::status__ Status )
 	{
@@ -187,7 +196,7 @@ namespace xpp {
 		str::string BlocTag;
 		str::string CDataTag;
 		str::string CypherTag;
-		str::string _AttributeAttribute;	//'<tag xpp:attribute="..." ...>'//
+		str::string AttributeAttribute;	//'<tag xpp:attribute="..." ...>'//
 		str::string MarkerAttribute;	//'<tag xpp:marker="..." ...>'//
 		str::string XMLNS;	// <... xmlns:xpp="..." ...> ('xpp' ou ce qui a �t� choisi par l'utilisateur ...).
 		void reset( bso::bool__ P = true )
@@ -200,7 +209,7 @@ namespace xpp {
 			IfeqTag.reset( P );
 			BlocTag.reset( P );
 			CDataTag.reset( P );
-			_AttributeAttribute.reset( P );
+			AttributeAttribute.reset( P );
 			MarkerAttribute.reset( P );
 			MarkerAttribute.reset( P );
 			XMLNS.reset( P );
@@ -641,7 +650,8 @@ namespace xpp {
 		}
 		status__ Handle(
 			_extended_parser___ *&Parser,
-			str::string_ &Data );
+			str::string_ &Data,
+			bso::sBool SwitchedParser);
 		xtf::extended_text_iflow__ &Flow( void )
 		{
 			return _Parser.Flow();
