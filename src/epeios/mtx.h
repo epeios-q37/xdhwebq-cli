@@ -38,12 +38,22 @@
 #  undef system
 # endif
 
+# ifdef rand
+#  define MTX_RAND_BUFFER_ rand
+#  undef rand
+# endif
+
 # include <condition_variable>
-# include <mutex>	// Before 'tol.h', otherwise they may be some conflict.
+# include <mutex>
 
 # ifdef MTX_SYSTEM_BUFFER_
 #  define system MTX_SYSTEM_BUFFER_
 #  undef MTX_SYSTEM_BUFFER_
+# endif
+
+# ifdef MTX_RAND_BUFFER_
+#  define rand MTX_SYSTEM_BUFFER_
+#  undef MTX_RAND_BUFFER_
 # endif
 
 
@@ -319,6 +329,10 @@ namespace mtx {
 		{
 			Init( Handler, true );
 		}
+		bso::sBool IsInitialized(void) const
+		{
+		  return Handler_ != NULL;
+		}
 		bso::bool__ TryToLock( tol::sDelay TimeOut = 0 )	// Returns 'true' if lock successful, or return false after timeout.
 		{
 			return mtx::TryToLock( H_(), TimeOut );
@@ -327,9 +341,7 @@ namespace mtx {
 		{
 			return mtx::Lock( H_() );
 		}
-		bso::sBool Lock(
-			handler___ Handler,
-			tol::sDelay TimeOut )	// Returns 'true' as soon as the lock succeeds, or false if timeout expired.
+		bso::sBool Lock(tol::sDelay TimeOut)	// Returns 'true' as soon as the lock succeeds, or false if timeout expired.
 		{
 			return mtx::Lock( H_(), TimeOut );
 		}

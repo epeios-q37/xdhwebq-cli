@@ -333,30 +333,33 @@ namespace tht {
 		qRT;
 		qRE;
 		}
-		void Wait( void )
+		// NOTA: rearms also the blocker.
+		// Returns true if had to wait, or false if it returned immediately.
+		bso::sBool Wait( void )
 		{
+		  bso::sBool HadToWait = false;
 		qRH
-			mtx::rHandle Mutex;
+			mtx::rHandle Guard;
 		qRB
-			Mutex.InitAndLock( Local_ );
+			Guard.InitAndLock( Local_ );
 
-			if ( mtx::TryToLock( Main_ ) )
-				mtx::Unlock( Main_ );
-			else
-				Mutex.Unlock();
-
-			mtx::Lock( Main_ );
+			if ( !mtx::TryToLock( Main_ ) ) {
+				Guard.reset(); // Ublocks and also avoid mutex unlocking on destruction when locked by other thread.
+        mtx::Lock(Main_);
+        HadToWait = true;
+      }
 		qRR
 		qRT
 		qRE
+      return HadToWait;
 		}
 		bso::sBool IsBlocked(void)
 		{
 			bso::sBool Blocked = false;
 		qRH
-			mtx::rHandle Mutex;
+			mtx::rHandle Guard;
 		qRB
-			Mutex.InitAndLock( Local_ );
+			Guard.InitAndLock( Local_ );
 
 			Blocked = mtx::IsLocked(Main_);
 		qRR
@@ -364,25 +367,24 @@ namespace tht {
 		qRE
 			return Blocked;
 		}
-		void Unblock( void )
+		// Returns true if it was blocked, false otherwise.
+		bso::sBool Unblock(void)
 		{
+		  bso::sBool WasBlocked = false;
 		qRH
-//			mtx::rMutex Mutex;	// Can not be used, because the destructor could be called after destruction of underlying mutes.
-			bso::sBool Locked = false;
+			mtx::rHandle Guard;
 		qRB
-			mtx::Lock( Local_ );
-			Locked = true;
+			Guard.InitAndLock(Local_);
 
-			if ( mtx::IsLocked( Main_ ) ) {
-				mtx::Unlock( Local_ );
-				Locked = false;
-				mtx::Unlock( Main_ );
+			if ( mtx::IsLocked(Main_) ) {
+				Guard.reset(); // Unlocks and also avoid calling the destructor with underlying mutexes already destroyed..
+				mtx::Unlock(Main_);
+				WasBlocked = true;
 			}
 		qRR
 		qRT
-			if ( Locked )
-				mtx::Unlock( Local_ );
 		qRE
+      return WasBlocked;
 		}
 	};
 

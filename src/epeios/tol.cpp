@@ -227,22 +227,7 @@ static inline void SetSystemCommandAvailabitity_( void )
 		SystemCommandIsAvailable_ = xbFalse;
 }
 
-const char *tol::UUIDGen( bUUID &UUID )
-{
-	InitializeRandomGenerator();
 
-	// http://stackoverflow.com/questions/2174768/generating-random-uuids-in-linux
-	// Modified, because, with the original, the size of the UUID can vary.
-
-	sprintf(UUID, "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
-		rand()&0xffff, rand()&0xffff,
-		rand()&0xffff,
-		((rand() & 0x0fff) | 0x4000),
-		rand() % 0x3fff + 0x8000,
-		rand()&0xffff, rand()&0xffff, rand()&0xffff);
-
-	return UUID;
-}
 
 namespace {
 	void Crash_( str::dString )
@@ -373,10 +358,11 @@ bso::sBool tol::GetEnv(
   return GetEnv_(Name, Value);
 }
 
-Q37_GCTOR( tol )
+qGCTOR( tol )
 {
 	SetSystemCommandAvailabitity_();
 	EnvLocker_.Init();
+
 #ifdef TOL__WIN
 	if ( QueryPerformanceFrequency( &tol::_TickFrequence ) == 0 )
 		qRSys();

@@ -12,6 +12,45 @@
 - [typo]: typography;
 - [warn]: fixing compiler warning messages;
 
+## 2022-06-25
+- MTX: fixing compilation isssues with *FreeBSD*;
+
+## 2022-06-24
+- RND, TOL: moving random generation stuff from *TOL* to newly creaeted module *RND*;
+- TOL ranaming `CPq` in `qCP`;
+
+## 2022-06-23
+- THT: `rBlocker::Wait()` and `rBlocker::Unblock()` return now a boolean, to facilate debugging;
+
+## 2022-06-22
+- TOL: introducing `Rand()` to deal with the non thread-safety of `rand()`;
+
+## 2022-06-21
+- MTX:
+  - fixing bad function declaration in `rHandle`;
+  - adding `rHandle::IsInitialized(…)`;
+
+## 2022-06-20
+- TOL:
+  - adding 'qMIMICr(…)'
+  - adding operator '()' to `MIMIC…` macros;
+
+## 2022-06-06
+- CSDBNS:
+  - using `inet_ntop(…)` instead of deprecated `inet_ntoa(…)`;
+  - changing the handling of the 'IP' parameter, to prevent problems in multi-threading;
+
+## 2022-06-03
+- CPE: adaptation to *FreeBSD*;
+- DIR: adaptation to *FreeBSD*;
+- MNS: fixing some -Wewtra` warnings;
+
+## 2022-05-31
+- THT: improvong blocker's rearming feature;
+
+## 2022-05-30
+- MTX: fixing innapropriate mutex unlocking;
+
 ## 2022-05-17
 - XDHCMN: [cont],
 
@@ -83,11 +122,11 @@
 
 ## 2022-02-18
 - THT: renaming blocker preset items,
-- TOL: introducing `qNEW(…]) and `qDELETE(…)`,
+- TOL: introducing `qNEW(…])` and `qDELETE(…)`,
 
 ## 2022-02-16
-- FLX: fixing first reading not blocked when no writing occured wirg *relay* object,
-- THT: using *enum* instead of *booleanù for blocker preset,
+- FLX: fixing first reading not blocked when no writing occured with *relay* object,
+- THT: using *enum* instead of *boolean* for blocker preset,
 
 ## 2022-01-13
 - TAGSBS: fixing unknown tag not detected issue when at the vary end of the input flow,
