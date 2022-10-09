@@ -5,19 +5,108 @@
 - [adpt]: adaptation to changes in underlying modules;
 - [cont]: continuation of previous modifications;
 - [crtn]: creation;
+- [extn]: extension;
 - [obvs]: obvious modifications;
 - [rvrt]: reverting modifications;
-- [stdz]: modification to comply with current standards;
+- [stdz]: modification to comply with cusrrent standards;
 - [trvl]: trivial modifications;
 - [typo]: typography;
 - [warn]: fixing compiler warning messages;
 
+## 2022-09-30
+- SCLX: [extn];
+
+## 2022-09-29
+- SCLX: [extn];
+
+## 2022-09-28
+- FLX: improving `rExecDriver`;
+
+## 2022-09-27
+- MECMLD: [stdz];
+
+## 2022-09-25
+- MSCMLD: [cont];
+
+## 2022-09-24
+- MSCMLD: [cont];
+
+## 2022-09-23
+- MSCMLD: the default pitch is now the MIDI note,
+- TOL: adding `qCDEFC(…)`;
+
+## 2022-09-17
+- MTK: [cont];
+- MTX: introducing 'eBahvior';
+- THT: introducing 'eBlockerBahvior';
+
+## 2022-09-16
+- MTK, MTX, THT: [cont];
+- THT: [cont];
+
+## 2022-09-15
+- ERR: 'qRPT tests now also bad 'err::handling__' value;
+- MTK: reports an error in the calling thread when, in the asynchrone thread:
+  - the routine returns without releasing the shared data,
+  - an error occurs before the shared data were released;
+- MTX:
+  - replacing `sFree` by existing but not used `s(_)Release`,
+  - introducing `IsLockedFlag`;
+- THT: introducing `IsBockedFlag`;
+
+## 2022-09-13
+- CSDBNC:
+  - [stdz],
+  - some extra testing,
+
+## 2022-09-09
+- SCLS: [crtn];
+- SCLX: moving all the frontend/backend stuff to *SCLS*:
+
+## 2022-08-19
+- STR: introducing `sPos::sPos(sdr::sRow)`;
+- MSCMDX: [adpt];
+
+## 2022-08-01
+- MSCMDM: fixing 64 bits issues;
+
+## 2022-07-31
+- FLSQ, FLW, MSCMDD, OSD: fixing *VC++* issues;
+
+## 2022-07-30
+- FLSQ, LST, OSD, RGSTRY, SCLR, TOL: [adpt];
+- FLW, STR: [cont];
+- SDR: [stdz];
+
+## 2022-07-29
+- FDR: adding `rRDriver::Skip(…)`;
+- FLW: implmenting number conversion;
+- RGSTRY: [adpt];
+- STR: moving number conversion to 'FDR' and using it;
+
+## 2022-07-26
+- MSCMDD: reoganization of devices fetching;
+- MSCMDM: [stdz];
+
+## 2022-07-24
+- STSFSM:
+  - introducing `sParser::Reset()`,
+  - [stdz];
+
+## 2022-07-23
+- MSCMDD: coding;
+- RGSTRY: [adpt];
+- STR: adding returning boolean for error detection to error position for number conversion;
+
+## 2022-07-15
+- MSCMDD: [adpt];
+
 ## 2022-06-25
-- MTX: fixing compilation isssues with *FreeBSD*;
+- MTX: fixing compilation issues with *FreeBSD*;
 
 ## 2022-06-24
 - RND, TOL: moving random generation stuff from *TOL* to newly creaeted module *RND*;
-- TOL ranaming `CPq` in `qCP`;
+- TOL: renaming `CPq` in `qCP`;
 
 ## 2022-06-23
 - THT: `rBlocker::Wait()` and `rBlocker::Unblock()` return now a boolean, to facilate debugging;
@@ -43,7 +132,7 @@
 ## 2022-06-03
 - CPE: adaptation to *FreeBSD*;
 - DIR: adaptation to *FreeBSD*;
-- MNS: fixing some -Wewtra` warnings;
+- MNS: fixing some *-Wewtra* warnings;
 
 ## 2022-05-31
 - THT: improvong blocker's rearming feature;
@@ -4287,6 +4376,7 @@
 [adpt]:#Adaptation
 [cont]:#Continuation
 [crtn]:#Creation
+[extn]:#Extension
 [obvs]:#Obvious
 [rvrt]:#Reverting
 [stdz]:#Standardization
@@ -4305,6 +4395,10 @@ Continuation of the in progress modifications.
 ### Creation (crtn)
 
 Creation of the library.
+
+### Extension
+
+The library is extended.
 
 ### Obvious (obvs)
 

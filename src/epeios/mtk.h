@@ -83,7 +83,7 @@ typedef void (* mtk__routine)(void *);
 namespace mtk {
     // Called on final error handling, before quitting the thread.
     // NOT called with 'Raw!launchAndKill' (hence the reminder).
-    extern void (* MTKErrorHandling)(void); // To override by user.
+  extern void (* MTKErrorHandling)(void); // To override by user.
 
 	typedef void (* routine__)(void *);
 
@@ -137,27 +137,59 @@ namespace mtk {
 	using tht::thread_id__;
 	using tht::GetTID;
 
+  struct rXBlocker_
+  {
+  public:
+    tht::rBlocker Blocker;
+    bso::sBool Error;
+    void reset(bso::sBool P = true)
+    {
+      Blocker.reset(P);
+      Error = false;
+    }
+    qCDTOR(rXBlocker_);
+    void Init(void)
+    {
+      Blocker.Init();
+      Error = false;
+    }
+    void Release(void)
+    {
+      Blocker.Unblock();
+    }
+    bso::sBool Wait(void)
+    {
+      Blocker.Wait(tht::bbDismiss);
+
+      return !Error;
+    }
+  };
+
+
 	class gBlocker {
 	private:
-		qRMV( tht::rBlocker, B_, Blocker_ );
+		qRMV( rXBlocker_, B_, Blocker_ );
 	protected:
-		void Init( tht::rBlocker &Blocker )
+		bso::sBool IsBlocked_;
+		void Init(rXBlocker_ &Blocker)
 		{
 			Blocker_ = &Blocker;
+			B_().Blocker.SetIsBlockedFlag(&IsBlocked_);
 		}
 	public:
 		void reset( bso::sBool P = true )
 		{
 			tol::reset( P, Blocker_ );
+			IsBlocked_ = false;
 		}
 		qCDTOR( gBlocker );
 		void Release( void )
 		{
-			B_().Unblock();
+			B_().Release();
 		}
-		tht::rBlocker &Blocker(void)
+		tht::rBlocker &Blocker(void) const
 		{
-			return B_();
+		  return B_().Blocker;
 		}
 	};
 

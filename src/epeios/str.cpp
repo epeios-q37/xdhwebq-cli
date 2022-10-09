@@ -60,14 +60,6 @@ static inline int toxupper_( int C )
 	return toupper( GetAccentFree_( C ) );
 }
 
-static bso::u8__ Convert_( bso::char__ C )
-{
-	if ( isdigit( C ) )
-		return C - '0';
-	else
-		return tolower( C )- 'a' + 10;
-}
-
 template <class ostream> static void Put_(
 	const string_ &String,
 	ostream &OStream )		// Can be optimized by using a buffer.
@@ -347,6 +339,8 @@ sdr::row__ string_::Search(
 		return Start;
 }
 
+// Moved to 'FLW'
+#if 0
 template <typename uint> static uint GenericUnsignedConversion_(
 	const str::string_ &String,
 	sdr::row__ Begin,
@@ -434,26 +428,84 @@ template <typename sint, typename uint> sint GenericSignedConversion_(
 	else
 		return (sint)GenericUnsignedConversion_( String, Begin, ErrP, Base, PositiveLimit );
 }
+#endif
 
-unsigned long long int str::_UConversion(
-	const str::string_ &String,
-	sdr::row__ Begin,
-	sdr::row__ *ErrP,
-	base__ BaseFlag,
-	unsigned long long int Limit )
-{
-	return GenericUnsignedConversion_( String, Begin, ErrP, BaseFlag, Limit );
+namespace {
+  namespace {
+    template <typename type, typename limit> sdr::sRow StringConversion_(
+      const str::string_ &String,
+      type &Number,
+      sPos Begin,
+      sBase Base,
+      limit Limit,
+      qRPN)
+    {
+      flx::sStringRFlow Flow;
+      bso::sBool IsError = false;
+
+      if ( Begin.Value() >= String.Amount() ) {
+        if ( qRPT )
+          qRFwk();
+        else
+          return false;
+      }
+
+      Flow.Init(String);
+      Flow.Skip(Begin.Value(), &IsError);
+
+      if ( IsError )
+        qRUnx();
+
+      if ( Flow.GetNumber(Number, Base, Limit, qRP) )
+        return qNIL;
+      else
+        return Flow.AmountRed();
+    }
+  }
+
+  template <typename type, typename limit> type StringConversion_(
+    const str::string_ &String,
+    sPos Begin,
+    sdr::row__ *ErrP,
+    sBase Base,
+    limit Limit)
+  {
+    type Result = 0;
+    sdr::sRow ErrorPointer = qNIL;
+
+    if ( ( ErrP != NULL ) && ( *ErrP != qNIL ) )
+      return 0;
+
+    if ( ( ErrorPointer = StringConversion_(String, Result, Begin, Base, Limit, qRPU ) ) != qNIL ) {
+      if ( ErrP != NULL )
+        *ErrP = ErrorPointer;
+      else
+        qRFwk();
+    }
+
+    return Result;
+  }
 }
 
-signed long long int str::_SConversion(
-	const class string_ &String,
-	sdr::row__ Begin,
+unsigned long long int str::UConversion(
+	const str::string_ &String,
+	sPos Begin,
 	sdr::row__ *ErrP,
-	base__ Base,
-	signed long long int PositiveLimit,
-	signed long long int NegativeLimit )
+	sBase Base,
+	sULimit<unsigned long long int> Limit)
 {
-	return GenericSignedConversion_<bso::s64__, bso::u64__>( String, Begin, ErrP, Base, PositiveLimit, NegativeLimit );
+  return StringConversion_<unsigned long long int, sULimit<unsigned long long int>>(String, Begin, ErrP, Base, Limit);
+}
+
+
+signed long long int str::SConversion(
+	const str::string_ &String,
+	sPos Begin,
+	sdr::row__ *ErrP,
+	sBase Base,
+	sSLimits<signed long long int> Limits)
+{
+  return StringConversion_<signed long long int, sSLimits<signed long long int>>(String, Begin, ErrP, Base, Limits);
 }
 /*
 uint__ str::_UIntConversion(

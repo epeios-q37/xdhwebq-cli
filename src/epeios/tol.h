@@ -95,7 +95,7 @@ namespace str {
 
 # define qXENUM( name, prefix )	typedef tol::extended_enum__<e##name##_, prefix##_False, prefix##_Error, prefix##_Undefined> e##name
 
-# define TOL_ROW_( name ) E_TMIMIC__( sdr::bRow, name )
+# define TOL_ROW_( name ) E_TMIMIC__( sdr::tRow, name )
 
 # define qROW( name ) TOL_ROW_( s##name )
 // Nota: although a static object, defining it as resource containing object
@@ -424,6 +424,7 @@ public:\
 	qCRM( type, method, variable )
 
 # define qCDEF( type, name, value ) const type name = value
+# define qCDEFC(name, value) qCDEF(char *, name, value)
 # define qCDEFS(name, value) qCDEF(str::wString, name, value)
 
 # define qFLAG( name, value )	qCDEF( bso::sFlag, f##name, 2 << ( value ) )

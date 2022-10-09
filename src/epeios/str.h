@@ -52,30 +52,101 @@ namespace str {
 		using bso::sint__;
 	}
 
-	enum base__
-	: bso::u8__
-	{
-		bAuto = 0,	// Dtermination automatique de la base (suivant le premier caractre).
-		b10 = 10,	// Base dcimale.
-		b16 = 16,	// Base hexadcimale.
-	};
+	using flw::sBase;
+	using flw::sULimit;
+	using flw::sSLimits;
 
 	class string_;	// Prdclaration.
 
-	long long unsigned _UConversion(
-		const class string_ &String,
-		sdr::row__ Begin,
-		sdr::row__ *ErrP,
-		base__ Base,
-		long long unsigned Limit );
+	typedef sdr::tRow tPos;
 
-	long long signed _SConversion(
+	struct sPos {
+  private:
+    tPos Value_;
+  public:
+    explicit sPos(tPos Value)
+    {
+      Value_ = Value;
+    }
+    sPos(sdr::sRow Row)
+    {
+      Value_ = *Row;
+    }
+    sdr::tRow Value(void) const
+    {
+      return Value_;
+    }
+	};
+
+	long long unsigned UConversion(
 		const class string_ &String,
-		sdr::row__ Begin,
+		sPos Begin,
 		sdr::row__ *ErrP,
-		base__ Base,
-		long long signed PositiveLimit,
-		long long signed NegativeLimit );
+		sBase Base,
+		sULimit<long long unsigned> Limit);
+
+	long long signed SConversion(
+		const class string_ &String,
+		sPos Begin,
+		sdr::row__ *ErrP,
+		sBase Base,
+		sSLimits<long long signed> Limits);
+
+  /* Both below fucntions facilitates the use of template. */
+
+	inline long long unsigned Conversion_(
+		const class string_ &String,
+		sPos Begin,
+		sdr::row__ *ErrP,
+		sBase Base,
+		sULimit<long long unsigned> Limit)
+  {
+    return UConversion(String, Begin, ErrP, Base, Limit);
+  }
+
+	inline long long signed Conversion_(
+		const class string_ &String,
+		sPos Begin,
+		sdr::row__ *ErrP,
+		sBase Base,
+		sSLimits<long long signed> Limits)
+  {
+    return SConversion(String, Begin, ErrP, Base, Limits);
+  }
+
+	template <typename limits, typename type> inline bso::sBool Conversion_(
+		const class string_ &String,
+		sPos Begin,
+		type &Number,
+		sBase Base,
+		limits Limits)
+  {
+    sdr::sRow ErrP = qNIL;
+
+    Number = (type)Conversion_(String, Begin, &ErrP, Base, Limits);
+
+    return ErrP == qNIL;
+  }
+
+	template <typename type> inline bso::sBool UConversion(
+		const class string_ &String,
+		sPos Begin,
+		type &Number,
+		sBase Base,
+		sULimit<type> Limit)
+  {
+    return Conversion_<sULimit<type>, type>(String, Begin, Number, Base, Limit);
+  }
+
+	template <typename type> inline bso::sBool SConversion(
+		const class string_ &String,
+		sPos Begin,
+		type &Number,
+		sBase Base,
+		sSLimits<type> Limits)
+  {
+    return Conversion_<sSLimits<type>, type>(String, Begin, Number, Base, Limits);
+  }
 
 	class _string_size_handler {
 	public:
@@ -220,82 +291,142 @@ namespace str {
 			sdr::row__ Start = 0 ) const;
 		// NOTA : Les mthodes 'ToNumber'(...)' facilitent la mise en oeuvre de 'template's.
 # define STR_UN( name, type, limit )\
-	type To##name(\
-			sdr::row__ Begin,\
+    type To##name(\
+			sPos Begin,\
 			sdr::row__ *ErrP = NULL,\
-			base__ Base = bAuto,\
-			type Limit = limit ) const\
+			sBase Base = sBase(),\
+			sULimit<type> Limit = sULimit<type>(limit) ) const\
 		{\
-			return (type)_U##Conversion( *this, Begin, ErrP, Base, Limit );\
+			return (type)UConversion(*this, Begin, ErrP, Base, Limit);\
+		}\
+    bso::sBool To##name(\
+			sPos Begin,\
+			type &Number,\
+			sBase Base = sBase(),\
+			sULimit<type> Limit = sULimit<type>(limit) ) const\
+		{\
+			return UConversion(*this, Begin, Number, Base, Limit);\
 		}\
 		type To##name(\
 			sdr::row__ *ErrP = NULL,\
-			base__ Base = bAuto,\
-			type Limit = limit ) const\
+			sBase Base = sBase(),\
+			sULimit<type> Limit = sULimit<type>(limit) ) const\
 		{\
-			return To##name( 0, ErrP, Base, Limit );\
+			return To##name(sPos(0), ErrP, Base, Limit);\
+		}\
+		bso::sBool To##name(\
+			type &Number,\
+			sBase Base = sBase(),\
+			sULimit<type> Limit = sULimit<type>(limit) ) const\
+		{\
+			return To##name(sPos(0), Number, Base, Limit);\
 		}
 # define STR_TUN( type, limit )\
 		void ToNumber( \
-			   type &Number, \
-			   sdr::row__ *Error = NULL ) const\
+     type &Number,\
+     sdr::row__ *Error) const\
 		{\
-			Number = (type)_UConversion( *this, 0, Error, bAuto, limit );\
+			Number = (type)UConversion(*this, sPos(0), Error, sBase(), sULimit<type>(limit));\
+		}\
+		bso::sBool ToNumber(type &Number) const\
+		{\
+			return UConversion(*this, sPos(0), Number, sBase(), sULimit<type>(limit));\
 		}\
 		void ToNumber(\
 			type &Number,\
-			type Limit,\
-			sdr::row__ *Error = NULL ) const\
+			sULimit<type> Limit,\
+			sdr::row__ *Error) const\
 		{\
-			Number = (type)_UConversion( *this, 0, Error, bAuto, Limit );\
+			Number = (type)UConversion(*this, sPos(0), Error, sBase(), Limit);\
+		}\
+		bso::sBool ToNumber(\
+			type &Number,\
+			sULimit<type> Limit) const\
+		{\
+			return UConversion(*this, sPos(0), Number, sBase(), Limit);\
 		}\
 		void ToNumber(\
 			type &Number,\
-			sdr::row__ Begin,\
-			sdr::row__ *Error = NULL ) const\
+			sPos Begin,\
+			sdr::row__ *Error) const\
 		{\
-			Number = (type)_UConversion( *this, Begin, Error, bAuto, limit );\
+			Number = (type)UConversion(*this, Begin, Error, sBase(), sULimit<type>(limit));\
+		}\
+		bso::sBool ToNumber(\
+			type &Number,\
+			sPos Begin) const\
+		{\
+			return UConversion(*this, Begin, Number, sBase(), sULimit<type>(limit));\
 		}\
 		void ToNumber(\
 			type &Number,\
-			type Limit,\
-			sdr::row__ Begin,\
-			sdr::row__ *Error = NULL ) const\
+			sULimit<type> Limit,\
+			sPos Begin,\
+			sdr::row__ *Error) const\
 		{\
-			Number = (type)_UConversion( *this, Begin, Error, bAuto, Limit );\
+			Number = (type)UConversion(*this, Begin, Error, sBase(), Limit);\
+		}\
+		bso::sBool ToNumber(\
+			type &Number,\
+			sULimit<type> Limit,\
+			sPos Begin) const\
+		{\
+			return UConversion(*this, Begin, Number, sBase(), Limit);\
 		}
-# define STR_SN( name, type, positive_limit, negative_limit )\
-	type To##name(\
-			sdr::row__ Begin,\
+# define STR_SN( name, type, upper_limit, lower_limit )\
+    type To##name(\
+			sPos Begin,\
 			sdr::row__ *ErrP,\
-			base__ Base,\
-			type PositiveLimit = positive_limit,\
-			type NegativeLimit = negative_limit ) const\
+			sBase Base,\
+			sSLimits<type> Limits = sSLimits<type>(upper_limit, lower_limit)) const\
 		{\
-			return (type)_SConversion( *this, Begin, ErrP, Base, PositiveLimit, NegativeLimit );\
+			return (type)SConversion(*this, Begin, ErrP, Base, Limits);\
+		}\
+    bso::sBool To##name(\
+			sPos Begin,\
+			type &Number,\
+			sBase Base,\
+			sSLimits<type> Limits = sSLimits<type>(upper_limit, lower_limit)) const\
+		{\
+			return SConversion<type>(*this, Begin, Number, Base, Limits);\
 		}\
 		type To##name(\
 			sdr::row__ *ErrP = NULL,\
-			base__ Base = bAuto,\
-			type PositiveLimit = positive_limit,\
-			type NegativeLimit = negative_limit ) const\
+			sBase Base = sBase(),\
+			sSLimits<type> Limits = sSLimits<type>(upper_limit, lower_limit)) const\
 		{\
-			return To##name( 0, ErrP, Base, PositiveLimit, NegativeLimit );\
+			return To##name(sPos(0), ErrP, Base, Limits);\
+		}\
+		bso::sBool To##name(\
+			type &Number,\
+			sBase Base = sBase(),\
+			sSLimits<type> Limits = sSLimits<type>(upper_limit, lower_limit)) const\
+		{\
+			return To##name(sPos(0), Number, Base, Limits);\
 		}
-# define STR_TSN( type, negative_limit, positive_limit )\
+# define STR_TSN( type, lower_limit, upper_limit )\
 		void ToNumber(\
 			type &Number,\
-			sdr::row__ *Error = NULL ) const\
+			sdr::row__ *Error) const\
 		{\
-			Number = (type)_SConversion( *this, 0, Error, bAuto, positive_limit, negative_limit );\
+			Number = (type)SConversion(*this, sPos(0), Error, sBase(), sSLimits<type>(upper_limit, lower_limit));\
+		}\
+		bso::sBool ToNumber(type &Number) const\
+		{\
+			return SConversion(*this, sPos(0), Number, sBase(), sSLimits<type>(upper_limit, lower_limit));\
 		}\
 		void ToNumber(\
 			type &Number,\
-			type PositiveLimit,\
-			type NegativeLimit,\
-			sdr::row__ *Error = NULL ) const\
+			sSLimits<type> Limits,\
+			sdr::row__ *Error) const\
 		{\
-			Number = (type)_SConversion( *this, 0, Error, bAuto, PositiveLimit, NegativeLimit );\
+			Number = (type)SConversion(*this, sPos(0), Error, sBase(), Limits);\
+		}\
+		bso::sBool ToNumber(\
+			type &Number,\
+			sSLimits<type> Limits) const\
+		{\
+			return SConversion(*this, sPos(0), Number, sBase(), Limits);\
 		}
 		STR_UN( Row, sdr::row_t__, SDR_ROW_T_MAX )
 		STR_UN( UInt, bso::uint__, BSO_UINT_MAX )
@@ -325,9 +456,9 @@ namespace str {
 		void *ToPointer( sdr::row__ *ErrP = NULL )
 		{
 # ifdef CPE_F_64BITS
-			return (void *)ToU64( ErrP, str::b16 );
+			return (void *)ToU64( ErrP, sBase() );
 # elif defined ( CPE_F_32BITS )
-			return (void *)ToU32( ErrP, str::b16 );
+			return (void *)ToU32( ErrP, sBase() );
 # else
 #  error "Unknown integer natural size !"
 # endif
@@ -702,6 +833,11 @@ namespace str {
 namespace str {
 	typedef string_ dString;
 	typedef string wString;
+
+	namespace {
+		using bso::sUInt;
+		using bso::sSInt;
+	}
 
 	template <typename row> class dTStrings_
 	: public tstrings_<row>

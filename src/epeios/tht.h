@@ -285,6 +285,14 @@ namespace tht {
 	  bp_Default = bpLock
 	};
 
+	qENUM(BlockerBehavior) {
+	  bbRearm, // The blocker is rearmed,
+	  bbDismiss,  // Blocker is not reamed.
+	  bb_amount,
+	  bb_Undefined,
+	  bb_Default = bbRearm
+	};
+
   // Block a thread until another unblocks it.
 	class rBlocker {
 	private:
@@ -313,14 +321,16 @@ namespace tht {
 			Local_ = Main_ = mtx::Undefined;
 		}
 		qCDTOR( rBlocker );
-		void Init(eBlockerPreset Preset = bp_Default)
+		void Init(
+      eBlockerPreset Preset = bp_Default,
+      bso::sBool *IsBlockedFlag = NULL)
 		{
 		qRH;
 		qRB;
 			ReleaseMutexes_();
 
 			Local_ = mtx::Create();
-			Main_ = mtx::Create();
+			Main_ = mtx::Create(IsBlockedFlag);
 
 			if ( Preset >= bp_amount )
         qRFwk();
@@ -333,9 +343,17 @@ namespace tht {
 		qRT;
 		qRE;
 		}
+		void Init(bso::sBool *IsBlockedFlag)
+		{
+		  return Init(bp_Default, IsBlockedFlag);
+		}
+		void SetIsBlockedFlag(bso::sBool *IsBlockedFlag)
+		{
+      mtx::SetIsLockedFlag(Main_, IsBlockedFlag);
+		}
 		// NOTA: rearms also the blocker.
 		// Returns true if had to wait, or false if it returned immediately.
-		bso::sBool Wait( void )
+		bso::sBool Wait(eBlockerBehavior Behavior = bb_Default)
 		{
 		  bso::sBool HadToWait = false;
 		qRH
@@ -343,9 +361,9 @@ namespace tht {
 		qRB
 			Guard.InitAndLock( Local_ );
 
-			if ( !mtx::TryToLock( Main_ ) ) {
+			if ( !mtx::TryToLock(Main_, Behavior == bbDismiss ? mtx::bRelease : mtx::bKeep) ) {
 				Guard.reset(); // Ublocks and also avoid mutex unlocking on destruction when locked by other thread.
-        mtx::Lock(Main_);
+        mtx::Lock(Main_, Behavior == bbDismiss ? mtx::bRelease : mtx::bKeep);
         HadToWait = true;
       }
 		qRR

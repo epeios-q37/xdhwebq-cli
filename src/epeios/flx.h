@@ -447,9 +447,15 @@ namespace flx {
 			_tiflow__::reset( P );
 		}
 		E_CVDTOR( string_text_iflow__ );
-		void Init( str::string_ &Target )
+		string_text_iflow__(const str::dString &Source)
 		{
-			_Flow.Init( Target );
+		  reset(false);
+
+		  Init(Source);
+		}
+		void Init(const str::string_ &Source)
+		{
+			_Flow.Init(Source);
 			_tiflow__::Init( _Flow );
 		}
 	};
@@ -563,6 +569,12 @@ namespace flx {
 			_toflow__::reset( P );
 		}
 		E_CVDTOR( string_text_oflow___ );
+		string_text_oflow___(str::dString &Target)
+		{
+		  reset(false);
+
+		  Init(Target);
+		}
 		void Init( str::string_ &Target )
 		{
 			_Flow.Init( Target );
@@ -1375,6 +1387,7 @@ namespace flx {
 #  error
 # endif
 
+	// Unlike 'exec_iflow_friver___', this one does NOT send a 'EOF' after command was executed (at least under POSIX).
 	class exec_ioflow_driver___
 	: public _ioflow_driver___<>
 	{
@@ -2091,9 +2104,11 @@ namespace flx {
 
 	typedef exec_iflow_driver___ rExecRDriver;
 	typedef exec_oflow_driver___ rExecWDriver;
+	typedef exec_ioflow_driver___ rExecDriver;
 
 	typedef exec_iflow___ rExecRFlow;
 	typedef exec_oflow___ rExecWFlow;
+	typedef exec_ioflow_driver___ rExecFlow;
 
 	extern fdr::rRDriver &VoidRDriver;
 	extern fdr::rWDriver &VoidWDriver;
