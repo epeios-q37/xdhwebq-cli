@@ -34,7 +34,7 @@ $out='
 		}
 		function adjust() {
 			let iframe = window.parent.document.body.firstElementChild.firstElementChild;
-			iframe.height = "1";
+			iframe.height = "1px";
 			iframe.height = iframe.contentWindow.document.body.scrollHeight + \'px\';
 		}
 	</script>
@@ -61,7 +61,7 @@ $out='
 			box-shadow: 3px 3px 4px black;
 		}
 
-		@keyframes fadeInDown {
+		@keyframes fadeIn {
 			0% {
 				opacity: 0;
 				transform: scale(0);
@@ -74,7 +74,7 @@ $out='
 		}
 
 		details[open] {
-			animation-name: fadeInDown;
+			animation-name: fadeIn;
 			animation-duration: 1s;
 		}
 	</style>	

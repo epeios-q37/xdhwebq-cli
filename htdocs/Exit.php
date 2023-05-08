@@ -26,8 +26,8 @@ $out = <<<EOS
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<script>
 		function adjust() {
-			let iframe = window.parent.document.body.firstElementChild.firstElementChild.firstElementChild;
-			iframe.height = "1"
+			let iframe = window.parent.document.body.firstElementChild.firstElementChild;
+//			iframe.height = "10px"
 			iframe.height = iframe.contentWindow.document.body.scrollHeight + 'px';
 		}
 	</script>
