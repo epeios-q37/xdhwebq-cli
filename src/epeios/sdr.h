@@ -89,6 +89,13 @@ namespace sdr {
 	// Unit of digital information, without any intrinsec signification.
 	using bso::byte__;
 
+	qENUM( Type )	{
+		tVolatile,
+		tPersistent,
+		t_amount,
+		t_Undefined
+	};
+
 	//c Abstract storage driver. Use 'E_STORAGE_DRIVER__' instead directly this class.
 	class storage_driver__
 	{
@@ -103,10 +110,11 @@ namespace sdr {
 		ou, si non initialise (fichier absent, par exemple), ou non persistente, retourne 0 */
 		virtual size__ SDRSize( void ) const = 0;
 		//v Recall 'Amount' at position 'Position' and put them in 'Buffer'.
-		virtual void SDRRecall(
+		virtual sSize SDRFetch(
 			row_t__ Position,
 			size__ Amount,
-			byte__ *Buffer ) = 0;
+			byte__ *Buffer,
+			qRPN) = 0;
 		//v Write 'Amount' bytes from 'Buffer' to storage at position 'Position'.
 		virtual void SDRStore(
 			const byte__ *Buffer,
@@ -130,15 +138,16 @@ namespace sdr {
 		//f Allocate 'Size' bytes in storage.
 		void Allocate( size__ Size )
 		{
-			SDRAllocate( Size );
+			return SDRAllocate( Size );
 		}
 		//f Recall 'Amount' at position 'Position' and put them into 'Buffer'. Return 'Buffer'.
-		void Recall(
+		sSize Fetch(
 			row_t__ Position,
 			size__ Amount,
-			byte__ *Buffer )
+			byte__ *Buffer,
+			qRPN)
 		{
-			SDRRecall( Position, Amount, Buffer );
+			return SDRFetch(Position, Amount, Buffer, qRP);
 		}
 		//f Store 'Amount' bytes from 'Buffer' at position 'Position'.
 		void Store(

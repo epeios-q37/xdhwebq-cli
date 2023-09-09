@@ -33,13 +33,13 @@ mods += fil flf flsq flw flx
 mods += fnm ias idsq iof iop 
 mods += lcl lck lst lstbch lstcrt 
 mods += lstctn mns mtk mtx ntvstr 
-mods += osd que rgstry sdr stkbse 
-mods += stkbch stkcrt stkctn str strng 
-mods += stsfsm tagsbs tht thtsub tol 
-mods += txf tys uys utf xml 
-mods += xpp xtf llio dlbrry plgn 
-mods += plgncore btr idxbtq idxbtr idxque 
-mods += sck sha1 strmrg websck 
+mods += osd que rgstry rnd sdr 
+mods += stkbse stkbch stkcrt stkctn str 
+mods += strng stsfsm tagsbs tht thtsub 
+mods += tol txf tys uys utf 
+mods += xml xpp xtf llio dlbrry 
+mods += plgn plgncore btr idxbtq idxbtr 
+mods += idxque sck sha1 strmrg websck 
 mods += csdbns csdcmn csdscb 
 mods += scla scli sclm scle scll 
 mods += sclr sclt 
@@ -406,8 +406,8 @@ ifeq ("$(os)","$(Android)")
 	mods += $(pmods)
 
 	libs += -lpthread -ldl -lrt
-	
-	ifeq ("$(target)","$(IA_32)")
+
+    ifeq ("$(target)","$(IA_32)")
 		co += -m32
 		lo += -m32
 	else # 'ifeq' on other line due to GNU 3.80 (Maemo on N900).
@@ -427,7 +427,7 @@ ifeq ("$(target)","$(Android)")
 	rm -rf *.d
 endif
 
-copt += -DVERSION=\""20220930"\"
+copt += -DVERSION=\""20230411"\"
 copt += -DCOPYRIGHT_YEARS=\""2017"\"
 copt += -DIDENTIFIER=\""effd756a-a901-46e8-939f-3f2a5e7986b0"\"
 

@@ -83,29 +83,30 @@ namespace ags {
 		descriptor__ &_Descriptor;
 		// memoire  laquelle il a t affect
 		class aggregated_storage_ *_AStorage;
-		void _Free( void );
+		void Free_(void);
 	protected:
-		virtual void SDRAllocate( sdr::size__ Size );
+		virtual void SDRAllocate( sdr::size__ Size ) override;
 		// Fonction dporte.
-		virtual sdr::size__ SDRSize( void ) const;
+		virtual sdr::size__ SDRSize( void ) const override;
 		// fonction dporte
 		// lit  partir de 'Position' et place dans 'Tampon' 'Nombre' octets;
-		virtual void SDRRecall(
+		virtual sdr::sSize SDRFetch(
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer );
+			sdr::byte__ *Buffer,
+			qRPN) override;
 		// fonction dporte
 		// crit 'Nombre' octets  la position 'Position'
 		virtual void SDRStore(
 			const sdr::byte__ *Buffer,
 			sdr::size__ Amount,
-			sdr::row_t__ Position );
+			sdr::row_t__ Position ) override;
 	public:
 		void reset( bool P = true )
 		{
 			if ( P ) {
 				if ( _AStorage != NULL )
-					_Free();
+					Free_();
 			} else
 				_AStorage = NULL;
 
@@ -778,12 +779,13 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 		{
 			return Storage.Size();
 		}
-		void _Read(
+		sdr::sSize _Read(
 			sdr::row_t__ Row,
 			size__ Size,
-			sdr::byte__ *Data ) const
+			sdr::byte__ *Data,
+			qRPN) const
 		{
-			Storage.Recall( Row, Size, Data );
+			return Storage.Fetch(Row, Size, Data, qRP);
 		}
 		void _Write(
 			const sdr::byte__ *Data,
@@ -808,7 +810,7 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 			if ( Amount == 0 )
 				qRFwk();
 
-			_Read( Row - Amount, Amount, Buffer );
+			_Read( Row - Amount, Amount, Buffer, qRPDefault );
 
 			return GetPriorMetaData( Pointer, Status, Header, Size );
 		}
@@ -836,9 +838,9 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 		}
 		void _Get(
 			sdr::row_t__ Row,
-			header__ &Header ) const
+			header__ &Header) const
 		{
-			_Read( Row, AGS_HEADER_SIZE, &*Header );
+			_Read(Row, AGS_HEADER_SIZE, &*Header, qRPDefault);
 		}
 		void _Set(
 			sdr::row_t__ Row,
@@ -903,9 +905,18 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 			bso::dint__ DSize;
 			size__ Limit = _Size() - Row;
 
-			_Read( Row, sizeof( DSize ) > Limit ? Limit : sizeof( DSize ), (sdr::byte__ *)&DSize );
+			sdr::sSize
+        Amount = 0,
+        Value = 0;
 
-			return ConvertValueToLongSize( bso::ConvertToInt( DSize, SizeLength ), Status );
+			Amount = _Read( Row, sizeof( DSize ) > Limit ? Limit : sizeof( DSize ), (sdr::byte__ *)&DSize, qRPUser);
+
+			Value = bso::ConvertToInt(DSize, SizeLength);
+
+			if ( Amount < SizeLength )
+        qRFwk();
+
+			return ConvertValueToLongSize(Value , Status);
 		}
 		void _GetMetaData(
 			sdr::row_t__ Row,
@@ -942,9 +953,9 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 
 			return Size + ( IsUsed( Header ) ? XHeaderLength : 0 );
 		}
-		size__ _GetSize( descriptor__ Descriptor ) const
+		size__ _GetSize(descriptor__ Descriptor) const
 		{
-			return _GetPriorSize( Descriptor );
+		  return _GetPriorSize(Descriptor);
 		}
 		bso::bool__ _IsLast( sdr::row_t__ Row ) const
 		{
@@ -1225,7 +1236,12 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 
 					NewDescriptor = NewRow + NewXHeader.MetaDataSize();
 
-					Storage.Store( Storage, OldSize, *NewDescriptor, *OldDescriptor );
+					if ( true || (OldDescriptor != NewDescriptor ) ) {
+            sdr::sSize OldPhysicalSize = Storage.PhysicalSize() - *OldDescriptor; // The physical size may be lesser than the theoretical size, if the storage is a file,
+                                              // so we must adjust the old fragment size to this physical size.
+
+            Storage.Store( Storage, OldSize > OldPhysicalSize ? OldPhysicalSize : OldSize, *NewDescriptor, *OldDescriptor );
+					}
 
 					_WriteHeadMetaData( NewRow, NewXHeader );
 
@@ -1420,9 +1436,10 @@ Si ce n'est plus le cas, alors il faut modifier cette fonction.
 			descriptor__ Descriptor,
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer ) const
+			sdr::byte__ *Buffer,
+			qRPD) const
 		{
-			Storage.Recall( *Descriptor + Position, Amount, Buffer );
+			Storage.Fetch(*Descriptor + Position, Amount, Buffer, qRP);
 		}
 		void Write(
 			const sdr::byte__ *Buffer,

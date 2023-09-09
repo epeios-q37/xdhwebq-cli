@@ -21,6 +21,8 @@
 
 #include "flw.h"
 
+#include <ctype.h>
+
 #ifdef FLW__IGNORE_SIGPIPE
 #	include <signal.h>
 #endif

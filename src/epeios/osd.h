@@ -48,15 +48,23 @@ namespace osd {
 		  if ( Storage_ == NULL )
         return 0;
 
-		  return S_().OSDSize();
+      sdr::sSize Size = S_().OSDSize();
+
+      if ( Size >= offset )
+        Size -= offset;
+      else if ( Size != 0 )
+        qRFwk();
+
+      return Size;
 		}
 		//v Recall 'Amount' at position 'Position' and put them in 'Buffer'.
-		virtual void SDRRecall(
+		virtual sdr::sSize SDRFetch(
 			sdr::tRow Position,
 			sdr::sSize Amount,
-			sdr::sByte *Buffer ) override
+			sdr::sByte *Buffer,
+			qRPN) override
     {
-        return S_().OSDRecall(Position + offset, Amount, Buffer);
+        return S_().OSDFetch(Position + offset, Amount, Buffer, qRP);
     }
 		//v Write 'Amount' bytes from 'Buffer' to storage at position 'Position'.
 		virtual void SDRStore(
@@ -83,19 +91,39 @@ namespace osd {
     {
       Init(&Storage);
     }
-    void Put(const sdr::sByte *Buffer)
+    void Put(
+      const sdr::sByte *Data,
+      sdr::sSize Position,
+      sdr::sSize Amount)
     {
       if ( offset == 0 )  // Calling this function in this context does not make sense.
         qRFwk();
 
-      return S_().OSDStore(Buffer, offset, 0);
+      if ( ( Position + Amount ) > offset )
+        qRFwk();
+
+      return S_().OSDStore(Data, Amount, Position);
     }
-    void Get(sdr::sByte *Buffer)
+    void Put(const sdr::sByte *Data)
+    {
+      return Put(Data, 0, offset);
+    }
+    void Get(
+      sdr::sSize Position,
+      sdr::sSize Amount,
+      sdr::sByte *Data)
     {
       if ( offset == 0 )  // Calling this function in this context does not make sense.
         qRFwk();
 
-      return S_().OSDRecall(0, offset, Buffer);
+      if ( ( Position + Amount ) > offset )
+        qRFwk();
+
+      S_().OSDFetch(Position, Amount, Data, qRPDefault);
+    }
+    void Get(sdr::sByte *Data)
+    {
+      return Get(0, offset, Data);
     }
   };
 }

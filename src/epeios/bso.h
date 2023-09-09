@@ -32,7 +32,7 @@
 # include <float.h>
 
 # ifdef __MINGW32__
-#   ifndef __STDC_FORMAT_MACROS
+#  ifndef __STDC_FORMAT_MACROS
 #   define __STDC_FORMAT_MACROS	// Needed by below header with the 'mingw' compiler.
 #  endif
 # endif
@@ -74,9 +74,8 @@ namespace bso {
 
 	typedef sU8 tEnum;
 
-	struct pGlobal_ {
-		char Datum[BSO_CONVERSION_SIZE_MAX+1];	// + 1 for the NUL chracter.
-	};
+	struct pGlobal_;  // pre-declaration.
+
 
 	typedef pGlobal_ pInteger;
 	typedef pInteger pInt;
@@ -224,13 +223,36 @@ namespace bso {
 #  error
 #endif
 
+	struct pGlobal_ {
+  private:
+		char Datum_[BSO_CONVERSION_SIZE_MAX+1];	// + 1 for the NUL chracter.
+  public:
+    const char *operator()(void) const
+    {
+      return Datum_;
+    }
+		template <typename t> friend const char *Convert_(
+      t Value,
+      const char *fmt,
+      pGlobal_ &Buffer);
+	};
+
+	template <typename t> inline const char *Convert_(
+    t Value,
+    const char *fmt,
+    pGlobal_ &Buffer)
+  {
+		sprintf( Buffer.Datum_, fmt, Value );
+
+		return Buffer();
+  }
+
 	inline const char *Convert(
 		u64__ Value,
 		integer_buffer__ &Buffer )
 	{
-		sprintf( Buffer.Datum, "%" BSO_U64_P_, Value );
+	  return Convert_(Value, "%" BSO_U64_P_, Buffer);
 
-		return Buffer.Datum;
 	}
 #  ifndef CPE_F_MT
 	inline const char *Convert( u64__ Value )
@@ -245,9 +267,7 @@ namespace bso {
 		bso::u32__ Value,
 		integer_buffer__ &Buffer )
 	{
-		sprintf( Buffer.Datum, "%" BSO_U32_P_, Value );
-
-		return Buffer.Datum;
+		return Convert_(Value, "%" BSO_U32_P_, Buffer);
 	}
 
 #ifndef CPE_F_MT
@@ -377,9 +397,7 @@ namespace bso {
 		s64__ Value,
 		integer_buffer__ &Buffer )
 	{
-		sprintf( Buffer.Datum, "%" BSO_S64_P_, Value );
-
-		return Buffer.Datum;
+		return Convert_(Value, "%" BSO_S64_P_, Buffer);
 	}
 
 # ifndef CPE_F_MT
@@ -397,9 +415,7 @@ namespace bso {
 		s32__ Value,
 		integer_buffer__ &Buffer )
 	{
-		sprintf( Buffer.Datum, "%" BSO_S32_P_, Value );
-
-		return Buffer.Datum;
+		return Convert_(Value, "%" BSO_S32_P_, Buffer);
 	}
 
 #ifndef CPE_F_MT
@@ -451,9 +467,7 @@ namespace bso {
 		lfloat__ Value,
 		float_buffer__ &Buffer )
 	{
-		sprintf( Buffer.Datum, "%Lg", Value );
-
-		return Buffer.Datum;
+		return Convert_(Value, "%Lg", Buffer);
 	}
 
 #ifndef CPE_F_MT
@@ -699,6 +713,16 @@ namespace bso {
 		return ConvertToSHuge( DInt, &Length );
 	}
 
+# ifdef CPE_F_64BITS
+#  define BSO_ENDIANESS_SEAL_SIZE 8
+# elif defined( CPE_F_32BITS )
+#  define BSO_ENDIANESS_SEAL_SIZE 4
+# else
+#  error
+# endif
+
+	const char *EndianessSeal(void);
+
 }
 
 /*************/
@@ -706,7 +730,7 @@ namespace bso {
 /*************/
 
 namespace bso {
-    typedef sign__ sSign;
+  typedef sign__ sSign;
 
 	typedef uint__ sUInt;
 	typedef sint__ sSInt;

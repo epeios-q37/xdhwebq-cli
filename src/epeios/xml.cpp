@@ -1548,4 +1548,8 @@ Q37_GCTOR( xml )
 {
 	if ( ( s_FirstNonXTFError - s_FirstXTFError ) != xtf::e_amount )
 		qRChk();
+
+  // To test if 'qNIL' is equivalent to -1.
+  if ( !tol::CanBeFilledWith<sdr::sRow>(qNIL, -1, qRPU) )
+    qRChk();
 }

@@ -32,7 +32,8 @@
 #include "flw.h"
 #include "str.h"
 #include "xtf.h"
-#include "stkctn.h"
+#include "stkbch.h"
+#include "stkcrt.h"
 #include "ctn.h"
 #include "cpe.h"
 
@@ -285,7 +286,7 @@ namespace xml {
 		void Init(
 			txf::text_oflow__ &Flow,
 			eLayout Outfit,
-			fEncoding Encoding,
+			fEncoding Encoding = e_Default,
 			sLevel LevelsToIgnore = 0,
 			eSpecialCharHandling SpecialCharHandling = sch_Default )
 		{
@@ -550,7 +551,18 @@ namespace xml {
 		eStatus Put(
 			const str::dString &XML,
 			xtf::sPos &ErrorPosition);	// Only valid when returned valus != 'sOK'.
-		qRODISCLOSEr( eLayout, Outfit )
+    template <typename type, int amount> void Put(
+      const char *TagName,
+      const char *(* GetLabel)(type e))
+    {
+      for(bso::tEnum I = 0; I < amount; I++) {
+        PushTag(TagName);
+        PutAttribute("id", I);
+        PutAttribute("Label", GetLabel((type)I));
+        PopTag();
+      }
+    }
+    qRODISCLOSEr( eLayout, Outfit )
 		qRODISCLOSEr( eSpecialCharHandling, SpecialCharHandling )
 	};
 }
@@ -785,8 +797,8 @@ namespace xml {
 		TF( Comment ),
 		TF( CData ),
 		tfAll = ( ( 1 << t_amount ) - 1 ),
-		tfAllButUseless = tfAll & ~( tfComment | tfSpecialAttribute | tfCData ),
-		tfObvious = tfStartTag | tfAttribute | tfValue | tfEndTag,
+		tfAllButUseless = tfAll & ~( tfComment | tfSpecialAttribute | tfProcessingInstruction ),
+		tfObvious = tfStartTag | tfAttribute | tfValue | tfCData | tfEndTag,
 		tfAllAttributes = tfAttribute | tfSpecialAttribute,
 	};
 
@@ -882,7 +894,7 @@ namespace xml {
 			str::string_ &AttributeName,
 			bso::sChar &AttributeDelimiter,
 			str::string_ &Value,	// Contient la valeur d'une balise ('tag') our d'un attribut, en fonction de la valeur retourne ('tTag' ou 'tAttribute').
-			xml::dump_ &Dump,
+			dump_ &Dump,
 			status__ &Status,
 			int TokenToReport = tfAll )	// 'Status' initialis seulement si valeur retourne == 'tError'.
 		{
@@ -993,6 +1005,312 @@ namespace xml {
 		callback__ &Callback,
 		qRPD );
 
+  qROW( VRow_ );
+
+  typedef stkcrt::qCSTACKw(str::dString, sVRow_) rValues_;
+
+  qENUM( Realm ) {
+    rTagClosed,
+    rValue,
+    rElementClosed,
+    rProcessed,
+    r_amount,
+    r_Undefined
+  };
+
+  typedef bso::sU8 sAmount_;
+  qCDEF(sAmount_, AmountMax_, bso::U8Max);
+
+  template <typename item, int amount, item undefined> struct sElement_
+  {
+  private:
+    item Tag_;
+    sVRow_ Attributes_[amount];
+    sAmount_ Amount_;
+  public:
+    void reset(bso::sBool P = true)
+    {
+      Tag_ = undefined;
+      memset(Attributes_, -1, sizeof(Attributes_));
+      Amount_ = 0;
+    }
+    void Init(void)
+    {
+      Tag_ = undefined;
+      memset(Attributes_, -1, sizeof(Attributes_));
+      Amount_ = 0;
+    }
+    sAmount_ GetAmount(void) const
+    {
+      return Amount_;
+    }
+    bso::sBool HasTag(void) const
+    {
+      return Tag_ != undefined;
+    }
+    void SetTag(item Item)
+    {
+      if ( Item > amount )
+        qRFwk();
+
+      if ( HasTag() )
+        qRFwk();
+
+      Tag_ = Item;
+    }
+    item GetTag(void) const
+    {
+      if ( !HasTag() )
+        qRFwk();
+
+      return Tag_;
+    }
+    bso::sBool HasAttribute(item Item) const
+    {
+      if ( Item > amount )
+        qRFwk();
+
+      return Attributes_[Item] != qNIL;
+    }
+    void SetAttribute(
+      item Item,
+      sVRow_ Row)
+    {
+      if ( HasAttribute(Item) )
+        qRFwk();
+
+      if ( Amount_ >= AmountMax_ )
+        qRFwk();
+
+      Attributes_[Item] = Row;
+    }
+    sVRow_ GetAttribute(item Item) const
+    {
+      if ( !HasAttribute(Item) )
+        qRFwk();
+
+       return Attributes_[Item];
+    }
+  };
+
+  qROW( TRow_ );
+
+  template <typename item, int amount, item undefined> qTCLONE(stkbch::qBSTACKw(sElement_<qCOVER3(item,amount,undefined)>, sTRow_), rElements_);
+
+  template <typename item, int amount, item undefined> class rBundle_
+  {
+  private:
+    rValues_ Values_;
+    rElements_<item,amount,undefined> Elements_;
+    sElement_<item,amount,undefined> Element_;  // Current element.
+    sVRow_ Value_; // Current element value.
+  public:
+    void reset(bso::sBool P = true )
+    {
+      tol::reset(P, Values_, Elements_, Element_, Value_);
+    }
+    qCDTOR( rBundle_ );
+    void Init(void)
+    {
+      tol::Init(Values_, Elements_, Element_, Value_);
+    }
+    bso::sBool IsEmpty(void) const
+    {
+      return Elements_.Amount() == 0;
+    }
+    void SetTag(item Item)
+    {
+      return Element_.SetTag(Item);
+    }
+    item Tag(void) const
+    {
+      return Element_.GetTag();
+    }
+    void SetValue(const str::dString &Value)
+    {
+      if ( Value_ != qNIL )
+        qRFwk();
+
+      Value_ = Values_.Push(Value);
+    }
+    const str::dString &Value(void) const
+    {
+      if ( Value_ == qNIL )
+        return str::Empty;
+      else
+        return Values_(Value_);
+    }
+    bso::sBool HasAttribute(item Item) const
+    {
+      return Element_.HasAttribute(Item);
+    }
+    void SetAttribute(
+      item Item,
+      const str::dString &Value)
+    {
+      return Element_.SetAttribute(Item, Values_.Push(Value));
+    }
+    const str::dString &Attribute(item Item) const
+    {
+      if ( HasAttribute(Item) )
+        return Values_(Element_.GetAttribute(Item));
+      else
+        return str::Empty;
+    }
+    template <typename t> bso::sBool Attribute(
+      item Item,
+      t &Number,
+      qRPD) const
+    {
+      if ( !HasAttribute(Item) ) {
+        if ( qRPT )
+          qRFwk();
+        else
+          return false;
+      }
+
+      Attribute(Item).ToNumber(Number);
+
+      return true;
+    }
+    bso::sBool Attribute(
+      item Item,
+      bso::tEnum &Number,
+      qRPD) const
+    {
+      if ( !HasAttribute(Item) ) {
+        if ( qRPT )
+          qRFwk();
+        else
+          return false;
+      }
+
+      Attribute(Item).ToNumber(Number);
+
+      return true;
+    }
+    template <typename type> type Attribute(item Item) const
+    {
+      type Value;
+
+      Attribute(Item, Value);
+
+      return Value;
+    }
+    void Pop(void)
+    {
+      sAmount_ Amount = Element_.GetAmount();
+
+      if ( Value_ != qNIL ) {
+        Values_.Pop();
+        Value_ = qNIL;
+      }
+
+      while ( Amount-- )
+        Values_.Pop();
+
+      Elements_.Pop(Element_);
+    }
+    void Push(void)
+    {
+      if ( Element_.HasTag() ) {
+        Elements_.Push(Element_);
+        Element_.Init();
+
+        if ( Value_ != qNIL ) {
+          Values_.Pop();
+          Value_ = qNIL;
+        }
+      } else if ( !IsEmpty() )
+        qRFwk();
+    }
+  };
+
+  template <typename item, int amount, item undefined> class rXParser
+  : public rBundle_<item,amount,undefined>
+  {
+  private:
+    qRMV(rParser, P_, Parser_);
+    item (*GI_)(const str::dString &Pattern);
+    bso::sBool Pop_;
+    item GetItem_(const str::dString &Pattern)
+    {
+      if ( GI_ == NULL )
+        qRFwk();
+
+      return GI_(Pattern);
+    }
+  public:
+    void reset(bso::sBool P = true)
+    {
+      tol::reset(P, Parser_, GI_,Pop_);
+      rBundle_<item,amount,undefined>::reset(P);
+    }
+    qCDTOR( rXParser );
+    void Init(
+      rParser &Parser,
+      item GetItem(const str::dString &Pattern))
+    {
+      Parser_ = &Parser;
+      GI_ = GetItem;
+      Pop_ = false;
+      rBundle_<item,amount,undefined>::Init();
+    }
+    eRealm Parse(void)
+    {
+      eRealm Realm = r_Undefined;
+      bso::sBool Continue = true;
+
+      if ( Pop_ ) {
+        this->Pop();
+        Pop_ = false;
+      }
+
+      while ( Continue ) {
+        switch( P_().Parse(tfAllButUseless) ) {
+        case tStartTag:
+          this->Push();
+          this->SetTag(GetItem_(P_().TagName()));
+          break;
+        case tAttribute:
+          this->SetAttribute(GetItem_(P_().AttributeName()), P_().Value());
+          break;
+        case tStartTagClosed:
+          Realm = rTagClosed;
+          Continue = false;
+          break;
+        case tValue:
+        case tCData:
+          this->SetValue(P_().Value());
+          Realm = rValue;
+          Continue = false;
+          break;
+        case tEndTag:
+          if ( this->IsEmpty() ) {
+            Realm = rProcessed;
+          } else {
+            Realm = rElementClosed;
+            Pop_ = true;
+          }
+          Continue = false;
+          break;
+        case t_Processed:
+          if ( !this->IsEmpty() )
+            qRFwk();
+
+          Realm = rProcessed;
+          Continue = false;
+          break;
+        default:
+          qRFwk();
+          break;
+        }
+      }
+
+      return Realm;
+    }
+  };
+
 	// Transformation des caractres spciaux, comm '<' qui devient '&lt;'.
 	void TransformUsingEntities(
 		const str::dString &Source,
@@ -1024,7 +1342,7 @@ namespace xml {
 
 	template <typename i> void PutValue(
 		i Value,
-		xml::rWriter &Writer )
+		rWriter &Writer )
 	{
 		bso::integer_buffer__ IBuffer;
 
@@ -1034,7 +1352,7 @@ namespace xml {
 	template <typename s, typename i> void PutValue(
 		i Value,
 		const s &Name,
-		xml::rWriter &Writer )
+		rWriter &Writer )
 	{
 		bso::integer_buffer__ IBuffer;
 
@@ -1044,7 +1362,7 @@ namespace xml {
 	template <typename s, typename i> void PutAttribute(
 		const s &Name,
 		i Value,
-		xml::rWriter &Writer )
+		rWriter &Writer )
 	{
 		bso::integer_buffer__ IBuffer;
 

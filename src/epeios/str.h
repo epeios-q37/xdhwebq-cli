@@ -148,65 +148,97 @@ namespace str {
     return Conversion_<sSLimits<type>, type>(String, Begin, Number, Base, Limits);
   }
 
-	class _string_size_handler {
-	public:
-		static sdr::size__ SizeOf( const char *S )
-		{
-			if ( NULL == S )
-				S = "";
-
-			return strlen( S );
-		}
-	};
-
 	using uys::sHook;
+
+	inline sdr::sSize Size_(const char *Seed)
+	{
+	  if ( NULL == Seed )
+      return 0;
+    else
+      return strlen(Seed);
+	}
 
 	//c A string.
 	class string_
-	: public E_BUNCHx_( bso::char__, _string_size_handler )
+	: public E_BUNCH_( bso::char__ )
 	{
 	private:
+	  s EmbeddedStatic_;  // Used when direct instantiation.
 	public:
 		struct s
-		: public E_BUNCHx_( bso::char__, _string_size_handler )::s {};
+		: public E_BUNCH_( bso::char__ )::s {};
 		string_( s &S )
-		: E_BUNCHx_( bso::char__, _string_size_handler )( S )
+		: E_BUNCH_( bso::char__ )( S )
 		{}
 		void reset( bool P = true )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::reset( P );
+			E_BUNCH_( bso::char__ )::reset( P );
+		}
+		string_(
+			const char *Seed,
+			sdr::size__ Size,
+			sdr::sRow Row = 0)
+		: E_BUNCH_( bso::char__ )(EmbeddedStatic_)
+		{
+			reset( false );
+
+			Init(Seed, Size, Row);
+		}
+		string_(
+      const char *Seed,
+      sdr::sRow Row = 0)
+		: E_BUNCH_( bso::char__ )(EmbeddedStatic_)
+		{
+			reset( false );
+
+			Init(Seed, Row);
+		}
+		string_( const string_ &String )
+		: E_BUNCH_( bso::char__ )(EmbeddedStatic_)
+		{
+			reset( false );
+
+			Init(String);
 		}
 		/*
 		void plug( qSD__ &Driver )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::plug( Driver );
+			E_BUNCH_( bso::char__ )::plug( Driver );
 		}
 		void plug( qAS_ &AS )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::plug( AS );
+			E_BUNCH_( bso::char__ )::plug( AS );
 		}
 		*/
 		string_ &operator =( const string_ &O )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::operator =( O );
+			E_BUNCH_( bso::char__ )::operator =( O );
 
 			return *this;
 		}
+		using E_BUNCH_( bso::char__ )::Append;
+		using E_BUNCH_( bso::char__ )::InsertAt;
 		//f Initialization.
 		void Init( void )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::Init();
+			E_BUNCH_( bso::char__ )::Init();
 		}
 		//f Initialization with 'Seed'.
-		void Init( const bso::char__ *Seed )
+		void Init(
+      const bso::char__ *Seed,
+      sdr::sSize Size,
+      sdr::sRow Row = 0)
 		{
-			if ( NULL == Seed )
-				Seed = "";
-
-			E_BUNCHx_( bso::char__, _string_size_handler )::Init( Seed, strlen( Seed ) );
+			E_BUNCH_( bso::char__ )::Init(Seed, Size, Row);
+		}
+		void Init(
+      const bso::char__ *Seed,
+      sdr::sRow Row = 0)
+		{
+			Init(Seed, Size_(Seed), Row);
 		}
 		//f Initialization with 'Seed'.
-		void Init( const str::string_ &Seed )
+		void Init(const str::string_ &Seed)
 		{
 			if ( this != &Seed ) {
 				Init();
@@ -214,13 +246,24 @@ namespace str {
 				this->operator =( Seed );
 			}
 		}
-		string_ &operator =( const char *Chaine )
+		void Init(char C)
 		{
-			if ( NULL == Chaine )
-				Chaine = "";
-
-			Init();
-			E_BUNCHx_( bso::char__, _string_size_handler )::StoreAndAdjust( Chaine, strlen( Chaine ) );
+		  Init();
+		  Append(C);
+		}
+		sdr::sRow Append(const bso::sChar *Seed)
+		{
+		  return Append(Seed, Size_(Seed));
+		}
+		void InsertAt(
+      const bso::sChar *Seed,
+      sdr::sRow Row = 0)
+		{
+		  return InsertAt(Seed, Size_(Seed), Row);
+		}
+		string_ &operator =(const char *Chaine)
+		{
+			Init(Chaine);
 
 			return *this;
 		}
@@ -262,13 +305,13 @@ namespace str {
 		bso::sBool IsBlank( void ) const;	// Returns 'true' if contains only blan characters.
 		string_ &Truncate( sdr::row__ Row )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::Truncate( Row );
+			E_BUNCH_( bso::char__ )::Truncate( Row );
 
 			return *this;
 		}
 		string_ &Truncate( bso::size__ Amount = 1 )
 		{
-			E_BUNCHx_( bso::char__, _string_size_handler )::Truncate( Amount );
+			E_BUNCH_( bso::char__ )::Truncate( Amount );
 
 			return *this;
 		}
@@ -596,44 +639,37 @@ namespace str {
 		{
 			reset( false );
 
-			string_::Init();
-
-			if ( S != NULL )
-				string_::Append( S );
+			Init(S);
 		}
 		string(
-			const char *S,
-			sdr::size__ Length )
+			const char *Seed,
+			sdr::size__ Size )
 		: string_( static_ )
 		{
 			reset( false );
 
-			string_::Init();
-			string_::Append( S, Length );
+			Init(Seed, Size);
 		}
 		string( char C )
 		: string_( static_ )
 		{
 			reset( false );
 
-			string_::Init();
-			string_::Append( C );
+			Init(C);
 		}
 		string( const string_ &String )
 		: string_( static_ )
 		{
 			reset( false );
 
-			string_::Init();
-			string_::operator =( String );
+			Init(String);
 		}
 		string( const string &String )
 		: string_( static_ )
 		{
 			reset( false );
 
-			string_::Init();
-			string_::operator =( String );
+			Init(String);
 		}
 		~string( void )
 		{
@@ -843,35 +879,46 @@ namespace str {
 	: public tstrings_<row>
 	{
 	public:
-        using tstrings_<row>::tstrings_;
-        using tstrings_<row>::Append;
-        sdr::sRow Append(const char *String)
-        {
-            return tstrings_<row>::Append(wString(String));
-        }
-        sdr::sRow AppendMulti(const string &String)
-        {
-            return tstrings_<row>::Append(String);
-        }
-        sdr::sRow AppendMulti(const string_ &String)
-        {
-            return tstrings_<row>::Append(String);
-        }
-				template <typename f, typename ...o> row AppendMulti(
-					const f &First,
-					const o &...Others)
-				{
-					row Row = Append(First);
+    using tstrings_<row>::tstrings_;
+    using tstrings_<row>::Init;
+    template <typename ...s> row Init(const s &...Strings)
+    {
+      Init();
 
-					AppendMulti(Others...);
+      return AppendMulti(Strings...);
+    }
+    using tstrings_<row>::Append;
+    sdr::sRow Append(const char *String)
+    {
+        return tstrings_<row>::Append(wString(String));
+    }
+    sdr::sRow AppendMulti(const char *String)
+    {
+        return Append(String);
+    }
+    sdr::sRow AppendMulti(const string &String)
+    {
+        return tstrings_<row>::Append(String);
+    }
+    sdr::sRow AppendMulti(const string_ &String)
+    {
+        return tstrings_<row>::Append(String);
+    }
+    template <typename f, typename ...o> row AppendMulti(
+      const f &First,
+      const o &...Others)
+    {
+      row Row = Append(First);
 
-					return Row;
-				}
-			};
+      AppendMulti(Others...);
+
+      return Row;
+    }
+  };
 
 //	template <typename row> qTCLONE(dTStrings_<row>, dTStrings);
 
-    typedef dTStrings_<sdr::sRow> dStrings;
+  typedef dTStrings_<sdr::sRow> dStrings;
 
 	qW1(TStrings_);
 
@@ -879,19 +926,19 @@ namespace str {
 	: public wTStrings_<row>
 	{
 	public:
-        using wTStrings_<row>::wTStrings_;
-        using wTStrings_<row>::Init;
-        using wTStrings_<row>::operator =;
-        void Init( const str::dString &String)
-        {
-            Init();
-            wTStrings_<row>::Append(String);
-        }
-        void Init( const bso::sChar *String)
-        {
-            Init();
-            wTStrings_<row>::Append(String);
-        }
+    using wTStrings_<row>::wTStrings_;
+    using wTStrings_<row>::Init;
+    using wTStrings_<row>::operator =;
+    void Init( const str::dString &String)
+    {
+        Init();
+        wTStrings_<row>::Append(String);
+    }
+    void Init( const bso::sChar *String)
+    {
+        Init();
+        wTStrings_<row>::Append(String);
+    }
 		wTStrings(void) // Needed by 'Windows'.
 		: wTStrings_<row>()
 		{}

@@ -25,17 +25,16 @@
 
 using namespace ags;
 
-void aggregated_storage_driver__::_Free( void )
+void aggregated_storage_driver__::Free_(void)
 {
 	if ( _Descriptor != AGS_UNDEFINED_DESCRIPTOR )
-		_AStorage->Free( _Descriptor );
+		_AStorage->Free( _Descriptor ); // Freeing must not be done on a 'reset(true)' with a persistent storage.
 }
 
 void aggregated_storage_driver__::SDRAllocate( sdr::size__ Size )
 {
 	_Descriptor = _AStorage->Reallocate( _Descriptor, Size );
 }
-
 
 sdr::size__ aggregated_storage_driver__::SDRSize( void ) const
 {
@@ -45,12 +44,15 @@ sdr::size__ aggregated_storage_driver__::SDRSize( void ) const
 		return 0;
 }
 
-void aggregated_storage_driver__::SDRRecall(
+sdr::sSize aggregated_storage_driver__::SDRFetch(
 	sdr::row_t__ Position,
 	sdr::size__ Amount,
-	sdr::byte__ *Buffer )
+	sdr::byte__ *Buffer,
+	qRPN)
 {
-	_AStorage->Read( _Descriptor, Position, Amount, Buffer );
+	_AStorage->Read(_Descriptor, Position, Amount, Buffer, qRP);
+
+	return Amount;
 }
 // lit  partir de 'Position' et place dans 'Tampon' 'Nombre' octets;
 void aggregated_storage_driver__::SDRStore(

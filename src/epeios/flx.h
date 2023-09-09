@@ -87,10 +87,6 @@ namespace flx {
 	typedef string_text_iflow__ sStringTIFlow;
 	typedef sStringTIFlow sStringTRFlow;
 
-	class string_text_oflow___;
-	typedef string_text_oflow___ rStringTOFlow;
-	typedef rStringTOFlow rStringTWFlow;
-
 	using flw::Copy;
 }
 
@@ -458,6 +454,10 @@ namespace flx {
 			_Flow.Init(Source);
 			_tiflow__::Init( _Flow );
 		}
+		_tiflow__ &operator ()(void)
+		{
+		  return *this;
+		}
 	};
 
 # define E_STRING_TOFLOW___	string_text_oflow___
@@ -579,6 +579,10 @@ namespace flx {
 		{
 			_Flow.Init( Target );
 			_toflow__::Init( _Flow );
+		}
+		_toflow__ &operator ()(void)
+		{
+		  return *this;
 		}
 	};
 

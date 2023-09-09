@@ -30,8 +30,8 @@ $out = str_replace(array("\r", "\n", "\t"), '',<<<MLS
       <script src="xdhtml.js"></script>
       <script src="xdhwebq.js"></script>
       <!-- Below both scripts are for PROD environment. -->
-      <script src="xdhtml_20220120.js"></script>
-      <script src="xdhwebq_20220120.js"></script>
+      <script src="xdhtml_20230508.js"></script>
+      <script src="xdhwebq_20230508.js"></script>
       <script data-goatcounter="https://faas.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
       <!--link rel="stylesheet" href="https://unpkg.com/marx-css/css/marx.min.css"-->
       <style id="XDHStyle">
@@ -45,7 +45,7 @@ $out = str_replace(array("\r", "\n", "\t"), '',<<<MLS
           min-height: 100%;
         }
         .xdh_style {
-          margin: 5px auto auto auto;
+          margin: 10px auto auto auto;
           height: calc(100% - 10px);
         }
       </style>

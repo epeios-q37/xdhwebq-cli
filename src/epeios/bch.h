@@ -53,8 +53,8 @@
 
 namespace bch {
 
-	//c The kernel of a bunch. For internal use only. The 'sh' template parameter is to simplify the use of the 'STR' library.
-	template <class type, class mmr, class mng, typename row, typename sh> class _bunch
+	//c The kernel of a bunch. For internal use only.
+	template <class type, class mmr, class mng, typename row> class _bunch
 	: public mmr,
 	  public mng
 	{
@@ -134,13 +134,13 @@ namespace bch {
 		//f Initialization with 'Seed' containing 'Size' objects.
 		void Init(
 			const type *Seed,
-			sdr::size__ Size )
+			sdr::size__ Size,
+			row Row = 0)
 		{
 			this->Init();
 
-			StoreAndAdjust( Seed, Size );
+			StoreAndAdjust(Seed, Size, Row);
 		}
-		//f Allocate 'Size' objects. Extent is forced to 'Size' when 'Mode' = 'mFitted'.
 		void Allocate(
 			sdr::size__ Size,
 			aem::mode__ Mode = aem::m_Default )
@@ -211,18 +211,6 @@ namespace bch {
 
 			mmr::Store( Buffer, Amount, Offset );
 		}
-		//f Store at 'Offset' objects from 'Buffer'.
-		void StoreAndAdjust(
-			const type *Buffer,
-			row Offset = 0 )
-		{
-/*			Allocate( sh::SizeOf( Buffer ) + *Offset );
-
-			mmr::Store( Buffer, sh::SizeOf( Buffer ), Offset );
-*/
-			StoreAndAjust( Buffer, sh::SizeOf( Buffer ), Offset );
-		}
-		// Remplit tout le conteneur avec 'object'  partir de la position 'offset'.
 		void FillWith(
 			const type &Object,
 			row Offset = 0 )
@@ -241,15 +229,6 @@ namespace bch {
 			row Position = this->Amount();
 
 			StoreAndAdjust( Buffer, Amount, Position );
-
-			return Position;
-		}
-		//f Append 'Buffer'. Return the position where the objects are put.
-		row Append( const type *Buffer )
-		{
-			row Position = this->Amount();
-
-			StoreAndAdjust( Buffer, sh::SizeOf( Buffer ), Position );
 
 			return Position;
 		}
@@ -413,12 +392,6 @@ namespace bch {
 		{
 			InsertAt( &Object, 1, Row );
 		}
-		void InsertAt(
-			const type *Source,
-			row Row = 0 )
-		{
-			InsertAt( Source, sh::SizeOf( Source ), Row );
-		}
 		void InsertAfter(
 			const mmr &Source,
 			sdr::size__ Amount,
@@ -531,28 +504,28 @@ namespace bch {
 	};
 
 	/*c The core set of static object of type 'type'. Internal use only. */
-	template <class type, typename row, typename mng, typename sh> class _bunch_
-	: public _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >
+	template <class type, typename row, typename mng> class _bunch_
+	: public _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>
 	{
 	public:
 		struct s
-		: public _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::s
+		: public _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::s
 		{};
 		_bunch_( s &S )
-		: _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >( S )
+		: _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>( S )
 		{};
 		void reset( bool P = true )
 		{
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::reset( P );
-//			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Memory().reset( P );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::reset( P );
+//			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Memory().reset( P );
 		}
 		_bunch_ &operator =( const _bunch_ &Op )
 		{
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row , sh>::operator =( Op );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::operator =( Op );
 
 			this->Allocate( Op.Amount(), aem::mFitted );
 
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Memory().Store( Op, Op.Amount() );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Memory().Store( Op, Op.Amount() );
 
 			return *this;
 		}
@@ -563,7 +536,7 @@ namespace bch {
 			if ( WriteSize )
 				dtfptb::OldPutSize( mng::Amount(), OFlow );
 
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::WriteToFlow( 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Amount(), OFlow );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::WriteToFlow( 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Amount(), OFlow );
 		}
 		void WriteToFlow(
 			flw::oflow__ &OFlow,
@@ -572,7 +545,7 @@ namespace bch {
 			if ( WriteSize )
 				dtfptb::VPut( mng::Amount(), OFlow );
 
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::WriteToFlow( 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Amount(), OFlow );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::WriteToFlow( 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Amount(), OFlow );
 		}
 		void OldReadFromFlow(
 			flw::iflow__ &IFlow,
@@ -581,8 +554,8 @@ namespace bch {
 			if ( Amount == 0 )
 				Amount = dtfptb::OldGetSize( IFlow );
 
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Allocate( Amount );
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::ReadFromFlow( IFlow, 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Amount() );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Allocate( Amount );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::ReadFromFlow( IFlow, 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row >::Amount() );
 
 		}
 		void ReadFromFlow(
@@ -592,57 +565,47 @@ namespace bch {
 			if ( Amount == 0 )
 				dtfptb::VGet( IFlow, Amount );
 
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Allocate( Amount );
-			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::ReadFromFlow( IFlow, 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Amount() );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Allocate( Amount );
+			_bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::ReadFromFlow( IFlow, 0, _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Amount() );
 
 		}
 		//f Adjust the extent to amount.
 		void Adjust( void )
 		{
-			if ( _bunch<type, tys::E_STORAGEt_( type, row ), mng, row, sh >::Force( mng::Amount() ) )
+			if ( _bunch<type, tys::E_STORAGEt_( type, row ), mng, row>::Force( mng::Amount() ) )
 				tys::E_STORAGEt_( type, row )::Memory().Allocate( mng::Amount() );
-		}
-	};
-
-	class dummy_size_handler
-	{
-	public:
-		static sdr::size__ SizeOf( void * )
-		{
-			qRFwk();
-			return 0;	// To avoid a warning.
 		}
 	};
 
 	using tys::sHook;
 
 	/*c A bunch of static object of type 'type'. Use 'E_BUNCH_( type )' rather then directly this class. */
-	template <class type, typename row, typename sh=dummy_size_handler> class bunch_
-	: public _bunch_<type, row, aem::amount_extent_manager_< row >, sh >
+	template <class type, typename row> class bunch_
+	: public _bunch_<type, row, aem::amount_extent_manager_< row >>
 	{
 	public:
 		struct s
-		: public _bunch_<type, row, aem::amount_extent_manager_< row >, sh >::s
+		: public _bunch_<type, row, aem::amount_extent_manager_< row >>::s
 		{};
 		bunch_( s &S )
-		: _bunch_<type, row, aem::amount_extent_manager_< row >, sh >( S )
+		: _bunch_<type, row, aem::amount_extent_manager_< row >>( S )
 		{};
 		void reset( bso::sBool P = true )
 		{
-			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::reset( P );
+			_bunch_<type, row, aem::amount_extent_manager_< row >>::reset( P );
 		}
 		void plug( sHook &Hook )
 		{
 			aem::size__ Amount = Hook.Size() / sizeof( type );
 
-			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::plug( Hook );
+			_bunch_<type, row, aem::amount_extent_manager_< row >>::plug( Hook );
 
 			if ( Amount != this->Amount() )
-				_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::Allocate( Amount, aem::mFitted );
+				_bunch_<type, row, aem::amount_extent_manager_< row >>::Allocate( Amount, aem::mFitted );
 		}
 		void plug( qASd *AS )
 		{
-			_bunch_<type, row, aem::amount_extent_manager_< row >, sh >::plug( AS );
+			_bunch_<type, row, aem::amount_extent_manager_< row >>::plug( AS );
 		}
 		bunch_ &GetBunch( void )
 		{
@@ -652,18 +615,18 @@ namespace bch {
 		{
 			return *this;
 		}
+		template <typename b> bunch_ &operator =(const b &B)
+		{
+		  _bunch_<type, row, aem::amount_extent_manager_< row >>::operator =(B);
+
+		  return *this;
+		}
 	};
 
-	E_AUTO3( bunch )
+	E_AUTO2( bunch )
 
-	#define E_BUNCHxt_( Type, r, s )	bunch_< Type, r, s  >
-	#define E_BUNCHxt( Type, r,s  )		bunch< Type, r, s >
-
-	#define E_BUNCHt_( Type, r )	E_BUNCHxt_( Type, r, bch::dummy_size_handler )
-	#define E_BUNCHt( Type, r )		E_BUNCHxt( Type, r, bch::dummy_size_handler )
-
-	#define E_BUNCHx( Type, s )		E_BUNCHxt( Type, sdr::row__, s )
-	#define E_BUNCHx_( Type, s )	E_BUNCHxt_( Type, sdr::row__, s )
+	#define E_BUNCHt_( Type, r )	bunch_< Type, r  >
+	#define E_BUNCHt( Type, r )		bunch< Type, r >
 
 	#define E_BUNCH( Type )		E_BUNCHt( Type, sdr::row__ )
 	#define E_BUNCH_( Type )	E_BUNCHt_( Type, sdr::row__ )
@@ -704,15 +667,15 @@ namespace bch {
 
 # if 0
 	/*c A portable bunch of static object of type 'type'. Use 'E_PBUNCH_( type )' rather then directly this class. */
-	template <class type, typename row, typename sh = dummy_size_handler> class p_bunch_
-	: public _bunch_<type, row, aem::p_amount_extent_manager_< row >, sh >
+	template <class type, typename row> class p_bunch_
+	: public _bunch_<type, row, aem::p_amount_extent_manager_< row >>
 	{
 	public:
 		struct s
-		: public _bunch_<type, row, aem::p_amount_extent_manager_< row >, sh >::s
+		: public _bunch_<type, row, aem::p_amount_extent_manager_< row >>::s
 		{};
 		p_bunch_( s &S )
-		: _bunch_<type, row, aem::p_amount_extent_manager_< row >, sh >( S )
+		: _bunch_<type, row, aem::p_amount_extent_manager_< row >>( S )
 		{};
 	};
 
@@ -728,9 +691,9 @@ namespace bch {
 # endif
 
 	//f Return 'S1' - 'S2' which respectively begins at 'BeginS1' et 'Begins2'.
-	template <class t, typename r, typename m, typename s> inline bso::sign__ Compare(
-		const _bunch_<t, r, m, s> &S1,
-		const _bunch_<t, r, m, s> &S2,
+	template <class t, typename r, typename m> inline bso::sign__ Compare(
+		const _bunch_<t, r, m> &S1,
+		const _bunch_<t, r, m> &S2,
 		r BeginS1 = 0,
 		r BeginS2 = 0 )
 	{
@@ -744,9 +707,9 @@ namespace bch {
 
 
 	//f Return 'S1' - 'S2' which respectively begin at 'BeginS1' et 'Begins2' and have a length of 'Amount'.
-	template <class t, typename r, typename s> inline bso::sign__ Compare(
-		const E_BUNCHxt_( t, r, s ) &S1,
-		const E_BUNCHxt_( t, r, s ) &S2,
+	template <class t, typename r> inline bso::sign__ Compare(
+		const E_BUNCHt_( t, r ) &S1,
+		const E_BUNCHt_( t, r ) &S2,
 		r BeginS1,
 		r BeginS2,
 		sdr::size__ Amount )
@@ -770,29 +733,29 @@ namespace bch {
 	}
 
 	//c A set of maximum 'size' static objects of type 'type'. Use 'SET__( type, size )' rather then directly this class.
-	template <typename type, int size, typename row, typename aem, typename sh> class _bunch__
-	: public _bunch< type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >
+	template <typename type, int size, typename row, typename aem> class _bunch__
+	: public _bunch< type, tys::E_STORAGEt__( type, size, row ), aem, row>
 	{
 	public:
 		struct s
-		: public _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >::s {} S_;
+		: public _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row>::s {} S_;
 		_bunch__( void )
-		: _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >( S_ ) {}
+		: _bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row>( S_ ) {}
 		_bunch__ &operator =( const _bunch__ &S )
 		{
-			_bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >::StoreAndAdjust( S, S.Amount_ );
+			_bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row>::StoreAndAdjust( S, S.Amount_ );
 
 			return *this;
 		}
 		void Init( void )
 		{
-			_bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row, sh >::Init();
+			_bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row>::Init();
 //			_bunch<type, tys::E_STORAGEt__( type, size, row ), aem, row >::SetStepValue( 0 );
 		}
 	};
 
-	template <typename type, int size, typename row, typename sh = dummy_size_handler> class bunch__
-	: public _bunch__< type, size, row, aem::amount_extent_manager__<size, row>, sh >
+	template <typename type, int size, typename row> class bunch__
+	: public _bunch__< type, size, row, aem::amount_extent_manager__<size, row>>
 	{};
 
 
@@ -802,30 +765,30 @@ namespace bch {
 	#define E_BUNCH__( c, i )		E_BUNCHt__( c, i , sdr::row__ )
 
 	//c A set of static objects of type 'type'. Use 'BUNCH___( type )' rather then directly this class.
-	template <typename type, typename row, typename aem, typename sh> class _bunch___
-	: public _bunch< type, tys::E_STORAGEt___( type, row ), aem, row, sh >
+	template <typename type, typename row, typename aem> class _bunch___
+	: public _bunch< type, tys::E_STORAGEt___( type, row ), aem, row>
 	{
 	public:
 		struct s
-		: public _bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::s {} S_;
+		: public _bunch<type, tys::E_STORAGEt___( type, row ), aem, row>::s {} S_;
 		_bunch___( void )
-		: _bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >( S_ ) {}
+		: _bunch<type, tys::E_STORAGEt___( type, row ), aem, row>( S_ ) {}
 		_bunch___ &operator =( const _bunch___ &S )
 		{
-			_bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::StoreAndAdjust( S, S.Amount_ );
+			_bunch<type, tys::E_STORAGEt___( type, row ), aem, row>::StoreAndAdjust( S, S.Amount_ );
 
 			return *this;
 		}
 		void Init( void )
 		{
-			_bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::Init();
-			if ( _bunch<type, tys::E_STORAGEt___( type, row ), aem, row, sh >::SetStepValue( 0 ) )
+			_bunch<type, tys::E_STORAGEt___( type, row ), aem, row>::Init();
+			if ( _bunch<type, tys::E_STORAGEt___( type, row ), aem, row>::SetStepValue( 0 ) )
 				qRFwk();
 		}
 	};
 
-	template <typename type, typename row, typename sh = dummy_size_handler> class bunch___
-	: public _bunch___< type, row, aem::amount_extent_manager___<row>, sh >
+	template <typename type, typename row> class bunch___
+	: public _bunch___< type, row, aem::amount_extent_manager___<row>>
 	{};
 
 
@@ -836,8 +799,8 @@ namespace bch {
 
 
 # if 0
-	template <typename type, int size, typename row, typename sh = dummy_size_handler> class p_bunch__
-	: public _bunch__< type, size, row, aem::p_amount_extent_manager__<size, row>, sh >
+	template <typename type, int size, typename row> class p_bunch__
+	: public _bunch__< type, size, row, aem::p_amount_extent_manager__<size, row>>
 	{};
 
 

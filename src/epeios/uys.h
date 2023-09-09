@@ -133,17 +133,20 @@ namespace uys {
 
 			_Driver->Allocate( Size );
 		}
-		void Recall(
+		sdr::sSize Fetch(
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer ) const
+			sdr::byte__ *Buffer,
+			qRPN) const
 		{
 			_Test();
 
 			if ( _CVMBuffer != NULL )
 				memcpy( Buffer, _CVMBuffer + Position, Amount );
 			else
-				_Driver->Recall( Position, Amount, Buffer );
+				return _Driver->Fetch(Position, Amount, Buffer, qRP);
+
+      return Amount;
 		}
 		void Store(
 			const sdr::byte__ *Buffer,
@@ -199,13 +202,14 @@ namespace uys {
 			if ( Amount > ( S_.Size - Position ) )
 				qRFwk();
 		}
-		void _Recall(
+		sdr::sSize _Fetch(
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer ) const
+			sdr::byte__ *Buffer,
+			qRPN) const
 		{
 			_Test( Position, Amount );
-			_Driver.Recall( Position, Amount, Buffer );
+			return _Driver.Fetch(Position, Amount, Buffer, qRP);
 		}
 		void _Store(
 			const sdr::byte__ *Buffer,
@@ -289,15 +293,16 @@ namespace uys {
 		{
 			_Allocate( Size );
 		}
-		/*f Recall 'Amount' bytes at 'Position' and put them in 'Buffer'.
+		/*f Fetch 'Amount' bytes at 'Position' and put them in 'Buffer'.
 		Ignore is only for 'UYS_DBG' mode and for the 'MMG' library.
 		When 'true', it didn't make the test about the size. */
-		void Recall(
+		sdr::sSize Fetch(
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer ) const
+			sdr::byte__ *Buffer,
+			qRPN) const
 		{
-			_Recall( Position, Amount, Buffer );
+			return _Fetch(Position, Amount, Buffer, qRP);
 		}
 		//f Store 'Amount' bytes from 'Buffer' at 'Offset'.
 		void Store(
@@ -308,18 +313,18 @@ namespace uys {
 			_Store( Buffer, Amount, Position );
 		}
 		//f Put byte at 'Position' in 'Datum'.
-		void Recall(
+		void Get(
 			sdr::row_t__ Position,
-			sdr::byte__ &Datum ) const
+			sdr::byte__ &Datum) const
 		{
-			Recall( Position, 1, &Datum );
+			Fetch(Position, 1, &Datum, qRPDefault);
 		}
 		//f Return byte at 'Position'.
 		sdr::byte__ Get( sdr::row_t__ Position ) const
 		{
 			sdr::byte__ D;
 
-			Recall( Position, D );
+			Get(Position, D);
 
 			return D;
 		}
@@ -350,7 +355,7 @@ namespace uys {
 				if ( TargetBuffer == NULL )
 					IndirectCopy_( Source, Offset, *this, Position, Amount );
 				else if ( Amount != 0 )
-					Source.Recall( Offset, Amount, TargetBuffer + Position );
+					Source.Fetch(Offset, Amount, TargetBuffer + Position, qRPDefault);
 			} else if ( TargetBuffer == NULL ) {
 				if ( Amount != 0  )
 					Store( SourceBuffer + Offset, Amount, Position );
@@ -379,6 +384,10 @@ namespace uys {
 		sdr::size__ Size( void ) const
 		{
 			return S_.Size;
+		}
+		sdr::sSize PhysicalSize(void) const // May be different as the theoretical one if the storage is a file, for ex.
+		{
+		  return _Driver.Size();
 		}
 		sdr::byte__ *CVMBuffer( void ) const
 		{
@@ -433,15 +442,6 @@ namespace uys {
 
 		return m_Undefined;	// Pour viter un 'warning'.
 	}
-
-	qENUM( Behavior )
-	{
-		bVolatile,
-		bPersistent,
-		b_amount,
-		b_Undefined,
-		b_Default = bPersistent
-	};
 }
 
 namespace uys {
@@ -509,15 +509,15 @@ namespace uys {
 		eState Init(
 			const rHF &Filenames,
 			mode__ Mode,
-			eBehavior Behavior = b_Default,
+			sdr::eType Type = sdr::tPersistent,
 			flsq::rId Id = flsq::Undefined)
 		{
 			fsd::Init(Id, Filenames.Filename, Convert_( Mode ), flsq::cFirstUse);
 
-			switch ( Behavior ) {
-			case bVolatile:
+			switch ( Type ) {
+			case sdr::tVolatile:
 				break;
-			case bPersistent:
+			case sdr::tPersistent:
 				fsd::Persistent();
 				break;
 			default:
@@ -533,10 +533,10 @@ namespace uys {
 		eState Init(
 			const fnm::rName &Name,
 			mode__ Mode,
-			eBehavior Behavior = b_Default,
+			sdr::eType Type = sdr::tPersistent,
 			flsq::rId Id = flsq::Undefined)
 		{
-		  return Init(rHF(Name), Mode, Behavior, Id);
+		  return Init(rHF(Name), Mode, Type, Id);
 		}
 		eState State( void ) const
 		{
@@ -626,12 +626,15 @@ namespace uys {
 		void Init( void )
 		{}
 		//f Put in 'Buffer' 'Amount' bytes at 'Position'.
-		void Recall(
+		sdr::sSize Fetch(
 			sdr::row_t__ Position,
 			sdr::size__ Amount,
-			sdr::byte__ *Buffer ) const
+			sdr::byte__ *Buffer,
+			qRPType) const
 		{
 			memcpy( Buffer, m::Data_ + Position, Amount );
+
+			return Amount;
 		}
 		//f Write to 'Position' 'Amount' bytes from 'Buffer'.
 		void Store(
@@ -675,7 +678,7 @@ namespace uys {
 			sdr::row_t__ Position = 0,
 			sdr::row_t__ Offset = 0 )
 		{
-			Source.Recall( Position, Quantity, *m::Data_ + Offset );
+			Source.Fetch(Position, Quantity, *m::Data_ + Offset, qRPDefault);
 		}
 		//f Fill at 'Position' with 'Object' of size 'Size' 'Count' times.
 		void Store(

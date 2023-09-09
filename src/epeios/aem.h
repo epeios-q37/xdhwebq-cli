@@ -33,15 +33,28 @@
 # include "sdr.h"
 # include "cpe.h"
 
+/*************/
+/**** NEW ****/
+/*************/
+
 namespace aem {
-	enum mode__ {
-		mFitted,	// Allocation de la taille exacte.
-		mStepped,	// Allocation relle ('extent') au palier suprieur le plus proche.
-		mOnlyGrowing,	// Allocation au palier suprieur le plus proche, seulement si la taille augmente.
+	qENUM( Mode ) {
+		mFitted, // Allocate the exact size.
+    mStepped, // Allocate to the nearest higher step.
+		mOnlyGrowing, // Allocation to the nearest higher level, only if the size increases.
 		m_amount,
 		m_Default = mOnlyGrowing,
 		m_Undefined
 	};
+}
+
+/*************/
+/**** OLD ****/
+/*************/
+
+
+namespace aem {
+  typedef eMode mode__;
 
 # define AEM_DEFAULT_STEP	64
 
@@ -85,7 +98,7 @@ namespace aem {
 
 		Step += 1;
 
-		while ( Step >>= 1 ) 
+		while ( Step >>= 1 )
 			Counter++;
 
 		Step = ~0;
@@ -196,7 +209,7 @@ namespace aem {
 		else
 			return ( _IsFitted( Shadow ) ? Amount : *Shadow );
 	}
-	
+
 	inline void _MarkAsFitted( shadow__ &Shadow )
 	{
 		Shadow = 0;
@@ -262,7 +275,7 @@ namespace aem {
 				}
 			} else {
 				S_.Amount = Amount;
-				
+
 				if ( !_IsUsable() || ( _GetExtent() != Amount ) ) {
 					_MarkAsFitted();
 					return true;

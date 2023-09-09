@@ -6,12 +6,184 @@
 - [cont]: continuation of previous modifications;
 - [crtn]: creation;
 - [extn]: extension;
+- [impr]: improvement;
 - [obvs]: obvious modifications;
 - [rvrt]: reverting modifications;
+- [simp]: simplification;
 - [stdz]: modification to comply with cusrrent standards;
 - [trvl]: trivial modifications;
 - [typo]: typography;
 - [warn]: fixing compiler warning messages;
+
+
+## 2023-04-11
+- FLW ; fixing https://github.com/epeios-q37/faasq/issues/2;
+
+## 2023-01-25
+- SCLX: [impr];
+
+## 2023-01-19
+- MSCABC: [impr];
+- SCLX: [extn], [impr];
+
+## 2023-01-18
+- MSCMLD: [extn];
+
+## 2023-01-17
+- FLX:
+  - removing duplicates;
+  - adding `operator ()` returning base class to string stuff to simplify use (see *mscabc.h* for example);
+- MSCABC: [crtn];
+
+## 2023-01-13
+- SCLX: [simpl], [extn], [impr];
+- STR: removing implicit conversion from `char` to `dString`, which causes problems with *enum*s;
+
+
+## 2023-01-12
+- SCLX: [simpl], [adpt];
+
+## 2023-01-11
+- BCH: simplification by removinf sizehandler template parameter, which was only used by the *STR* library;
+- STR: [adpt];
+
+## 2023-01-10
+- IDXBTQ: [adpt];
+
+## 2022-12-23
+- DTE: [extn];
+- SCLX: [extn];
+- TME: [extn];
+- XML: rewriting `rXParser`;
+
+## 2022-12-21
+- TOL: [extn];
+- XML: [extn];
+
+## 2022-12-19
+- DTE: [extn];
+- SCLX: [extn];
+- XML: [extn];
+
+## 2022-12-18
+- DTE: removing dubious automatic conversion ti `tDate`;
+- TME: removing dubious automatic conversion ti `tTime`;
+
+## 2022-12-17
+- DTE: [extn];
+- TME: [extn];
+- TOL: [extn];
+- XML: [extn];
+
+## 2022-12-16
+- SCLX:adding some checking;
+- TOL: intoducing `CanBeFilledWith(…)`;
+- XML: introducing `cXParser` with corresponding `Parse(…)`;
+;
+## 2022-12-14
+- SCLX: [extn];
+
+## 2022-12-09
+- DTE: [stdz];
+- SCLX: [impr];
+- SCLX: [extn
+- TME: [stdz];
+- TOL: adding `reset(…)` method to `qROW(…)` so it can be used with `tol::teset(…)`;
+
+## 2022-12-05
+- DTR: [extn];
+- SCLX: [extn];
+
+## 2022-12-02
+- AEM: [stdz];
+- SCLX: [extn];
+
+## 2022-11-30
+- DTR:
+  - [adpt],
+  - [extn];
+
+## 2022-11-29
+- SCLX: [extn];
+
+## 2022-11-26
+- SCLX: adding `ConfirmB(…)`
+- XDHCMN: changing return type of `Escape(…)`;
+
+## 2022-11-22
+- BSO: introducing endianess handling;
+- CPE: adding bitness handling;
+- OSD: [extn];
+- XML: fixing *CData* issue;
+
+## 2022-11-21
+- AGS, IAS, MNS, OSD, SDR, UYS: [adpt];
+- SLCM:
+  - simplification;
+  - [extn];
+- SDR: removing newly introduced `SDRType()` method, as it is inadequate;
+- UTF: [stdz];
+- XML: adding dafault parameter value for `rWriter::Init(…)`
+;
+## 2022-11-19
+- AGS:
+  - fixing size issue occuring when storage is a file;
+  - optimisation;
+- UYS: [extn];
+
+## 2022-11-17
+- AGS: fixing missing handling of `qRP`;
+- CTN: changing somewhat misleading naming;
+
+## 2022-11-16
+- AGS: is now aware of storage type (persistent/volatile) and behaves appropriatly;
+- CTN, LSTBCH, LSTCTN, MNS, OSD, UYS: [adpt];
+- ERR: [extn];
+- SDR: introducing storage type;
+
+## 2022-11-15
+- BCH, IAS, MNS: [adpt];
+- FLSQ: it's now possible to ask for more data the available without généretinf an error (useful with the agregated storage based on file);
+- OSD, SDR, UYS:
+  - `(OSD|SDR|)Recall` becomes `(OSD|SDR\)Fetch`,
+  - `(OSD|SDR|)Fetch` (ex `(OSD|SDR\)Recall`) returns amount of data red, which can be less then asked (useful with the agregated storage based on file),
+
+## 2022-11-13
+- BSO: [extn];
+- OSD: fixing storage/file size issue;
+
+## 2022-11-11
+- LSTBCH: [trvl];
+- QUE: [extn];
+
+## 2022-11-08
+- TOL: fixing recursion issue with *VC++*;
+
+## 2022-11-05
+- SCLX: introducing the handling of the head section by user;
+- XPP: XPP directives inside a *cdata* directive are now handled;
+
+## 2022-11-04
+- MSCMLD: [rvrt] octave;
+- MTX: [typo];
+- STR: [extn];
+
+## 2022-11-03
+- MSCMLD:
+  - adding `Octave` attribute for *XML* pitch diff;
+  - [stdz];
+
+## 2022-11-01
+- SCLX: [extn];
+
+## 2022-10-29
+- MECMLD: [stdz];
+
+## 2022-10-28
+- MSCMLD: [extn];
+
+## 2022-10-26
+- SCLX: [extn];
 
 ## 2022-09-30
 - SCLX: [extn];
@@ -4377,8 +4549,10 @@
 [cont]:#Continuation
 [crtn]:#Creation
 [extn]:#Extension
+[impr]:#Improvement
 [obvs]:#Obvious
 [rvrt]:#Reverting
+[simp]:#Simplification
 [stdz]:#Standardization
 [trvl]:#Trivial
 [typo]:#Typography
@@ -4396,9 +4570,13 @@ Continuation of the in progress modifications.
 
 Creation of the library.
 
-### Extension
+### Extension (extn)
 
-The library is extended.
+The library is extended (adding functionalities).
+
+### Improvement (impr)
+
+The library is improved.
 
 ### Obvious (obvs)
 
@@ -4407,6 +4585,10 @@ Obvious modifications; look at source code diffs.
 ### Reverting (rvrt)
 
 Reverting previous modifications.
+
+### Simplification (simp)
+
+The library is simplified.
 
 ### Standardization (stdz)
 

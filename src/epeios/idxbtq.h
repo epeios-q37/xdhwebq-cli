@@ -316,13 +316,13 @@ namespace idxbtq {
 		uys::eState Init(
 			const rHF &Filenames,
 			uys::mode__ Mode,
-			uys::eBehavior Behavior,
+			sdr::eType Type,
 			flsq::id__ ID )
 		{
-			uys::eState State = Tree_.Init( Filenames.Tree, Mode, Behavior, ID );
+			uys::eState State = Tree_.Init( Filenames.Tree, Mode, Type, ID );
 
 			if ( !State.IsError() ) {
-				if ( Queue_.Init( Filenames.Queue, Mode, Behavior, ID ) != State )
+				if ( Queue_.Init( Filenames.Queue, Mode, Type, ID ) != State )
 					State = uys::sInconsistent;
 			}
 
